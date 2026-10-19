@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Sample Size and Proportions Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: a projected lesson in six numbered stops (the teaching order), each a full-width band; simulators get a controls rail + large chart.
+   Brand: MSU navy #162860 + gold #F3B324, Aptos (from BlankMSUPowerPoint_2026.04.15.pptx and the BMGT 240IS course card). */
+:root {
+  --navy: #162860;
+  --navy-deep: #0f1c48;
+  --gold: #F3B324;
+  --bg: #f3f5fa;
+  --panel: #ffffff;
+  --ink: #111a30;
+  --muted: #4a5570;
+  --line: #d5dae7;
+  --hit: #162860;
+  --hit-soft: rgba(22,40,96,.13);
+  --miss: #c8432f;
+  --miss-soft: rgba(200,67,47,.14);
+  --zline: #8a6100;
+  --mu: #111a30;
+  --chip: #e7ebf4;
+  --focus: #F3B324;
+  --on-accent: #ffffff;
+  --display: Aptos, "Aptos Display", "Segoe UI", Arial, Helvetica, sans-serif;
+  --body: Aptos, "Segoe UI", Arial, Helvetica, sans-serif;
+  --mono: Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b1433; --panel: #14214d; --ink: #eef1f8; --muted: #a9b3cc; --line: #2a3a6e;
+    --hit: #F3B324; --hit-soft: rgba(243,179,36,.18); --miss: #f07a63; --miss-soft: rgba(240,122,99,.16);
+    --zline: #8fb3ff; --mu: #eef1f8; --chip: #1c2b5c; --focus: #FADA92; --on-accent: #162860;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b1433; --panel: #14214d; --ink: #eef1f8; --muted: #a9b3cc; --line: #2a3a6e;
+  --hit: #F3B324; --hit-soft: rgba(243,179,36,.18); --miss: #f07a63; --miss-soft: rgba(240,122,99,.16);
+  --zline: #8fb3ff; --mu: #eef1f8; --chip: #1c2b5c; --focus: #FADA92; --on-accent: #162860;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 56px;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 1280px; margin: 0 auto; display: grid; gap: 28px; }
+header.brand {
+  margin-top: 20px; border-radius: 12px; padding: 26px clamp(18px, 3vw, 36px) 24px;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-deep) 100%); color: #ffffff;
+  display: grid; gap: 8px; border: 1px solid var(--line);
+}
+header.brand .bar { width: 52px; height: 4px; border-radius: 2px; background: var(--gold); }
+header.brand .course { font-size: 14px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); }
+header.brand h1 { color: #ffffff; }
+header.brand .meta { font-size: 14px; color: #b9c3dc; }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(30px, 4.2vw, 44px); line-height: 1.1; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--display); font-size: clamp(22px, 2.6vw, 28px); line-height: 1.2; margin: 0; text-wrap: balance; }
+h3 { font-family: var(--display); font-size: 18px; margin: 0; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+b.m, .mono { font-family: var(--mono); font-weight: 500; font-variant-numeric: tabular-nums; }
+.xb { display: inline-block; position: relative; font-weight: 700; font-style: italic; line-height: 1; padding: 0 .06em; }
+.xb::before { content: ""; position: absolute; left: .1em; right: .02em; top: .1em; height: .1em; min-height: 2px; border-radius: 1px; background: currentColor; }
+
+nav.stops {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg);
+  display: flex; gap: 6px; overflow-x: auto; padding-block: 10px; border-bottom: 1px solid var(--line);
+}
+nav.stops a {
+  flex: 0 0 auto; text-decoration: none; color: var(--ink); background: var(--chip); border: 1px solid var(--line);
+  border-radius: 999px; padding: 5px 12px; font-size: 14px; font-weight: 500; white-space: nowrap;
+}
+nav.stops a span { font-family: var(--mono); color: var(--hit); margin-right: 6px; }
+nav.stops a:hover { border-color: var(--hit); }
+
+section.stop { display: grid; gap: 14px; scroll-margin-top: 64px; }
+.stop-head { display: grid; gap: 4px; }
+.stop-num { font: 700 13px var(--body); color: var(--hit); letter-spacing: .14em; display: flex; align-items: center; gap: 10px; }
+.stop-num::before { content: ""; width: 28px; height: 3px; border-radius: 2px; background: var(--gold); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; min-width: 0; align-content: start; }
+.two { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 860px) { .two { grid-template-columns: 1fr; } }
+.problem .tag { display: inline-block; font: 600 12px var(--mono); background: var(--chip); border-radius: 4px; padding: 1px 6px; margin-right: 6px; }
+.big-claim { font-size: 21px; line-height: 1.4; max-width: 60ch; }
+.big-claim em { font-style: normal; background: var(--hit-soft); padding: 0 4px; border-radius: 4px; }
+.contrast { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 520px) { .contrast { grid-template-columns: 1fr; } }
+.contrast div { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 2px; }
+.contrast div.on { border-color: var(--hit); background: var(--hit-soft); }
+.contrast .k { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; font-weight: 600; color: var(--muted); }
+
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button, .btn {
+  font: 600 15px var(--body); color: var(--ink); background: var(--chip); border: 1px solid var(--line);
+  border-radius: 7px; padding: 8px 12px; cursor: pointer; min-width: 52px;
+}
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+.btn.primary { background: var(--hit); color: var(--on-accent); border-color: var(--hit); }
+button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+button:hover { filter: brightness(1.06); }
+.btnrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+canvas { width: 100%; display: block; }
+
+.kv { display: grid; gap: 6px; font-variant-numeric: tabular-nums; }
+.kv div { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; border-bottom: 1px dashed var(--line); padding-bottom: 4px; }
+.kv div:last-child { border-bottom: 0; }
+.kv span:first-child { color: var(--muted); }
+.kv b { font: 500 17px var(--mono); }
+.xl { font: 14px var(--mono); background: var(--chip); border-radius: 6px; padding: 6px 8px; overflow-x: auto; white-space: nowrap; }
+.callout { border-left: 4px solid var(--hit); padding: 4px 0 4px 12px; }
+.ans { background: var(--hit-soft); border-radius: 8px; padding: 10px 12px; }
+.label { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.note { font-size: 14px; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 14px; color: var(--muted); }
+.legend i { display: inline-block; width: 22px; height: 4px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+.row { display: flex; align-items: center; gap: 10px; }
+input[type="range"] { flex: 1; accent-color: var(--hit); }
+.val { font: 600 20px var(--mono); min-width: 64px; text-align: right; font-variant-numeric: tabular-nums; }
+
+.bench { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 900px) { .bench { grid-template-columns: 1fr; } }
+.rail { display: grid; gap: 18px; }
+.group { display: grid; gap: 8px; }
+.draws { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.draws .btn { padding: 10px 6px; }
+.versus { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tile { background: var(--chip); border-radius: 8px; padding: 8px 12px; display: grid; border: 2px solid transparent; }
+.tile.sel { border-color: var(--hit); }
+.tile .num { font: 600 26px var(--display); font-variant-numeric: tabular-nums; line-height: 1.15; }
+.tile .cap { font-size: 13px; color: var(--muted); }
+.tile .num.bad { color: var(--miss); }
+kbd { font: 12px var(--mono); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--panel); }
+.stage-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; align-items: baseline; }
+
+.terms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 900px) { .terms { grid-template-columns: 1fr; } }
+.term .def { font-size: 15px; }
+.term .src { font-size: 12px; color: var(--muted); }
+
+.ttable { overflow-x: auto; }
+.ttable table { border-collapse: collapse; font-variant-numeric: tabular-nums; min-width: 460px; width: 100%; }
+.ttable th, .ttable td { border: 1px solid var(--line); padding: 6px 10px; text-align: center; font-family: var(--mono); font-size: 15px; }
+.ttable th { background: var(--chip); font-family: var(--body); font-size: 13px; }
+.ttable td.hl { background: var(--hit-soft); font-weight: 700; }
+
+.parts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.parts button { text-align: left; }
+@media (max-width: 520px) { .parts { grid-template-columns: 1fr 1fr; } }
+
+.formula { font-family: var(--mono); font-size: clamp(24px, 4vw, 40px); display: flex; flex-wrap: wrap; align-items: flex-start; gap: 4px 14px; padding-block: 8px; }
+.formula .part { display: grid; justify-items: center; gap: 6px; }
+.formula .sym { padding: 2px 8px; border-radius: 6px; }
+.formula .sym.a { background: var(--chip); }
+.formula .sym.b { background: var(--hit-soft); }
+.formula .lab { font: 500 13px var(--body); color: var(--muted); text-align: center; max-width: 18ch; }
+.frac { display: inline-grid; justify-items: center; line-height: 1.05; vertical-align: middle; }
+.frac .top { border-bottom: 2px solid currentColor; padding: 0 4px; }
+.cmp { overflow-x: auto; }
+.cmp table { border-collapse: collapse; width: 100%; min-width: 520px; }
+.cmp th, .cmp td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; font-size: 15px; }
+.cmp th { background: var(--chip); font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.cmp td.diff { background: var(--hit-soft); font-weight: 600; }
+
+.grid6 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 960px) { .grid6 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .grid6 { grid-template-columns: 1fr; } }
+.step { gap: 8px; }
+.step .n { font: 600 13px var(--mono); color: var(--hit); letter-spacing: .04em; }
+.math { font-size: 17px; font-variant-numeric: tabular-nums; }
+.math b { font-family: var(--mono); font-weight: 500; }
+.answer { font-size: 13px; font-weight: 600; color: var(--miss); text-transform: uppercase; letter-spacing: .06em; }
+.why { font-size: 14px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<style>
+.calc { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 520px) { .calc { grid-template-columns: 1fr; } }
+.field { display: grid; gap: 4px; }
+.field input[type="number"] { font: 600 18px var(--mono); padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--ink); width: 100%; }
+.bign { font: 700 clamp(34px, 5vw, 48px) var(--display); color: var(--hit); line-height: 1; font-variant-numeric: tabular-nums; }
+.badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 13px; font-weight: 700; }
+.badge.ok { background: var(--hit-soft); color: var(--hit); }
+.badge.bad { background: var(--miss-soft); color: var(--miss); }
+.sources { display: grid; gap: 6px; margin: 0; padding-left: 20px; }
+</style>
+
+<div class="wrap">
+  <header class="brand">
+    <div class="bar"></div>
+    <div class="course">BMGT 240IS · Business Analytics</div>
+    <h1>Sample Size &amp; Proportions Lab</h1>
+    <div class="meta">Ch 8.3 Determining the sample size · Ch 8.4 Population proportion · Fall 2026 · Montana State University</div>
+  </header>
+
+  <nav class="stops" aria-label="Lesson stops">
+    <a href="#purpose"><span>1</span>Purpose</a>
+    <a href="#samplesize"><span>2</span>How big a sample?</a>
+    <a href="#planning"><span>3</span>Planning value</a>
+    <a href="#proportion"><span>4</span>Intervals for p</a>
+    <a href="#formulas"><span>5</span>The formulas</a>
+    <a href="#solve"><span>6</span>Solve Q8 &amp; Q9</a>
+  </nav>
+
+  <!-- 1 -->
+  <section class="stop" id="purpose">
+    <div class="stop-head"><div class="stop-num">STOP 1</div><h2>Two new questions</h2></div>
+    <div class="two">
+      <div class="card">
+        <p class="big-claim"><b>8.3:</b> Before we collect data, <em>how big a sample do we need</em> for a margin of error we choose?</p>
+        <p class="big-claim"><b>8.4:</b> What if the variable is <em>Yes / No</em>, and we want a <em>proportion</em> instead of a mean?</p>
+        <div class="contrast">
+          <div><span class="k">8.1 – 8.2</span><span>given n → find E</span></div>
+          <div class="on"><span class="k">8.3</span><span>choose E → find n</span></div>
+        </div>
+      </div>
+      <div class="card problem">
+        <p><span class="tag">Q6</span><b>Salaries of Business Graduates.</b> Starting salaries are generally expected to be between <b>$45,000 and $60,000</b>. A 95% confidence interval for the mean is desired. (a) Planning value for σ? (b) Sample size for E = $500, $200, $100? (c) Would you recommend E = $100?</p>
+        <p><span class="tag">Q7</span>Sample size for a 95% interval with E = 10, σ = 40?</p>
+        <p><span class="tag">Q8</span><b>Healthcare Survey.</b> Of <b>1,007</b> adults, <b>574</b> lack confidence they can afford health insurance in the future. (a) p̄? (b) 90% margin of error? (c) 90% interval? (d) 95% interval?</p>
+        <p><span class="tag">Q9</span>400 individuals, 100 Yes. (a) p̄? (b) σ<sub>p̄</sub>? (c) 95% interval?</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="stop" id="samplesize">
+    <div class="stop-head"><div class="stop-num">STOP 2 · 8.3</div><h2>Turn the margin of error around to solve for n</h2>
+      <p class="muted">E = z<sub>α/2</sub> · σ/√n &nbsp;→&nbsp; n = (z<sub>α/2</sub>)² σ² / E²</p></div>
+    <div class="two">
+      <div class="card">
+        <div class="btnrow">
+          <span class="label">Load</span>
+          <button type="button" class="btn" id="q6a">Q6 · E = $500</button>
+          <button type="button" class="btn" id="q6b">Q6 · E = $200</button>
+          <button type="button" class="btn" id="q6c">Q6 · E = $100</button>
+          <button type="button" class="btn" id="q7">Q7 · σ = 40, E = 10</button>
+        </div>
+        <div class="calc">
+          <div class="field"><label class="label" for="ss-sigma">Planning value <span style="text-transform:none">σ</span></label><input type="number" id="ss-sigma" min="0.01" step="any" value="3750"></div>
+          <div class="field"><label class="label" for="ss-e">Desired margin of error E</label><input type="number" id="ss-e" min="0.01" step="any" value="500"></div>
+        </div>
+        <div class="seg" role="group" aria-label="Confidence level">
+          <button type="button" data-ssc="0.90">90%</button>
+          <button type="button" data-ssc="0.95">95%</button>
+          <button type="button" data-ssc="0.99">99%</button>
+        </div>
+        <canvas id="ssChart" aria-label="Required sample size as the margin of error changes"></canvas>
+      </div>
+      <div class="card">
+        <span class="label">Sample size needed</span>
+        <div class="bign" id="ss-n">217</div>
+        <div class="kv">
+          <div><span>z<sub>α/2</sub></span><b id="ss-z">1.960</b></div>
+          <div><span>n = z²σ²/E² (raw)</span><b id="ss-raw">216.09</b></div>
+          <div><span>Round <b>up</b></span><b id="ss-up">217</b></div>
+          <div><span>E with that n</span><b id="ss-chk">498.85</b></div>
+          <div><span>E if we rounded down</span><b id="ss-chk2">500.00</b></div>
+        </div>
+        <div class="xl" id="ss-xl">=ROUNDUP(NORM.S.INV(0.975)^2*3750^2/500^2,0)</div>
+        <p class="callout"><b>Always round up.</b> Rounding down leaves the margin of error just above the target. <b>Halving E quadruples n</b>, because E is squared in the denominator.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="stop" id="planning">
+    <div class="stop-head"><div class="stop-num">STOP 3 · 8.3</div><h2>We need σ before we sample. Where does it come from?</h2></div>
+    <div class="two">
+      <div class="card">
+        <canvas id="pvChart" aria-label="Normal curve with plus or minus two standard deviations spanning 45,000 to 60,000"></canvas>
+        <p class="callout">About 95% of a roughly normal variable lies within ±2σ of the mean, a span of 4σ. So <b>range ≈ 4σ</b>, and σ ≈ (60,000 − 45,000)/4 = <b>$3,750</b> (Q6a).</p>
+      </div>
+      <div class="card">
+        <h3>Ways to get a planning value for σ</h3>
+        <ol class="sources">
+          <li>Use the standard deviation from a <b>previous study</b> of the same or similar units.</li>
+          <li>Run a small <b>pilot study</b> and use its sample standard deviation.</li>
+          <li>Use <b>judgment</b> or a best guess, for example range / 4 when only a typical range is known.</li>
+        </ol>
+        <p class="note">Planning values are approximate. That is one more reason to round n up.</p>
+        <div class="ans">
+          <p><b>Q6(c) · Would you recommend E = $100?</b></p>
+          <p>Probably not. It needs 5,403 graduates, 25 times the 217 needed for E = $500. A $500 margin on a salary near $52,500 is already under 1%, so the extra cost is hard to justify.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="stop" id="proportion">
+    <div class="stop-head"><div class="stop-num">STOP 4 · 8.4 · EXPERIMENT</div><h2>Intervals for a proportion: when does the normal approximation work?</h2>
+      <p class="muted">Each line is p̄ ± z · √[p̄(1 − p̄)/n] from one random sample of Yes / No answers. We pretend we know the true p so we can see which intervals catch it.</p></div>
+    <div class="bench">
+      <div class="card rail" aria-label="Proportion simulator controls">
+        <div class="group">
+          <div class="label" id="pp-label">True proportion p (pretend)</div>
+          <div class="seg" role="group" aria-labelledby="pp-label">
+            <button type="button" data-pp="0.57">0.57</button>
+            <button type="button" data-pp="0.10">0.10</button>
+          </div>
+        </div>
+        <div class="group">
+          <div class="label" id="pn-label">Sample size n</div>
+          <div class="seg" role="group" aria-labelledby="pn-label">
+            <button type="button" data-pn="20">20</button>
+            <button type="button" data-pn="100">100</button>
+            <button type="button" data-pn="1007">1,007</button>
+          </div>
+        </div>
+        <div class="group">
+          <div class="label" id="pc-label">Confidence level</div>
+          <div class="seg" role="group" aria-labelledby="pc-label">
+            <button type="button" data-pc="0.90">90%</button>
+            <button type="button" data-pc="0.95">95%</button>
+          </div>
+        </div>
+        <div class="group">
+          <div class="label">Draw samples</div>
+          <div class="draws">
+            <button type="button" class="btn primary" id="p1">+1</button>
+            <button type="button" class="btn primary" id="p20">+20</button>
+            <button type="button" class="btn primary" id="p100">+100</button>
+          </div>
+          <button type="button" class="btn" id="pclear">Clear all intervals</button>
+        </div>
+        <div class="kv">
+          <div><span>np</span><b id="pc-np">11.4</b></div>
+          <div><span>n(1 − p)</span><b id="pc-nq">8.6</b></div>
+          <div><span>Both ≥ 5?</span><span id="pc-ok" class="badge ok">OK</span></div>
+        </div>
+        <div class="tile"><span class="num" id="pc-rate">–</span><span class="cap" id="pc-cap">captured p (target 95%)</span></div>
+        <p class="note">Keys: <kbd>D</kbd> +1, <kbd>T</kbd> +20, <kbd>H</kbd> +100, <kbd>C</kbd> clear.</p>
+      </div>
+      <div class="card">
+        <div class="stage-head">
+          <h3 id="pc-title">Intervals from repeated samples</h3>
+          <div class="legend">
+            <span><i style="background:var(--hit)"></i>captures p</span>
+            <span><i style="background:var(--miss)"></i>misses p</span>
+            <span><i style="background:var(--mu);width:3px;height:14px"></i>true p</span>
+          </div>
+        </div>
+        <canvas id="pcChart" aria-label="Stack of confidence intervals for a proportion"></canvas>
+        <p class="note">Try p = 0.10 with n = 20: np = 2, too small. The capture rate falls well below the target, and some intervals even run below 0.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="stop" id="formulas">
+    <div class="stop-head"><div class="stop-num">STOP 5</div><h2>The formulas</h2></div>
+    <div class="card cmp">
+      <table>
+        <thead><tr><th></th><th>Mean, <span style="text-transform:none">σ</span> known (8.1)</th><th>Proportion (8.4)</th></tr></thead>
+        <tbody>
+          <tr><td>Point estimate</td><td><span class="xb">x</span></td><td class="diff">p̄ = (number of Yes) / n</td></tr>
+          <tr><td>Standard error</td><td>σ / √n</td><td class="diff">√[ p̄(1 − p̄) / n ]</td></tr>
+          <tr><td>Interval</td><td><span class="xb">x</span> ± z<sub>α/2</sub> σ/√n</td><td class="diff">p̄ ± z<sub>α/2</sub> √[ p̄(1 − p̄) / n ]</td></tr>
+          <tr><td>Condition</td><td>n ≥ 30 or normal population</td><td class="diff">np̄ ≥ 5 and n(1 − p̄) ≥ 5</td></tr>
+          <tr><td>Sample size (8.3)</td><td>n = z² σ² / E²</td><td class="diff">n = z² p*(1 − p*) / E²</td></tr>
+          <tr><td>Excel margin of error</td><td class="mono">=CONFIDENCE.NORM(α, σ, n)</td><td class="diff mono">=NORM.S.INV(1−α/2)*SQRT(p̄*(1−p̄)/n)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="two">
+      <div class="card">
+        <h3>Planning value p* for a proportion's sample size</h3>
+        <div class="row">
+          <span class="label" style="min-width:90px">p*</span>
+          <input type="range" id="pstar" min="0.05" max="0.95" step="0.01" value="0.5" aria-label="Planning value p star">
+          <span class="val" id="pstar-v">0.50</span>
+        </div>
+        <canvas id="pqChart" aria-label="p star times one minus p star, highest at 0.5"></canvas>
+      </div>
+      <div class="card">
+        <div class="field"><label class="label" for="pe">Desired margin of error E (95%)</label><input type="number" id="pe" min="0.001" step="any" value="0.03"></div>
+        <span class="label">Sample size needed</span>
+        <div class="bign" id="pn-out">1068</div>
+        <div class="kv">
+          <div><span>p*(1 − p*)</span><b id="pq">0.2500</b></div>
+          <div><span>n = 1.96² · p*(1 − p*) / E²</span><b id="pn-raw">1067.11</b></div>
+        </div>
+        <div class="xl" id="pn-xl">=ROUNDUP(1.96^2*0.5*(1-0.5)/0.03^2,0)</div>
+        <p class="callout">p*(1 − p*) is largest at <b>p* = 0.5</b>. With no better information, use 0.5: it gives the largest, safest n.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="stop" id="solve">
+    <div class="stop-head"><div class="stop-num">STOP 6 · APPLY</div><h2>Solve Question 8 (healthcare survey) and Question 9</h2></div>
+    <div class="grid6" id="grid6"></div>
+    <div class="two">
+      <div class="card">
+        <span class="answer">Question 9</span>
+        <h3>400 individuals, 100 Yes</h3>
+        <div class="kv">
+          <div><span>(a) p̄ = 100 / 400</span><b>0.25</b></div>
+          <div><span>(b) σ<sub>p̄</sub> = √[0.25(0.75)/400]</span><b>0.0217</b></div>
+          <div><span>(c) 0.25 ± 1.96(0.0217)</span><b>0.2076 to 0.2924</b></div>
+        </div>
+        <div class="xl">=0.25-NORM.S.INV(0.975)*SQRT(0.25*0.75/400)</div>
+      </div>
+      <div class="card">
+        <span class="answer">Questions 6 &amp; 7</span>
+        <h3>Sample sizes (from Stop 2)</h3>
+        <div class="kv">
+          <div><span>Q6(a) planning value σ</span><b>$3,750</b></div>
+          <div><span>Q6(b) E = $500 / $200 / $100</span><b>217 / 1,351 / 5,403</b></div>
+          <div><span>Q7 σ = 40, E = 10</span><b>62</b></div>
+        </div>
+        <p class="note">Q7: 1.96² × 40² / 10² = 61.47 → round up to 62.</p>
+      </div>
+    </div>
+    <div class="stop-head"><h3>Say it right</h3></div>
+    <div class="two">
+      <div class="card">
+        <div class="label" style="color:var(--hit)">Right</div>
+        <p>We are 95% confident that between <b>53.9% and 60.1%</b> of <b>all</b> adults lack confidence they will be able to afford health insurance in the future.</p>
+      </div>
+      <div class="card">
+        <div class="label" style="color:var(--miss)">Wrong</div>
+        <p>Between 53.9% and 60.1% of the 1,007 surveyed adults lack confidence.</p>
+        <p class="note">For the sample we already know the answer exactly: 574 / 1,007 = 57.0%. The interval is about the population.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const $ = id => document.getElementById(id);
+  const fmt = (v, d) => (+v.toFixed(d)).toString();
+  const comma = (v, d = 0) => v.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+  function normInv(p) {
+    const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.3577518672690,-30.66479806614716,2.506628277459239];
+    const b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572];
+    const c=[-0.007784894002430293,-0.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783];
+    const d=[0.007784695709041462,0.3224671290700398,2.445134137142996,3.754408661907416];
+    const pl=0.02425; let q,r;
+    if (p<pl){q=Math.sqrt(-2*Math.log(p));return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+    if (p>1-pl){q=Math.sqrt(-2*Math.log(1-p));return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+    q=p-0.5;r=q*q;return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);
+  }
+  const tok = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const colors = () => ({ ink: tok("--ink"), muted: tok("--muted"), line: tok("--line"), hit: tok("--hit"), miss: tok("--miss"),
+    soft: tok("--hit-soft"), missSoft: tok("--miss-soft"), mu: tok("--mu"), z: tok("--zline"), mono: tok("--mono"), body: tok("--body") });
+  function setup(cv, H) {
+    const dpr = window.devicePixelRatio || 1, W = cv.clientWidth;
+    cv.style.height = H + "px"; cv.width = W * dpr; cv.height = H * dpr;
+    const ctx = cv.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+    return { ctx, W, H };
+  }
+
+  // ================= STOP 2: sample size for a mean =================
+  const ss = { sigma: 3750, E: 500, conf: 0.95 };
+  function readSS() {
+    const s = parseFloat($("ss-sigma").value), e = parseFloat($("ss-e").value);
+    if (s > 0) ss.sigma = s; if (e > 0) ss.E = e;
+  }
+  function drawSS() {
+    const z = normInv(1 - (1 - ss.conf) / 2), raw = z * z * ss.sigma * ss.sigma / (ss.E * ss.E);
+    const up = Math.ceil(raw - 1e-9), down = Math.max(1, Math.floor(raw + 1e-9));
+    const d = ss.E >= 100 ? 2 : ss.E >= 1 ? 3 : 4;
+    $("ss-n").textContent = comma(up); $("ss-z").textContent = z.toFixed(3);
+    $("ss-raw").textContent = comma(raw, 2); $("ss-up").textContent = comma(up);
+    $("ss-chk").textContent = comma(z * ss.sigma / Math.sqrt(up), d);
+    $("ss-chk2").textContent = down === up ? "same n" : comma(z * ss.sigma / Math.sqrt(down), d) + (z * ss.sigma / Math.sqrt(down) > ss.E + 1e-9 ? "  (over target)" : "");
+    const alpha2 = fmt(1 - (1 - ss.conf) / 2, 3);
+    $("ss-xl").textContent = "=ROUNDUP(NORM.S.INV(" + alpha2 + ")^2*" + fmt(ss.sigma, 4) + "^2/" + fmt(ss.E, 4) + "^2,0)";
+    document.querySelectorAll("[data-ssc]").forEach(b => b.setAttribute("aria-pressed", Math.abs(+b.dataset.ssc - ss.conf) < 1e-9));
+    // chart: n vs E from E/4 to 2E
+    const cv = $("ssChart"), { ctx, W, H } = setup(cv, 240), C = colors();
+    const L = 56, R = W - 14, T = 14, B = H - 34, e0 = ss.E / 4, e1 = ss.E * 2;
+    const nOf = e => z * z * ss.sigma * ss.sigma / (e * e), nmax = nOf(e0 * 1.0);
+    const x = e => L + (e - e0) / (e1 - e0) * (R - L), y = n => B - n / nmax * (B - T);
+    ctx.strokeStyle = C.line; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(L, T); ctx.lineTo(L, B); ctx.lineTo(R, B); ctx.stroke();
+    ctx.beginPath(); for (let e = e0, f = true; e <= e1 + 1e-9; e += (e1 - e0) / 200, f = false) f ? ctx.moveTo(x(e), y(nOf(e))) : ctx.lineTo(x(e), y(nOf(e)));
+    ctx.strokeStyle = C.hit; ctx.lineWidth = 2.5; ctx.stroke();
+    const mark = (e, lab) => { const px = x(e), py = y(nOf(e)); ctx.fillStyle = C.hit; ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = C.ink; ctx.font = "600 12px " + C.mono; ctx.textAlign = "left"; ctx.fillText(lab, px + 8, py - 6); };
+    mark(ss.E, "n = " + comma(Math.ceil(nOf(ss.E) - 1e-9)));
+    mark(ss.E / 2, "E/2 → n = " + comma(Math.ceil(nOf(ss.E / 2) - 1e-9)));
+    ctx.fillStyle = C.muted; ctx.font = "12px " + C.mono; ctx.textAlign = "center";
+    [e0, ss.E / 2, ss.E, ss.E * 1.5, e1].forEach(e => { ctx.fillText(fmt(e, d), x(e), B + 16); });
+    ctx.fillText("margin of error E", (L + R) / 2, B + 30);
+    ctx.textAlign = "right"; [0, 0.5, 1].forEach(f => ctx.fillText(comma(nmax * f), L - 6, y(nmax * f) + 4));
+  }
+  const loadSS = (s, e) => { $("ss-sigma").value = s; $("ss-e").value = e; ss.conf = 0.95; readSS(); drawSS(); };
+  $("q6a").addEventListener("click", () => loadSS(3750, 500));
+  $("q6b").addEventListener("click", () => loadSS(3750, 200));
+  $("q6c").addEventListener("click", () => loadSS(3750, 100));
+  $("q7").addEventListener("click", () => loadSS(40, 10));
+  ["ss-sigma", "ss-e"].forEach(id => $(id).addEventListener("input", () => { readSS(); drawSS(); }));
+  document.querySelectorAll("[data-ssc]").forEach(b => b.addEventListener("click", () => { ss.conf = +b.dataset.ssc; drawSS(); }));
+
+  // ================= STOP 3: planning value =================
+  function drawPV() {
+    const cv = $("pvChart"), { ctx, W, H } = setup(cv, 230), C = colors();
+    const L = 14, R = W - 14, base = H - 44, top = 14, half = 3.4;
+    const x = v => L + (v + half) / (2 * half) * (R - L), y = v => base - Math.exp(-0.5 * v * v) * (base - top);
+    ctx.beginPath(); ctx.moveTo(x(-2), base); for (let v = -2; v <= 2; v += 0.02) ctx.lineTo(x(v), y(v)); ctx.lineTo(x(2), base); ctx.closePath(); ctx.fillStyle = C.soft; ctx.fill();
+    ctx.beginPath(); for (let v = -half, f = true; v <= half; v += 0.02, f = false) f ? ctx.moveTo(x(v), y(v)) : ctx.lineTo(x(v), y(v));
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 1.8; ctx.stroke();
+    ctx.strokeStyle = C.line; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(L, base); ctx.lineTo(R, base); ctx.stroke();
+    ctx.font = "12px " + C.mono; ctx.textAlign = "center"; ctx.fillStyle = C.muted;
+    [-2, -1, 0, 1, 2].forEach(k => { const px = x(k); ctx.beginPath(); ctx.moveTo(px, base); ctx.lineTo(px, base + 4); ctx.stroke();
+      ctx.fillText(k === 0 ? "μ" : (k > 0 ? "+" : "−") + Math.abs(k) + "σ", px, base + 16); });
+    ctx.fillStyle = C.hit; ctx.font = "600 13px " + C.mono;
+    ctx.fillText("$45,000", x(-2), base + 32); ctx.fillText("$52,500", x(0), base + 32); ctx.fillText("$60,000", x(2), base + 32);
+    ctx.fillStyle = C.ink; ctx.font = "600 13px " + C.body; ctx.fillText("about 95% of salaries", x(0), y(0) + 40);
+    ctx.strokeStyle = C.hit; ctx.lineWidth = 1.5; const yb = top + 4;
+    ctx.beginPath(); ctx.moveTo(x(-2), yb); ctx.lineTo(x(2), yb); ctx.stroke();
+    [-2, 2].forEach(k => { ctx.beginPath(); ctx.moveTo(x(k), yb - 5); ctx.lineTo(x(k), yb + 5); ctx.stroke(); });
+    ctx.fillStyle = C.hit; ctx.fillRect(x(-0.9), yb - 9, x(0.9) - x(-0.9), 18);
+    ctx.fillStyle = tok("--on-accent"); ctx.font = "700 12px " + C.body; ctx.fillText("range = 4σ", x(0), yb + 4);
+  }
+
+  // ================= STOP 4: proportion simulator =================
+  const ps = { p: 0.57, n: 20, conf: 0.95, draws: [] };
+  let queue = 0, timer = null;
+  function drawOne() { let k = 0; for (let i = 0; i < ps.n; i++) if (Math.random() < ps.p) k++; return k / ps.n; }
+  const zc = () => normInv(1 - (1 - ps.conf) / 2);
+  const eOf = pb => zc() * Math.sqrt(pb * (1 - pb) / ps.n);
+  function drawPC() {
+    const cv = $("pcChart"), W0 = cv.clientWidth, Hh = Math.max(400, Math.min(580, Math.round(W0 * 0.66)));
+    const { ctx, W, H } = setup(cv, Hh), C = colors();
+    const se = Math.sqrt(ps.p * (1 - ps.p) / ps.n), half = Math.max(5 * se, 0.02);
+    const lo = ps.p - half, hi = ps.p + half, L = 12, R = W - 12;
+    const x = v => L + (v - lo) / (hi - lo) * (R - L);
+    const top = 10, axisY = H - 28, bot = axisY - 10;
+    const vis = ps.draws.slice(-100), rowH = (bot - top) / 100, lw = Math.max(1.5, Math.min(4, rowH * 0.55));
+    if (lo < 0) { ctx.fillStyle = C.missSoft; ctx.fillRect(L, top, x(0) - L, bot - top); }
+    vis.forEach((pb, i) => {
+      const e = eOf(pb), hit = Math.abs(pb - ps.p) <= e, yy = top + rowH * (i + 0.5);
+      ctx.strokeStyle = hit ? C.hit : C.miss; ctx.lineWidth = hit ? lw : lw + 0.8;
+      if (e === 0) { ctx.fillStyle = C.miss; ctx.fillRect(x(pb) - 1, yy - lw, 3, lw * 2); }
+      ctx.beginPath(); ctx.moveTo(Math.max(L, x(pb - e)), yy); ctx.lineTo(Math.min(R, x(pb + e)), yy); ctx.stroke();
+      ctx.fillStyle = hit ? C.hit : C.miss; ctx.beginPath(); ctx.arc(x(pb), yy, Math.max(1.6, lw * 0.75), 0, Math.PI * 2); ctx.fill();
+    });
+    if (!vis.length) { ctx.fillStyle = C.muted; ctx.font = "15px " + C.body; ctx.textAlign = "center"; ctx.fillText("No samples yet. Press +1, +20 or +100.", (L + R) / 2, (top + bot) / 2); }
+    ctx.strokeStyle = C.mu; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x(ps.p), top - 4); ctx.lineTo(x(ps.p), axisY); ctx.stroke();
+    ctx.strokeStyle = C.line; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(L, axisY); ctx.lineTo(R, axisY); ctx.stroke();
+    ctx.fillStyle = C.muted; ctx.font = "12px " + C.mono; ctx.textAlign = "center";
+    const step = half > 0.2 ? 0.1 : half > 0.08 ? 0.05 : half > 0.04 ? 0.02 : 0.01;
+    for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) {
+      const px = x(v); ctx.beginPath(); ctx.moveTo(px, axisY); ctx.lineTo(px, axisY + 4); ctx.stroke();
+      if (px > L + 18 && px < R - 18) ctx.fillText(v.toFixed(2), px, axisY + 17);
+    }
+    if (lo < 0) { ctx.fillStyle = C.miss; ctx.font = "600 12px " + C.body; ctx.textAlign = "left"; ctx.fillText("below 0: impossible", L + 4, top + 14); }
+  }
+  function updatePC() {
+    const np = ps.n * ps.p, nq = ps.n * (1 - ps.p), ok = np >= 5 && nq >= 5, tot = ps.draws.length;
+    $("pc-np").textContent = fmt(np, 1); $("pc-nq").textContent = fmt(nq, 1);
+    $("pc-ok").textContent = ok ? "OK" : "Too small"; $("pc-ok").className = "badge " + (ok ? "ok" : "bad");
+    const hits = ps.draws.filter(pb => Math.abs(pb - ps.p) <= eOf(pb)).length;
+    $("pc-rate").textContent = tot ? (100 * hits / tot).toFixed(1) + "%" : "–";
+    $("pc-rate").classList.toggle("bad", tot >= 50 && 100 * hits / tot < 100 * ps.conf - 3);
+    $("pc-cap").textContent = "of " + tot + " intervals captured p (target " + Math.round(ps.conf * 100) + "%)";
+    $("pc-title").textContent = "Intervals for p = " + ps.p.toFixed(2) + " · n = " + comma(ps.n) + " · " + Math.round(ps.conf * 100) + "%";
+    document.querySelectorAll("[data-pp]").forEach(b => b.setAttribute("aria-pressed", +b.dataset.pp === ps.p));
+    document.querySelectorAll("[data-pn]").forEach(b => b.setAttribute("aria-pressed", +b.dataset.pn === ps.n));
+    document.querySelectorAll("[data-pc]").forEach(b => b.setAttribute("aria-pressed", Math.abs(+b.dataset.pc - ps.conf) < 1e-9));
+    drawPC();
+  }
+  function addP(k) {
+    if (reduce || k === 1) { for (let i = 0; i < k; i++) ps.draws.push(drawOne()); updatePC(); return; }
+    queue += k; if (timer) return;
+    timer = setInterval(() => {
+      const batch = Math.max(1, Math.ceil(queue / 40));
+      for (let i = 0; i < batch && queue > 0; i++, queue--) ps.draws.push(drawOne());
+      updatePC(); if (queue <= 0) { clearInterval(timer); timer = null; }
+    }, 22);
+  }
+  function stopQ() { queue = 0; if (timer) { clearInterval(timer); timer = null; } }
+  function resetP() { stopQ(); ps.draws = []; updatePC(); addP(100); }
+  document.querySelectorAll("[data-pp]").forEach(b => b.addEventListener("click", () => { if (+b.dataset.pp !== ps.p) { ps.p = +b.dataset.pp; resetP(); } }));
+  document.querySelectorAll("[data-pn]").forEach(b => b.addEventListener("click", () => { if (+b.dataset.pn !== ps.n) { ps.n = +b.dataset.pn; resetP(); } }));
+  document.querySelectorAll("[data-pc]").forEach(b => b.addEventListener("click", () => { ps.conf = +b.dataset.pc; updatePC(); }));
+  $("p1").addEventListener("click", () => addP(1));
+  $("p20").addEventListener("click", () => addP(20));
+  $("p100").addEventListener("click", () => addP(100));
+  $("pclear").addEventListener("click", () => { stopQ(); ps.draws = []; updatePC(); });
+  document.addEventListener("keydown", e => {
+    if (e.target.tagName === "INPUT" || e.ctrlKey || e.metaKey || e.altKey) return;
+    const k = e.key.toLowerCase();
+    if (k === "d") addP(1); else if (k === "t") addP(20); else if (k === "h") addP(100); else if (k === "c") { stopQ(); ps.draws = []; updatePC(); }
+  });
+
+  // ================= STOP 5: p* planning value =================
+  function drawPQ() {
+    const pst = +$("pstar").value, E = parseFloat($("pe").value) > 0 ? parseFloat($("pe").value) : 0.03;
+    const pq = pst * (1 - pst), raw = 1.959964 ** 2 * pq / (E * E), up = Math.ceil(raw - 1e-9);
+    $("pstar-v").textContent = pst.toFixed(2); $("pq").textContent = pq.toFixed(4);
+    $("pn-raw").textContent = comma(raw, 2); $("pn-out").textContent = comma(up);
+    $("pn-xl").textContent = "=ROUNDUP(1.96^2*" + pst.toFixed(2) + "*(1-" + pst.toFixed(2) + ")/" + fmt(E, 4) + "^2,0)";
+    const cv = $("pqChart"), { ctx, W, H } = setup(cv, 200), C = colors();
+    const L = 46, R = W - 14, T = 14, B = H - 30, x = p => L + p * (R - L), y = v => B - v / 0.27 * (B - T);
+    ctx.strokeStyle = C.line; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(L, T); ctx.lineTo(L, B); ctx.lineTo(R, B); ctx.stroke();
+    ctx.beginPath(); for (let p = 0, f = true; p <= 1.0001; p += 0.01, f = false) f ? ctx.moveTo(x(p), y(p * (1 - p))) : ctx.lineTo(x(p), y(p * (1 - p)));
+    ctx.strokeStyle = C.hit; ctx.lineWidth = 2.5; ctx.stroke();
+    ctx.setLineDash([4, 4]); ctx.strokeStyle = C.muted; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(L, y(0.25)); ctx.lineTo(R, y(0.25)); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = C.hit; ctx.beginPath(); ctx.arc(x(pst), y(pq), 6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = C.muted; ctx.font = "12px " + C.mono; ctx.textAlign = "center";
+    [0, 0.25, 0.5, 0.75, 1].forEach(p => ctx.fillText(p.toFixed(2), x(p), B + 16));
+    ctx.textAlign = "right"; [0, 0.1, 0.2, 0.25].forEach(v => ctx.fillText(v.toFixed(2), L - 6, y(v) + 4));
+    ctx.textAlign = "left"; ctx.fillStyle = C.ink; ctx.font = "600 12px " + C.body; ctx.fillText("p*(1 − p*)", L + 6, T + 4);
+  }
+  $("pstar").addEventListener("input", drawPQ); $("pe").addEventListener("input", drawPQ);
+
+  // ================= STOP 6: Q8 steps =================
+  const n8 = 1007, k8 = 574, pb = k8 / n8, se8 = Math.sqrt(pb * (1 - pb) / n8);
+  const z90 = normInv(0.95), z95 = normInv(0.975), e90 = z90 * se8, e95 = z95 * se8;
+  const steps = [
+    { h: "Point estimate", a: "Answer (a)", m: "p̄ = 574 / 1,007 = <b>" + pb.toFixed(4) + "</b>", xl: "=574/1007", w: "About 57% of the sample." },
+    { h: "Check the condition", m: "np̄ = <b>574</b>, n(1 − p̄) = <b>433</b>", xl: "=AND(1007*B1>=5,1007*(1-B1)>=5)", w: "Both are at least 5, so the normal approximation holds." },
+    { h: "Standard error", m: "√[p̄(1 − p̄)/n] = <b>" + se8.toFixed(4) + "</b>", xl: "=SQRT(B1*(1-B1)/1007)", w: "Uses p̄ in place of the unknown p." },
+    { h: "Margin of error, 90%", a: "Answer (b)", m: z90.toFixed(3) + " × " + se8.toFixed(4) + " = <b>" + e90.toFixed(4) + "</b>", xl: "=NORM.S.INV(0.95)*B3", w: "No CONFIDENCE shortcut for proportions: build z × standard error." },
+    { h: "90% interval", a: "Answer (c)", m: pb.toFixed(2) + " ± " + e90.toFixed(4) + " → <b>" + (pb - e90).toFixed(4) + " to " + (pb + e90).toFixed(4) + "</b>", xl: "=B1-B4  and  =B1+B4", w: "About 54.4% to 59.6% of all adults." },
+    { h: "95% interval", a: "Answer (d)", m: "1.960 × " + se8.toFixed(4) + " = " + e95.toFixed(4) + " → <b>" + (pb - e95).toFixed(4) + " to " + (pb + e95).toFixed(4) + "</b>", xl: "=B1-NORM.S.INV(0.975)*B3", w: "Wider than 90%: more confidence costs precision." },
+  ];
+  $("grid6").innerHTML = steps.map((st, i) =>
+    '<article class="card step"><span class="n">STEP ' + (i + 1) + "</span>" + (st.a ? '<span class="answer">' + st.a + "</span>" : "") +
+    "<h3>" + st.h + '</h3><div class="math">' + st.m + '</div><div class="xl">' + st.xl + '</div><p class="why">' + st.w + "</p></article>").join("");
+
+  // ================= boot =================
+  function drawAll() { drawSS(); drawPV(); drawPC(); drawPQ(); }
+  for (let i = 0; i < 100; i++) ps.draws.push(drawOne());
+  readSS(); drawSS(); drawPV(); updatePC(); drawPQ();
+  let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(drawAll, 80); });
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawAll);
+  new MutationObserver(drawAll).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+})();
+</script>
+
+</body>
+</html>

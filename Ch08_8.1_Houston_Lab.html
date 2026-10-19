@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Houston Lunch Interval Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: a projected lesson in six numbered stops (the real teaching order), each a full-width band; the simulator stop gets a controls rail + large chart.
+   Brand: MSU navy #162860 + gold #F3B324, Aptos (from BlankMSUPowerPoint_2026.04.15.pptx and the BMGT 240IS course card). */
+:root {
+  --navy: #162860;
+  --navy-deep: #0f1c48;
+  --gold: #F3B324;
+  --gold-soft: #FADA92;
+  --bg: #f3f5fa;
+  --panel: #ffffff;
+  --ink: #111a30;
+  --muted: #4a5570;
+  --line: #d5dae7;
+  --hit: #162860;
+  --hit-soft: rgba(22,40,96,.13);
+  --miss: #c8432f;
+  --miss-soft: rgba(200,67,47,.14);
+  --mu: #111a30;
+  --chip: #e7ebf4;
+  --focus: #F3B324;
+  --on-accent: #ffffff;
+  --display: Aptos, "Aptos Display", "Segoe UI", Arial, Helvetica, sans-serif;
+  --body: Aptos, "Segoe UI", Arial, Helvetica, sans-serif;
+  --mono: Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b1433; --panel: #14214d; --ink: #eef1f8; --muted: #a9b3cc; --line: #2a3a6e;
+    --hit: #F3B324; --hit-soft: rgba(243,179,36,.18); --miss: #f07a63; --miss-soft: rgba(240,122,99,.16);
+    --mu: #eef1f8; --chip: #1c2b5c; --focus: #FADA92; --on-accent: #162860;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b1433; --panel: #14214d; --ink: #eef1f8; --muted: #a9b3cc; --line: #2a3a6e;
+  --hit: #F3B324; --hit-soft: rgba(243,179,36,.18); --miss: #f07a63; --miss-soft: rgba(240,122,99,.16);
+  --mu: #eef1f8; --chip: #1c2b5c; --focus: #FADA92; --on-accent: #162860;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 56px;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 1280px; margin: 0 auto; display: grid; gap: 28px; }
+header.brand {
+  margin-top: 20px; border-radius: 12px; padding: 26px clamp(18px, 3vw, 36px) 24px;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-deep) 100%); color: #ffffff;
+  display: grid; gap: 8px; border: 1px solid var(--line);
+}
+header.brand .bar { width: 52px; height: 4px; border-radius: 2px; background: var(--gold); }
+header.brand .course { font-size: 14px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); }
+header.brand h1 { color: #ffffff; }
+header.brand .meta { font-size: 14px; color: #b9c3dc; }
+.eyebrow { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(30px, 4.2vw, 44px); line-height: 1.1; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--display); font-size: clamp(22px, 2.6vw, 28px); line-height: 1.2; margin: 0; text-wrap: balance; }
+h3 { font-family: var(--display); font-size: 18px; margin: 0; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+b.m, .mono { font-family: var(--mono); font-weight: 500; font-variant-numeric: tabular-nums; }
+
+nav.stops {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg);
+  display: flex; gap: 6px; overflow-x: auto; padding-block: 10px; border-bottom: 1px solid var(--line);
+}
+nav.stops a {
+  flex: 0 0 auto; text-decoration: none; color: var(--ink); background: var(--chip); border: 1px solid var(--line);
+  border-radius: 999px; padding: 5px 12px; font-size: 14px; font-weight: 500; white-space: nowrap;
+}
+nav.stops a span { font-family: var(--mono); color: var(--hit); margin-right: 6px; }
+nav.stops a:hover { border-color: var(--hit); }
+
+section.stop { display: grid; gap: 14px; scroll-margin-top: 64px; }
+.stop-head { display: grid; gap: 4px; }
+.stop-num { font: 700 13px var(--body); color: var(--hit); letter-spacing: .14em; display: flex; align-items: center; gap: 10px; }
+.stop-num::before { content: ""; width: 28px; height: 3px; border-radius: 2px; background: var(--gold); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; min-width: 0; }
+.two { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 860px) { .two { grid-template-columns: 1fr; } }
+.problem { font-size: 17px; }
+.problem .tag { display: inline-block; font: 600 12px var(--mono); background: var(--chip); border-radius: 4px; padding: 1px 6px; margin-right: 6px; }
+.big-claim { font-size: 21px; line-height: 1.4; max-width: 60ch; }
+.big-claim em { font-style: normal; background: var(--hit-soft); padding: 0 4px; border-radius: 4px; }
+.contrast { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 520px) { .contrast { grid-template-columns: 1fr; } }
+.contrast div { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 2px; }
+.contrast div.on { border-color: var(--hit); background: var(--hit-soft); }
+.contrast .k { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; font-weight: 600; color: var(--muted); }
+
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button, .btn {
+  font: 600 15px var(--body); color: var(--ink); background: var(--chip); border: 1px solid var(--line);
+  border-radius: 7px; padding: 8px 12px; cursor: pointer; min-width: 56px;
+}
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+.btn.primary { background: var(--hit); color: var(--on-accent); border-color: var(--hit); }
+button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+button:hover { filter: brightness(1.06); }
+.btnrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+canvas { width: 100%; display: block; }
+
+.kv { display: grid; gap: 6px; font-variant-numeric: tabular-nums; }
+.kv div { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; border-bottom: 1px dashed var(--line); padding-bottom: 4px; }
+.kv div:last-child { border-bottom: 0; }
+.kv span:first-child { color: var(--muted); }
+.kv b { font: 500 17px var(--mono); }
+.xl { font: 14px var(--mono); background: var(--chip); border-radius: 6px; padding: 6px 8px; overflow-x: auto; white-space: nowrap; }
+.callout { border-left: 4px solid var(--hit); padding: 4px 0 4px 12px; }
+.reveal { display: grid; gap: 8px; }
+.reveal .ans { background: var(--hit-soft); border-radius: 8px; padding: 10px 12px; }
+
+/* simulator */
+.bench { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 900px) { .bench { grid-template-columns: 1fr; } }
+.rail { display: grid; gap: 18px; }
+.group { display: grid; gap: 8px; }
+.label { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.draws { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.draws .btn { padding: 10px 6px; }
+.row { display: flex; align-items: center; gap: 10px; }
+input[type="range"] { flex: 1; accent-color: var(--hit); }
+.confval { font: 600 20px var(--mono); min-width: 72px; text-align: right; font-variant-numeric: tabular-nums; }
+.score { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tile { background: var(--chip); border-radius: 8px; padding: 8px 12px; display: grid; gap: 0; }
+.tile .num { font: 600 26px var(--display); font-variant-numeric: tabular-nums; line-height: 1.15; }
+.tile .num.hit { color: var(--hit); } .tile .num.miss { color: var(--miss); }
+.tile .cap { font-size: 13px; color: var(--muted); }
+.tile.wide { grid-column: 1 / -1; }
+.hint { font-size: 13px; color: var(--muted); }
+kbd { font: 12px var(--mono); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--panel); }
+.stage-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; align-items: baseline; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 14px; color: var(--muted); }
+.legend i { display: inline-block; width: 22px; height: 4px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+.note { font-size: 14px; color: var(--muted); }
+
+.terms { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 1060px) { .terms { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .terms { grid-template-columns: 1fr; } }
+.term { align-content: start; }
+.term .live { font: 600 26px var(--display); font-variant-numeric: tabular-nums; color: var(--hit); line-height: 1.1; }
+.term .live.miss { color: var(--miss); }
+.term .def { font-size: 15px; }
+.term .src { font-size: 12px; color: var(--muted); }
+
+/* formula */
+.formula { font-family: var(--mono); font-size: clamp(24px, 4vw, 40px); display: flex; flex-wrap: wrap; align-items: flex-start; gap: 4px 14px; padding-block: 8px; }
+.formula .part { display: grid; justify-items: center; gap: 6px; }
+.formula .sym { padding: 2px 8px; border-radius: 6px; }
+.formula .sym.a { background: var(--chip); }
+.formula .sym.b { background: var(--hit-soft); }
+.formula .lab { font: 500 13px var(--body); color: var(--muted); text-align: center; max-width: 16ch; }
+.formula .op { padding-top: 2px; }
+.xb { display: inline-block; position: relative; font-weight: 700; font-style: italic; line-height: 1; padding: 0 .06em; }
+.xb::before { content: ""; position: absolute; left: .1em; right: .02em; top: .1em; height: .1em; min-height: 2px; border-radius: 1px; background: currentColor; }
+.frac { display: inline-grid; justify-items: center; line-height: 1.05; vertical-align: middle; }
+.frac .top { border-bottom: 2px solid currentColor; padding: 0 4px; }
+
+.grid6 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 960px) { .grid6 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .grid6 { grid-template-columns: 1fr; } }
+.step { align-content: start; gap: 8px; }
+.step .n { font: 600 13px var(--mono); color: var(--hit); letter-spacing: .04em; }
+.math { font-size: 17px; font-variant-numeric: tabular-nums; }
+.math b { font-family: var(--mono); font-weight: 500; }
+.answer { font-size: 13px; font-weight: 600; color: var(--miss); text-transform: uppercase; letter-spacing: .06em; }
+.why { font-size: 14px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="brand">
+    <div class="bar"></div>
+    <div class="course">BMGT 240IS · Business Analytics</div>
+    <h1>Houston Lunch Interval Lab</h1>
+    <div class="meta">Ch 8.1 · Population mean, σ known · Fall 2026 · Montana State University</div>
+  </header>
+
+  <nav class="stops" aria-label="Lesson stops">
+    <a href="#purpose"><span>1</span>Purpose</a>
+    <a href="#sampling"><span>2</span>Sampling distribution of <span class="xb">x</span></a>
+    <a href="#ztable"><span>3</span>The z table</a>
+    <a href="#simulator"><span>4</span>Simulator &amp; terms</a>
+    <a href="#formula"><span>5</span>The formula</a>
+    <a href="#houston"><span>6</span>Solve Houston</a>
+  </nav>
+
+  <!-- 1 -->
+  <section class="stop" id="purpose">
+    <div class="stop-head"><div class="stop-num">STOP 1</div><h2>Why we are doing this problem</h2></div>
+    <div class="two">
+      <div class="card">
+        <p class="big-claim">Develop an <em>interval estimate of the population mean μ</em> when the <em>population standard deviation σ is known</em>.</p>
+        <div class="contrast">
+          <div class="on"><span class="k">Today · 8.1</span><span>σ known → use <b class="m">z</b></span></div>
+          <div><span class="k">Next · 8.2</span><span>σ unknown, use sample <i>s</i> → use <b class="m">t</b></span></div>
+        </div>
+      </div>
+      <div class="card problem">
+        <p>Data were collected on the amount spent by <b>64 customers</b> for lunch at a major Houston restaurant.</p>
+        <p class="muted">Data file <b>houston.xlsx</b>, column Amount, A2:A65</p>
+        <p>From past studies, the <b>population</b> standard deviation is known: <b>σ = $6</b>.</p>
+        <p><span class="tag">(a)</span>At 99% confidence, what is the margin of error?</p>
+        <p><span class="tag">(b)</span>Develop a 99% confidence interval estimate of the mean amount spent for lunch.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="stop" id="sampling">
+    <div class="stop-head"><div class="stop-num">STOP 2 · REVIEW</div><h2>The sampling distribution shows how <span class="xb">x</span> is spread around μ</h2></div>
+    <div class="two">
+      <div class="card">
+        <canvas id="sdChart" aria-label="Sampling distribution of x-bar with sample means piling up"></canvas>
+        <div class="btnrow">
+          <button type="button" class="btn primary" id="sd1">Take 1 sample of 64</button>
+          <button type="button" class="btn primary" id="sd50">+50 samples</button>
+          <button type="button" class="btn" id="sdClear">Clear</button>
+        </div>
+      </div>
+      <div class="card">
+        <p>Every sample of 64 bills gives a different <span class="xb">x</span>. The sampling distribution of <span class="xb">x</span> tells us <b>how far <span class="xb">x</span> is likely to be from μ</b>.</p>
+        <div class="kv">
+          <div><span>Shape</span><b>normal</b></div>
+          <div><span>Center</span><b>μ</b></div>
+          <div><span>Standard error σ<sub><span class="xb">x</span></sub> = σ/√n</span><b>6/√64 = 0.75</b></div>
+          <div><span>Last <span class="xb">x</span> (pretend μ = $21.00)</span><b id="sdLast">–</b></div>
+          <div><span>Distance <span class="xb">x</span> − μ</span><b id="sdDist">–</b></div>
+          <div><span>Within 1.96 × 0.75 = $1.47 of μ</span><b id="sdWithin">–</b></div>
+        </div>
+        <p class="note">μ = $21.00 is a pretend value so the demo can show where μ is. In practice μ is unknown.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="stop" id="ztable">
+    <div class="stop-head"><div class="stop-num">STOP 3 · REVIEW</div><h2>The standard normal (z) table gives the cutoffs</h2></div>
+    <div class="two">
+      <div class="card">
+        <div class="seg" role="group" aria-label="Middle area">
+          <button type="button" data-zc="0.90">90%</button>
+          <button type="button" data-zc="0.95" aria-pressed="true">95%</button>
+          <button type="button" data-zc="0.99">99%</button>
+        </div>
+        <canvas id="zChart" aria-label="Standard normal curve with shaded middle area"></canvas>
+      </div>
+      <div class="card">
+        <p>The z distribution is the <b>standard normal</b> distribution: mean 0, standard deviation 1.</p>
+        <div class="kv">
+          <div><span>Middle area 1 − α</span><b id="zMid">0.95</b></div>
+          <div><span>Each tail α/2</span><b id="zTail">0.025</b></div>
+          <div><span>Look up cumulative area</span><b id="zCum">0.9750</b></div>
+          <div><span>z<sub>α/2</sub></span><b id="zVal">1.96</b></div>
+        </div>
+        <div class="xl" id="zXl">=NORM.S.INV(0.975)</div>
+        <p class="callout">95% of the values of <b>any</b> normal random variable lie within <b>1.96 standard deviations</b> of its mean. For <span class="xb">x</span>, that standard deviation is σ/√n.</p>
+        <div class="reveal">
+          <p><b>Your turn:</b> the Houston problem asks for <b>99%</b>. Find z<sub>α/2</sub> in the table.</p>
+          <button type="button" class="btn" id="revealBtn" aria-expanded="false" aria-controls="revealAns">Show answer</button>
+          <div class="ans" id="revealAns" hidden>α = 0.01, α/2 = 0.005. Look up a cumulative area of 0.9950. The table puts it between 2.57 and 2.58, and the more exact value is <b class="m">z<sub>0.005</sub> = 2.576</b>.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="stop" id="simulator">
+    <div class="stop-head"><div class="stop-num">STOP 4</div><h2>What “95% confident” actually means</h2>
+      <p class="muted">Each line is one confidence interval from one random sample. We pretend μ = $21.00 and σ = $6 so we can see which intervals catch μ.</p></div>
+    <div class="bench">
+      <div class="card rail" aria-label="Simulator controls">
+        <div class="group">
+          <div class="label" id="conf-label">Confidence level</div>
+          <div class="seg" role="group" aria-labelledby="conf-label">
+            <button type="button" data-conf="0.90">90%</button>
+            <button type="button" data-conf="0.95">95%</button>
+            <button type="button" data-conf="0.99">99%</button>
+          </div>
+          <div class="row">
+            <input type="range" id="conf" min="80" max="99.5" step="0.5" value="95" aria-label="Confidence level percent">
+            <span class="confval" id="confval">95%</span>
+          </div>
+        </div>
+        <div class="group">
+          <div class="label" id="n-label">Sample size n</div>
+          <div class="seg" role="group" aria-labelledby="n-label">
+            <button type="button" data-n="16">16</button>
+            <button type="button" data-n="64">64</button>
+            <button type="button" data-n="256">256</button>
+          </div>
+        </div>
+        <div class="group">
+          <div class="label">Draw samples</div>
+          <div class="draws">
+            <button type="button" class="btn primary" id="d1">+1</button>
+            <button type="button" class="btn primary" id="d20">+20</button>
+            <button type="button" class="btn primary" id="d100">+100</button>
+          </div>
+          <button type="button" class="btn" id="clear">Clear all intervals</button>
+        </div>
+        <div class="kv" aria-live="polite">
+          <div><span>z<sub>α/2</sub></span><b id="r-z">1.960</b></div>
+          <div><span>σ/√n</span><b id="r-se">0.750</b></div>
+          <div><span>Margin of error E</span><b id="r-e">1.470</b></div>
+        </div>
+        <div class="xl" id="r-xl">=CONFIDENCE.NORM(0.05,6,64)</div>
+        <div class="score">
+          <div class="tile"><span class="num hit" id="s-hit">0</span><span class="cap">captured μ</span></div>
+          <div class="tile"><span class="num miss" id="s-miss">0</span><span class="cap">missed μ</span></div>
+        </div>
+        <p class="hint">Keys: <kbd>D</kbd> +1, <kbd>T</kbd> +20, <kbd>H</kbd> +100, <kbd>C</kbd> clear.</p>
+      </div>
+      <div class="card">
+        <div class="stage-head">
+          <h3>Intervals from repeated samples</h3>
+          <div class="legend">
+            <span><i style="background:var(--hit)"></i>captures μ</span>
+            <span><i style="background:var(--miss)"></i>misses μ</span>
+            <span><i style="background:var(--mu);width:3px;height:14px"></i>true μ</span>
+          </div>
+        </div>
+        <canvas id="chart" aria-label="Sampling distribution of the sample mean above a stack of confidence intervals"></canvas>
+        <p class="note">Top: the <span class="xb">x</span> distribution with μ ± E shaded. An <span class="xb">x</span> that lands in the shaded zone gives an interval that reaches μ. Changing the confidence level redraws the <b>same samples</b> at the new width.</p>
+      </div>
+    </div>
+
+    <div class="terms">
+      <div class="card term">
+        <div class="label">Confidence interval</div>
+        <div class="live" id="t-ci">100 drawn</div>
+        <p class="def">Another name for an interval estimate.</p>
+        <p class="muted" style="font-size:14px">Each line on the chart is one confidence interval.</p>
+        <p class="src">Textbook Ch 8 key terms</p>
+      </div>
+      <div class="card term">
+        <div class="label">Confidence level</div>
+        <div class="live" id="t-level">95%</div>
+        <p class="def">The confidence associated with an interval estimate. If a procedure gives intervals such that 95% of them include the population parameter, the interval estimate is constructed at the 95% confidence level.</p>
+        <p class="src">Textbook Ch 8 key terms</p>
+      </div>
+      <div class="card term">
+        <div class="label">Confidence coefficient · 1 − <span style="text-transform:none">α</span></div>
+        <div class="live" id="t-coef">0.95</div>
+        <p class="def">The confidence level expressed as a decimal value. For example, 0.95 is the confidence coefficient for a 95% confidence level.</p>
+        <p class="src">Textbook Ch 8 key terms</p>
+      </div>
+      <div class="card term">
+        <div class="label">Level of significance · <span style="text-transform:none">α</span></div>
+        <div class="live miss" id="t-alpha">0.05</div>
+        <p class="def">α = 1 − confidence coefficient: the share of intervals this method is expected to miss μ. It is split α/2 into each tail.</p>
+        <p class="muted" style="font-size:14px">Observed miss rate: <b class="m" id="t-missrate">–</b></p>
+        <p class="src">Used in the Ch 8 Excel slides (=1−0.95)</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="stop" id="formula">
+    <div class="stop-head"><div class="stop-num">STOP 5</div><h2>Interval estimate of a population mean, σ known</h2></div>
+    <div class="card">
+      <div class="formula" aria-label="x-bar plus or minus z alpha over 2 times sigma over square root of n">
+        <div class="part"><span class="sym a"><span class="xb">x</span></span><span class="lab">point estimate (Stop 2)</span></div>
+        <div class="part"><span class="op">±</span></div>
+        <div class="part"><span class="sym b">z<sub>α/2</sub></span><span class="lab">from the z table (Stop 3)</span></div>
+        <div class="part"><span class="sym b"><span class="frac"><span class="top">σ</span><span>√n</span></span></span><span class="lab">standard error (Stop 2)</span></div>
+      </div>
+      <div class="kv">
+        <div><span>z<sub>α/2</sub> · σ/√n</span><b>margin of error E</b></div>
+        <div><span>1 − α</span><b>confidence coefficient</b></div>
+        <div><span>z<sub>α/2</sub></span><b>z value with area α/2 in the upper tail</b></div>
+      </div>
+      <p class="callout">Every part comes from an earlier stop. If σ were unknown we would use the sample <i>s</i> and a t value instead (Section 8.2).</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="stop" id="houston">
+    <div class="stop-head"><div class="stop-num">STOP 6 · APPLY</div><h2>Solve the Houston problem in six steps</h2>
+      <p class="muted">Computed from houston.xlsx, A2:A65, with σ = $6 at 99% confidence.</p></div>
+    <div class="grid6" id="grid6"></div>
+    <div class="stop-head"><h3>Say it right</h3></div>
+    <div class="two">
+      <div class="card">
+        <div class="label" style="color:var(--hit)">Right</div>
+        <p>We are 99% confident that the mean lunch bill of <b>all</b> customers is between $19.59 and $23.45.</p>
+      </div>
+      <div class="card">
+        <div class="label" style="color:var(--miss)">Wrong</div>
+        <p>99% of customers spend between $19.59 and $23.45.</p>
+        <p class="note">The interval is about the mean, not individual bills. The 64 bills run from $6.83 to $36.55.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  // houston.xlsx, column Amount, A2:A65
+  const HOUSTON = [20.5,14.63,23.77,29.96,29.49,32.7,9.2,20.89,28.87,15.78,18.16,12.16,11.22,16.43,17.66,9.59,18.89,19.88,23.11,20.11,20.34,20.08,30.36,21.79,21.18,19.22,34.13,27.49,36.55,18.37,32.27,12.63,25.53,27.71,33.81,21.79,19.16,26.35,20.01,26.85,13.63,17.22,13.17,20.12,22.11,22.47,20.36,35.47,11.85,17.88,6.83,30.99,14.62,18.38,26.85,25.1,27.55,25.87,14.37,15.61,26.46,24.24,16.66,20.85];
+  const SIGMA = 6, MU = 21.0, VISIBLE = 100;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const $ = id => document.getElementById(id);
+
+  // Acklam's inverse standard normal
+  function normInv(p) {
+    const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.3577518672690,-30.66479806614716,2.506628277459239];
+    const b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572];
+    const c=[-0.007784894002430293,-0.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783];
+    const d=[0.007784695709041462,0.3224671290700398,2.445134137142996,3.754408661907416];
+    const pl=0.02425; let q,r;
+    if (p<pl){q=Math.sqrt(-2*Math.log(p));return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+    if (p>1-pl){q=Math.sqrt(-2*Math.log(1-p));return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+    q=p-0.5;r=q*q;return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);
+  }
+  function rnorm() { let u=0,v=0; while(!u)u=Math.random(); while(!v)v=Math.random(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+  function sampleMean(n) { let s=0; for (let i=0;i<n;i++) s += MU + SIGMA*rnorm(); return s/n; }
+  const tok = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const colors = () => ({ ink: tok("--ink"), muted: tok("--muted"), line: tok("--line"), hit: tok("--hit"), miss: tok("--miss"),
+    soft: tok("--hit-soft"), missSoft: tok("--miss-soft"), mu: tok("--mu"), mono: tok("--mono"), body: tok("--body") });
+  function setup(cv, H) {
+    const dpr = window.devicePixelRatio || 1, W = cv.clientWidth;
+    cv.style.height = H + "px"; cv.width = W * dpr; cv.height = H * dpr;
+    const ctx = cv.getContext("2d"); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,H);
+    return { ctx, W, H };
+  }
+  const fmt = (v, d) => (+v.toFixed(d)).toString();
+
+  // ================= STOP 2: sampling distribution =================
+  const sd = { xbars: [] };
+  const SE64 = SIGMA / 8;
+  function drawSD() {
+    const cv = $("sdChart"), { ctx, W, H } = setup(cv, 300), C = colors();
+    const L = 12, R = W - 12, base = H - 34, top = 16, half = 4 * SE64;
+    const x = v => L + (v - (MU - half)) / (2 * half) * (R - L);
+    const dens = v => Math.exp(-0.5 * ((v - MU) / SE64) ** 2);
+    const e = 1.96 * SE64;
+    // shade ±1.96 SE
+    ctx.beginPath(); ctx.moveTo(x(MU - e), base);
+    for (let v = MU - e; v <= MU + e; v += half / 200) ctx.lineTo(x(v), base - dens(v) * (base - top) * 0.9);
+    ctx.lineTo(x(MU + e), base); ctx.closePath(); ctx.fillStyle = C.soft; ctx.fill();
+    // dot pile
+    const bw = SE64 / 5, counts = {}, r = Math.max(2.2, Math.min(4, (x(MU + bw) - x(MU)) / 2.4));
+    sd.xbars.forEach((xb, i) => {
+      const k = Math.round((xb - MU) / bw); counts[k] = (counts[k] || 0) + 1;
+      const cx = x(MU + k * bw), cy = base - r - (counts[k] - 1) * (r * 2 + 0.6);
+      if (cy < top) return;
+      ctx.fillStyle = Math.abs(xb - MU) <= e ? C.hit : C.miss;
+      ctx.globalAlpha = i === sd.xbars.length - 1 ? 1 : 0.75;
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+    });
+    // curve
+    ctx.beginPath();
+    for (let v = MU - half, f = true; v <= MU + half; v += half / 200, f = false) { const px = x(v), py = base - dens(v) * (base - top) * 0.9; f ? ctx.moveTo(px, py) : ctx.lineTo(px, py); }
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 1.5; ctx.stroke();
+    // μ line
+    ctx.strokeStyle = C.mu; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x(MU), top - 6); ctx.lineTo(x(MU), base); ctx.stroke();
+    // axis
+    ctx.strokeStyle = C.line; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(L, base); ctx.lineTo(R, base); ctx.stroke();
+    ctx.font = "12px " + C.mono; ctx.textAlign = "center"; ctx.fillStyle = C.muted;
+    for (let k = -3; k <= 3; k++) {
+      const px = x(MU + k * SE64);
+      ctx.beginPath(); ctx.moveTo(px, base); ctx.lineTo(px, base + 4); ctx.stroke();
+      ctx.fillText("$" + (MU + k * SE64).toFixed(2), px, base + 17);
+    }
+    ctx.fillStyle = C.hit;
+    ctx.fillText("μ − 1.96 SE", x(MU - e), base + 31); ctx.fillText("μ + 1.96 SE", x(MU + e), base + 31);
+    ctx.fillStyle = C.ink; ctx.font = "600 13px " + C.body; ctx.textAlign = "left"; ctx.fillText("μ", x(MU) + 6, top + 4);
+    // readouts
+    const n = sd.xbars.length;
+    if (n) {
+      const last = sd.xbars[n - 1], d = last - MU, w = sd.xbars.filter(v => Math.abs(v - MU) <= e).length;
+      $("sdLast").textContent = "$" + last.toFixed(2);
+      $("sdDist").textContent = (d >= 0 ? "+" : "−") + "$" + Math.abs(d).toFixed(2);
+      $("sdWithin").textContent = w + " of " + n + " (" + (100 * w / n).toFixed(0) + "%)";
+    } else { $("sdLast").textContent = "–"; $("sdDist").textContent = "–"; $("sdWithin").textContent = "–"; }
+  }
+  $("sd1").addEventListener("click", () => { sd.xbars.push(sampleMean(64)); drawSD(); });
+  $("sd50").addEventListener("click", () => { for (let i = 0; i < 50; i++) sd.xbars.push(sampleMean(64)); drawSD(); });
+  $("sdClear").addEventListener("click", () => { sd.xbars = []; drawSD(); });
+
+  // ================= STOP 3: z table =================
+  let zc = 0.95;
+  function drawZ() {
+    const cv = $("zChart"), { ctx, W, H } = setup(cv, 260), C = colors();
+    const L = 12, R = W - 12, base = H - 30, top = 14, half = 3.6;
+    const x = v => L + (v + half) / (2 * half) * (R - L);
+    const dens = v => Math.exp(-0.5 * v * v);
+    const zz = normInv(1 - (1 - zc) / 2), y = v => base - dens(v) * (base - top) * 0.92;
+    const fillRange = (a, b, col) => { ctx.beginPath(); ctx.moveTo(x(a), base); for (let v = a; v <= b; v += 0.01) ctx.lineTo(x(v), y(v)); ctx.lineTo(x(b), base); ctx.closePath(); ctx.fillStyle = col; ctx.fill(); };
+    fillRange(-zz, zz, C.soft); fillRange(-half, -zz, C.missSoft); fillRange(zz, half, C.missSoft);
+    ctx.beginPath(); for (let v = -half, f = true; v <= half; v += 0.01, f = false) f ? ctx.moveTo(x(v), y(v)) : ctx.lineTo(x(v), y(v));
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.strokeStyle = C.line; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(L, base); ctx.lineTo(R, base); ctx.stroke();
+    ctx.font = "12px " + C.mono; ctx.textAlign = "center"; ctx.fillStyle = C.muted;
+    for (let k = -3; k <= 3; k++) { const px = x(k); ctx.beginPath(); ctx.moveTo(px, base); ctx.lineTo(px, base + 4); ctx.stroke(); if (Math.abs(Math.abs(k) - zz) > 0.35) ctx.fillText(k, px, base + 17); }
+    // cutoff lines
+    ctx.strokeStyle = C.hit; ctx.lineWidth = 2;
+    [-zz, zz].forEach(v => { ctx.beginPath(); ctx.moveTo(x(v), base); ctx.lineTo(x(v), y(v) - 10); ctx.stroke(); });
+    ctx.fillStyle = C.hit; ctx.font = "600 14px " + C.mono;
+    ctx.fillText("−" + zz.toFixed(zz > 2.5 ? 3 : 2), x(-zz), base + 17); ctx.fillText("+" + zz.toFixed(zz > 2.5 ? 3 : 2), x(zz), base + 17);
+    ctx.fillStyle = C.ink; ctx.font = "600 18px " + C.mono;
+    ctx.fillText(zc.toFixed(2), x(0), base - (base - top) * 0.35);
+    ctx.fillStyle = C.miss; ctx.font = "600 13px " + C.mono;
+    const tail = fmt((1 - zc) / 2, 4);
+    ctx.fillText(tail, x(-(zz + half) / 2), base - 26); ctx.fillText(tail, x((zz + half) / 2), base - 26);
+    ctx.font = "12px " + C.body; ctx.fillStyle = C.muted;
+    ctx.fillText("α/2", x(-(zz + half) / 2), base - 42); ctx.fillText("α/2", x((zz + half) / 2), base - 42);
+    $("zMid").textContent = zc.toFixed(2);
+    $("zTail").textContent = tail;
+    $("zCum").textContent = (1 - (1 - zc) / 2).toFixed(4);
+    $("zVal").textContent = zz.toFixed(zc === 0.99 ? 3 : zc === 0.90 ? 3 : 2);
+    $("zXl").textContent = "=NORM.S.INV(" + fmt(1 - (1 - zc) / 2, 4) + ")";
+    document.querySelectorAll("[data-zc]").forEach(b => b.setAttribute("aria-pressed", +b.dataset.zc === zc));
+  }
+  document.querySelectorAll("[data-zc]").forEach(b => b.addEventListener("click", () => { zc = +b.dataset.zc; drawZ(); }));
+  $("revealBtn").addEventListener("click", e => {
+    const a = $("revealAns"), open = a.hidden; a.hidden = !open;
+    e.currentTarget.setAttribute("aria-expanded", open); e.currentTarget.textContent = open ? "Hide answer" : "Show answer";
+  });
+
+  // ================= STOP 4: simulator =================
+  const state = { conf: 0.95, n: 64, xbars: [] };
+  let queue = 0, timer = null;
+  const z = () => normInv(1 - (1 - state.conf) / 2);
+  const se = () => SIGMA / Math.sqrt(state.n);
+  const E = () => z() * se();
+  const pct = c => (Math.round(c * 1000) / 10) + "%";
+
+  function drawSim() {
+    const cv = $("chart"), W0 = cv.clientWidth, Hh = Math.max(420, Math.min(600, Math.round(W0 * 0.7)));
+    const { ctx, W, H } = setup(cv, Hh), C = colors();
+    const s = se(), e = E(), half = 5 * s, L = 12, R = W - 12;
+    const x = v => L + (v - (MU - half)) / (2 * half) * (R - L);
+    const curveTop = 8, curveH = 96, curveBase = curveTop + curveH, axisY = H - 28;
+    const rowsTop = curveBase + 20, rowsBot = axisY - 10;
+    const dens = v => Math.exp(-0.5 * ((v - MU) / s) ** 2);
+    ctx.beginPath(); ctx.moveTo(x(MU - e), curveBase);
+    for (let v = MU - e; v <= MU + e; v += half / 200) ctx.lineTo(x(v), curveBase - dens(v) * curveH * 0.92);
+    ctx.lineTo(x(MU + e), curveBase); ctx.closePath(); ctx.fillStyle = C.soft; ctx.fill();
+    ctx.beginPath();
+    for (let v = MU - half, f = true; v <= MU + half; v += half / 200, f = false) { const px = x(v), py = curveBase - dens(v) * curveH * 0.92; f ? ctx.moveTo(px, py) : ctx.lineTo(px, py); }
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(L, curveBase); ctx.lineTo(R, curveBase); ctx.strokeStyle = C.line; ctx.lineWidth = 1; ctx.stroke();
+    ctx.font = "12px " + C.mono; ctx.fillStyle = C.hit; ctx.textAlign = "center";
+    ctx.fillText("μ − E", x(MU - e), curveBase + 14); ctx.fillText("μ + E", x(MU + e), curveBase + 14);
+    ctx.fillStyle = C.muted; ctx.textAlign = "left"; ctx.fillText("Sample-mean distribution · middle " + pct(state.conf), L, curveTop + 10);
+
+    const vis = state.xbars.slice(-VISIBLE), rowH = (rowsBot - rowsTop) / VISIBLE;
+    const lw = Math.max(1.5, Math.min(4, rowH * 0.55));
+    vis.forEach((xb, i) => {
+      const hit = Math.abs(xb - MU) <= e, y = rowsTop + rowH * (i + 0.5);
+      ctx.strokeStyle = hit ? C.hit : C.miss; ctx.lineWidth = hit ? lw : lw + 0.8;
+      ctx.beginPath(); ctx.moveTo(x(xb - e), y); ctx.lineTo(x(xb + e), y); ctx.stroke();
+      ctx.fillStyle = hit ? C.hit : C.miss;
+      ctx.beginPath(); ctx.arc(x(xb), y, Math.max(1.6, lw * 0.75), 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 0.55; ctx.fillRect(x(xb) - 1, curveBase - 7, 2, 7); ctx.globalAlpha = 1;
+    });
+    if (!vis.length) {
+      ctx.fillStyle = C.muted; ctx.font = "15px " + C.body; ctx.textAlign = "center";
+      ctx.fillText("No samples yet. Press +1, +20 or +100.", (L + R) / 2, (rowsTop + rowsBot) / 2);
+    }
+    ctx.strokeStyle = C.mu; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x(MU), curveTop); ctx.lineTo(x(MU), axisY); ctx.stroke();
+    ctx.strokeStyle = C.line; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(L, axisY); ctx.lineTo(R, axisY); ctx.stroke();
+    ctx.fillStyle = C.muted; ctx.font = "12px " + C.mono; ctx.textAlign = "center";
+    const step = half > 2.5 ? 1 : half > 1.2 ? 0.5 : 0.25;
+    for (let v = Math.ceil((MU - half) / step) * step; v <= MU + half + 1e-9; v += step) {
+      const px = x(v); ctx.beginPath(); ctx.moveTo(px, axisY); ctx.lineTo(px, axisY + 4); ctx.stroke();
+      if (px > L + 18 && px < R - 18) ctx.fillText("$" + v.toFixed(step < 1 ? 2 : 0), px, axisY + 17);
+    }
+  }
+  function updateSim() {
+    const e = E(), a = 1 - state.conf;
+    $("confval").textContent = pct(state.conf);
+    $("conf").value = (state.conf * 100).toFixed(1);
+    $("r-z").textContent = z().toFixed(3); $("r-se").textContent = se().toFixed(3); $("r-e").textContent = e.toFixed(3);
+    $("r-xl").textContent = "=CONFIDENCE.NORM(" + fmt(a, 3) + ",6," + state.n + ")";
+    document.querySelectorAll("[data-conf]").forEach(b => b.setAttribute("aria-pressed", Math.abs(+b.dataset.conf - state.conf) < 1e-9));
+    document.querySelectorAll("[data-n]").forEach(b => b.setAttribute("aria-pressed", +b.dataset.n === state.n));
+    const hits = state.xbars.filter(xb => Math.abs(xb - MU) <= e).length, tot = state.xbars.length;
+    $("s-hit").textContent = hits; $("s-miss").textContent = tot - hits;
+    $("t-ci").textContent = tot + " drawn";
+    $("t-level").textContent = pct(state.conf);
+    $("t-coef").textContent = fmt(state.conf, 3);
+    $("t-alpha").textContent = fmt(a, 3);
+    $("t-missrate").textContent = tot ? (tot - hits) + " of " + tot + " = " + (100 * (tot - hits) / tot).toFixed(1) + "%" : "–";
+    drawSim();
+  }
+  function add(k) {
+    if (reduce || k === 1) { for (let i = 0; i < k; i++) state.xbars.push(sampleMean(state.n)); updateSim(); return; }
+    queue += k; if (timer) return;
+    timer = setInterval(() => {
+      const batch = Math.max(1, Math.ceil(queue / 40));
+      for (let i = 0; i < batch && queue > 0; i++, queue--) state.xbars.push(sampleMean(state.n));
+      updateSim(); if (queue <= 0) { clearInterval(timer); timer = null; }
+    }, 22);
+  }
+  function stopQueue() { queue = 0; if (timer) { clearInterval(timer); timer = null; } }
+  function clearSim() { stopQueue(); state.xbars = []; updateSim(); }
+  document.querySelectorAll("[data-conf]").forEach(b => b.addEventListener("click", () => { state.conf = +b.dataset.conf; updateSim(); }));
+  $("conf").addEventListener("input", e => { state.conf = +e.target.value / 100; updateSim(); });
+  document.querySelectorAll("[data-n]").forEach(b => b.addEventListener("click", () => {
+    if (+b.dataset.n === state.n) return; stopQueue(); state.n = +b.dataset.n; state.xbars = []; updateSim(); add(20);
+  }));
+  $("d1").addEventListener("click", () => add(1));
+  $("d20").addEventListener("click", () => add(20));
+  $("d100").addEventListener("click", () => add(100));
+  $("clear").addEventListener("click", clearSim);
+  document.addEventListener("keydown", e => {
+    if (e.target.tagName === "INPUT" || e.ctrlKey || e.metaKey || e.altKey) return;
+    const k = e.key.toLowerCase();
+    if (k === "d") add(1); else if (k === "t") add(20); else if (k === "h") add(100); else if (k === "c") clearSim();
+  });
+
+  // ================= STOP 6: Houston =================
+  const n = HOUSTON.length, xbar = HOUSTON.reduce((p, q) => p + q, 0) / n;
+  const s99 = SIGMA / Math.sqrt(n), z99 = normInv(0.995), e99 = z99 * s99;
+  const steps = [
+    { h: "Point estimate", m: "<span class=\"xb\">x</span> = <b>$" + xbar.toFixed(2) + "</b>", xl: "=AVERAGE(A2:A65)", w: "Our best single guess for μ, from n = " + n + " bills." },
+    { h: "Standard error", m: "σ/√n = 6/√" + n + " = <b>" + s99.toFixed(2) + "</b>", xl: "=6/SQRT(COUNT(A2:A65))", w: "σ is known, so we use it directly." },
+    { h: "Confidence coefficient", m: "1 − α = <b>0.99</b>, α = 0.01, α/2 = <b>0.005</b>", xl: "=1-0.99", w: "99% confidence leaves 0.005 in each tail." },
+    { h: "Critical value", m: "z<sub>0.005</sub> = <b>" + z99.toFixed(3) + "</b>", xl: "=NORM.S.INV(1-0.01/2)", w: "Look up a cumulative area of 0.9950 in the z table." },
+    { h: "Margin of error", a: "Answer (a)", m: "E = " + z99.toFixed(3) + " × " + s99.toFixed(2) + " = <b>$" + e99.toFixed(2) + "</b>", xl: "=CONFIDENCE.NORM(0.01,6,64)", w: "CONFIDENCE.NORM returns E directly." },
+    { h: "Interval estimate", a: "Answer (b)", m: "$" + xbar.toFixed(2) + " ± " + e99.toFixed(2) + " → <b>$" + (xbar - e99).toFixed(2) + " to $" + (xbar + e99).toFixed(2) + "</b>", xl: "=AVERAGE(A2:A65)-CONFIDENCE.NORM(0.01,6,64)", w: "Upper limit: same formula with + instead of −." }
+  ];
+  $("grid6").innerHTML = steps.map((s, i) =>
+    '<article class="card step"><span class="n">STEP ' + (i + 1) + '</span>' + (s.a ? '<span class="answer">' + s.a + '</span>' : '') +
+    '<h3>' + s.h + '</h3><div class="math">' + s.m + '</div><div class="xl">' + s.xl + '</div><p class="why">' + s.w + '</p></article>').join("");
+
+  // ================= boot =================
+  function drawAll() { drawSD(); drawZ(); drawSim(); }
+  for (let i = 0; i < 40; i++) sd.xbars.push(sampleMean(64));
+  for (let i = 0; i < 100; i++) state.xbars.push(sampleMean(state.n));
+  drawSD(); drawZ(); updateSim();
+  let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(drawAll, 80); });
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawAll);
+  new MutationObserver(drawAll).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawAll);
+})();
+</script>
+
+</body>
+</html>

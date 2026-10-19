@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Hong Kong Meals Interval Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: a projected lesson in six numbered stops (the teaching order), each a full-width band; simulators get a controls rail + large chart.
+   Brand: MSU navy #162860 + gold #F3B324, Aptos (from BlankMSUPowerPoint_2026.04.15.pptx and the BMGT 240IS course card). */
+:root {
+  --navy: #162860;
+  --navy-deep: #0f1c48;
+  --gold: #F3B324;
+  --bg: #f3f5fa;
+  --panel: #ffffff;
+  --ink: #111a30;
+  --muted: #4a5570;
+  --line: #d5dae7;
+  --hit: #162860;
+  --hit-soft: rgba(22,40,96,.13);
+  --miss: #c8432f;
+  --miss-soft: rgba(200,67,47,.14);
+  --zline: #8a6100;
+  --mu: #111a30;
+  --chip: #e7ebf4;
+  --focus: #F3B324;
+  --on-accent: #ffffff;
+  --display: Aptos, "Aptos Display", "Segoe UI", Arial, Helvetica, sans-serif;
+  --body: Aptos, "Segoe UI", Arial, Helvetica, sans-serif;
+  --mono: Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b1433; --panel: #14214d; --ink: #eef1f8; --muted: #a9b3cc; --line: #2a3a6e;
+    --hit: #F3B324; --hit-soft: rgba(243,179,36,.18); --miss: #f07a63; --miss-soft: rgba(240,122,99,.16);
+    --zline: #8fb3ff; --mu: #eef1f8; --chip: #1c2b5c; --focus: #FADA92; --on-accent: #162860;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b1433; --panel: #14214d; --ink: #eef1f8; --muted: #a9b3cc; --line: #2a3a6e;
+  --hit: #F3B324; --hit-soft: rgba(243,179,36,.18); --miss: #f07a63; --miss-soft: rgba(240,122,99,.16);
+  --zline: #8fb3ff; --mu: #eef1f8; --chip: #1c2b5c; --focus: #FADA92; --on-accent: #162860;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 56px;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 1280px; margin: 0 auto; display: grid; gap: 28px; }
+header.brand {
+  margin-top: 20px; border-radius: 12px; padding: 26px clamp(18px, 3vw, 36px) 24px;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-deep) 100%); color: #ffffff;
+  display: grid; gap: 8px; border: 1px solid var(--line);
+}
+header.brand .bar { width: 52px; height: 4px; border-radius: 2px; background: var(--gold); }
+header.brand .course { font-size: 14px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); }
+header.brand h1 { color: #ffffff; }
+header.brand .meta { font-size: 14px; color: #b9c3dc; }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(30px, 4.2vw, 44px); line-height: 1.1; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--display); font-size: clamp(22px, 2.6vw, 28px); line-height: 1.2; margin: 0; text-wrap: balance; }
+h3 { font-family: var(--display); font-size: 18px; margin: 0; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+b.m, .mono { font-family: var(--mono); font-weight: 500; font-variant-numeric: tabular-nums; }
+.xb { display: inline-block; position: relative; font-weight: 700; font-style: italic; line-height: 1; padding: 0 .06em; }
+.xb::before { content: ""; position: absolute; left: .1em; right: .02em; top: .1em; height: .1em; min-height: 2px; border-radius: 1px; background: currentColor; }
+
+nav.stops {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg);
+  display: flex; gap: 6px; overflow-x: auto; padding-block: 10px; border-bottom: 1px solid var(--line);
+}
+nav.stops a {
+  flex: 0 0 auto; text-decoration: none; color: var(--ink); background: var(--chip); border: 1px solid var(--line);
+  border-radius: 999px; padding: 5px 12px; font-size: 14px; font-weight: 500; white-space: nowrap;
+}
+nav.stops a span { font-family: var(--mono); color: var(--hit); margin-right: 6px; }
+nav.stops a:hover { border-color: var(--hit); }
+
+section.stop { display: grid; gap: 14px; scroll-margin-top: 64px; }
+.stop-head { display: grid; gap: 4px; }
+.stop-num { font: 700 13px var(--body); color: var(--hit); letter-spacing: .14em; display: flex; align-items: center; gap: 10px; }
+.stop-num::before { content: ""; width: 28px; height: 3px; border-radius: 2px; background: var(--gold); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; min-width: 0; align-content: start; }
+.two { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 860px) { .two { grid-template-columns: 1fr; } }
+.problem .tag { display: inline-block; font: 600 12px var(--mono); background: var(--chip); border-radius: 4px; padding: 1px 6px; margin-right: 6px; }
+.big-claim { font-size: 21px; line-height: 1.4; max-width: 60ch; }
+.big-claim em { font-style: normal; background: var(--hit-soft); padding: 0 4px; border-radius: 4px; }
+.contrast { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 520px) { .contrast { grid-template-columns: 1fr; } }
+.contrast div { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 2px; }
+.contrast div.on { border-color: var(--hit); background: var(--hit-soft); }
+.contrast .k { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; font-weight: 600; color: var(--muted); }
+
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button, .btn {
+  font: 600 15px var(--body); color: var(--ink); background: var(--chip); border: 1px solid var(--line);
+  border-radius: 7px; padding: 8px 12px; cursor: pointer; min-width: 52px;
+}
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+.btn.primary { background: var(--hit); color: var(--on-accent); border-color: var(--hit); }
+button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+button:hover { filter: brightness(1.06); }
+.btnrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+canvas { width: 100%; display: block; }
+
+.kv { display: grid; gap: 6px; font-variant-numeric: tabular-nums; }
+.kv div { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; border-bottom: 1px dashed var(--line); padding-bottom: 4px; }
+.kv div:last-child { border-bottom: 0; }
+.kv span:first-child { color: var(--muted); }
+.kv b { font: 500 17px var(--mono); }
+.xl { font: 14px var(--mono); background: var(--chip); border-radius: 6px; padding: 6px 8px; overflow-x: auto; white-space: nowrap; }
+.callout { border-left: 4px solid var(--hit); padding: 4px 0 4px 12px; }
+.ans { background: var(--hit-soft); border-radius: 8px; padding: 10px 12px; }
+.label { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.note { font-size: 14px; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 14px; color: var(--muted); }
+.legend i { display: inline-block; width: 22px; height: 4px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+.row { display: flex; align-items: center; gap: 10px; }
+input[type="range"] { flex: 1; accent-color: var(--hit); }
+.val { font: 600 20px var(--mono); min-width: 64px; text-align: right; font-variant-numeric: tabular-nums; }
+
+.bench { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 900px) { .bench { grid-template-columns: 1fr; } }
+.rail { display: grid; gap: 18px; }
+.group { display: grid; gap: 8px; }
+.draws { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.draws .btn { padding: 10px 6px; }
+.versus { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tile { background: var(--chip); border-radius: 8px; padding: 8px 12px; display: grid; border: 2px solid transparent; }
+.tile.sel { border-color: var(--hit); }
+.tile .num { font: 600 26px var(--display); font-variant-numeric: tabular-nums; line-height: 1.15; }
+.tile .cap { font-size: 13px; color: var(--muted); }
+.tile .num.bad { color: var(--miss); }
+kbd { font: 12px var(--mono); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--panel); }
+.stage-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; align-items: baseline; }
+
+.terms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 900px) { .terms { grid-template-columns: 1fr; } }
+.term .def { font-size: 15px; }
+.term .src { font-size: 12px; color: var(--muted); }
+
+.ttable { overflow-x: auto; }
+.ttable table { border-collapse: collapse; font-variant-numeric: tabular-nums; min-width: 460px; width: 100%; }
+.ttable th, .ttable td { border: 1px solid var(--line); padding: 6px 10px; text-align: center; font-family: var(--mono); font-size: 15px; }
+.ttable th { background: var(--chip); font-family: var(--body); font-size: 13px; }
+.ttable td.hl { background: var(--hit-soft); font-weight: 700; }
+
+.parts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.parts button { text-align: left; }
+@media (max-width: 520px) { .parts { grid-template-columns: 1fr 1fr; } }
+
+.formula { font-family: var(--mono); font-size: clamp(24px, 4vw, 40px); display: flex; flex-wrap: wrap; align-items: flex-start; gap: 4px 14px; padding-block: 8px; }
+.formula .part { display: grid; justify-items: center; gap: 6px; }
+.formula .sym { padding: 2px 8px; border-radius: 6px; }
+.formula .sym.a { background: var(--chip); }
+.formula .sym.b { background: var(--hit-soft); }
+.formula .lab { font: 500 13px var(--body); color: var(--muted); text-align: center; max-width: 18ch; }
+.frac { display: inline-grid; justify-items: center; line-height: 1.05; vertical-align: middle; }
+.frac .top { border-bottom: 2px solid currentColor; padding: 0 4px; }
+.cmp { overflow-x: auto; }
+.cmp table { border-collapse: collapse; width: 100%; min-width: 520px; }
+.cmp th, .cmp td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; font-size: 15px; }
+.cmp th { background: var(--chip); font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.cmp td.diff { background: var(--hit-soft); font-weight: 600; }
+
+.grid6 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 960px) { .grid6 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .grid6 { grid-template-columns: 1fr; } }
+.step { gap: 8px; }
+.step .n { font: 600 13px var(--mono); color: var(--hit); letter-spacing: .04em; }
+.math { font-size: 17px; font-variant-numeric: tabular-nums; }
+.math b { font-family: var(--mono); font-weight: 500; }
+.answer { font-size: 13px; font-weight: 600; color: var(--miss); text-transform: uppercase; letter-spacing: .06em; }
+.why { font-size: 14px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="brand">
+    <div class="bar"></div>
+    <div class="course">BMGT 240IS · Business Analytics</div>
+    <h1>Hong Kong Meals Interval Lab</h1>
+    <div class="meta">Ch 8.2 · Population mean, σ unknown · Fall 2026 · Montana State University</div>
+  </header>
+
+  <nav class="stops" aria-label="Lesson stops">
+    <a href="#purpose"><span>1</span>Purpose</a>
+    <a href="#whynotz"><span>2</span>Why not z?</a>
+    <a href="#tdist"><span>3</span>The t distribution</a>
+    <a href="#tareas"><span>4</span>Reading t areas</a>
+    <a href="#formula"><span>5</span>The formula</a>
+    <a href="#hongkong"><span>6</span>Solve Hong Kong</a>
+  </nav>
+
+  <!-- 1 -->
+  <section class="stop" id="purpose">
+    <div class="stop-head"><div class="stop-num">STOP 1</div><h2>Why we are doing this problem</h2></div>
+    <div class="two">
+      <div class="card">
+        <p class="big-claim">Develop an <em>interval estimate of the population mean μ</em> when the <em>population standard deviation σ is unknown</em>.</p>
+        <div class="contrast">
+          <div><span class="k">Last time · 8.1 Houston</span><span>σ = $6 given → <b class="m">z</b></span></div>
+          <div class="on"><span class="k">Today · 8.2 Hong Kong</span><span>only data → sample <i>s</i> → <b class="m">t</b></span></div>
+        </div>
+        <p class="note">In practice σ is almost never known. This is the case you will use most.</p>
+      </div>
+      <div class="card problem">
+        <p><b>Meal Cost in Hong Kong.</b> The mean cost of a meal for two in a mid-range restaurant in Tokyo is <b>$40</b>. How do prices for comparable meals in Hong Kong compare?</p>
+        <p class="muted">Data file <b>hongkongmeals.xlsx</b>, column Meal Price ($), A2:A43, 42 recent meals</p>
+        <p><span class="tag">(a)</span>With 95% confidence, what is the margin of error?</p>
+        <p><span class="tag">(b)</span>What is the 95% confidence interval estimate of the population mean?</p>
+        <p><span class="tag">(c)</span>How do Hong Kong prices compare to Tokyo prices?</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="stop" id="whynotz">
+    <div class="stop-head"><div class="stop-num">STOP 2 · EXPERIMENT</div><h2>What goes wrong if we plug s into the z formula?</h2>
+      <p class="muted">Each line is one sample's interval x̄ ± (cutoff) × s/√n. We pretend μ = $32 and σ = $7 so we can see which intervals catch μ. Both methods use the <b>same samples</b>.</p></div>
+    <div class="bench">
+      <div class="card rail" aria-label="Experiment controls">
+        <div class="group">
+          <div class="label" id="m-label">Cutoff used</div>
+          <div class="seg" role="group" aria-labelledby="m-label">
+            <button type="button" data-m="z" id="mz">z = 1.96 (wrong)</button>
+            <button type="button" data-m="t" id="mt">t with n − 1 df</button>
+          </div>
+        </div>
+        <div class="group">
+          <div class="label" id="n-label">Sample size n</div>
+          <div class="seg" role="group" aria-labelledby="n-label">
+            <button type="button" data-n="5">5</button>
+            <button type="button" data-n="10">10</button>
+            <button type="button" data-n="42">42</button>
+          </div>
+        </div>
+        <div class="group">
+          <div class="label">Draw samples</div>
+          <div class="draws">
+            <button type="button" class="btn primary" id="d1">+1</button>
+            <button type="button" class="btn primary" id="d20">+20</button>
+            <button type="button" class="btn primary" id="d100">+100</button>
+          </div>
+          <button type="button" class="btn" id="clear">Clear all intervals</button>
+        </div>
+        <div class="kv">
+          <div><span>z cutoff</span><b>1.960</b></div>
+          <div><span>t<sub>0.025</sub> with <span id="r-df">4</span> df</span><b id="r-t">2.776</b></div>
+        </div>
+        <div class="label">95% target · share that captured <span style="text-transform:none">μ</span></div>
+        <div class="versus" aria-live="polite">
+          <div class="tile" id="tile-z"><span class="num" id="s-z">–</span><span class="cap">z with s</span></div>
+          <div class="tile" id="tile-t"><span class="num" id="s-t">–</span><span class="cap">t with s</span></div>
+        </div>
+        <p class="note">Keys: <kbd>D</kbd> +1, <kbd>T</kbd> +20, <kbd>H</kbd> +100, <kbd>C</kbd> clear.</p>
+      </div>
+      <div class="card">
+        <div class="stage-head">
+          <h3 id="sim-title">Intervals from repeated samples</h3>
+          <div class="legend">
+            <span><i style="background:var(--hit)"></i>captures μ</span>
+            <span><i style="background:var(--miss)"></i>misses μ</span>
+            <span><i style="background:var(--mu);width:3px;height:14px"></i>true μ</span>
+          </div>
+        </div>
+        <canvas id="sim" aria-label="Stack of confidence intervals built with s"></canvas>
+        <p class="note">Unlike 8.1, the lines have <b>different lengths</b>: each sample has its own s. Some samples get an s that is too small, and z does not allow for that.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="stop" id="tdist">
+    <div class="stop-head"><div class="stop-num">STOP 3</div><h2>The t distribution: z with heavier tails</h2></div>
+    <div class="two">
+      <div class="card">
+        <div class="row">
+          <span class="label" style="min-width:120px">Degrees of freedom</span>
+          <input type="range" id="df" min="1" max="100" step="1" value="5" aria-label="Degrees of freedom">
+          <span class="val" id="dfval">5</span>
+        </div>
+        <div class="seg" role="group" aria-label="Preset degrees of freedom">
+          <button type="button" data-df="4">4</button>
+          <button type="button" data-df="9">9</button>
+          <button type="button" data-df="16">16</button>
+          <button type="button" data-df="41">41</button>
+          <button type="button" data-df="100">100</button>
+        </div>
+        <canvas id="tChart" aria-label="t distribution compared with the standard normal"></canvas>
+        <div class="legend">
+          <span><i style="background:var(--hit)"></i>t distribution</span>
+          <span><i style="background:var(--zline)"></i>standard normal (z)</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="kv">
+          <div><span>Degrees of freedom</span><b id="k-df">5</b></div>
+          <div><span>t<sub>0.025</sub> (95%)</span><b id="k-t">2.571</b></div>
+          <div><span>z<sub>0.025</sub></span><b>1.960</b></div>
+          <div><span>Extra width from using t</span><b id="k-x">31%</b></div>
+        </div>
+        <div class="xl" id="k-xl">=T.INV.2T(0.05,5)</div>
+        <p class="callout">More degrees of freedom → less spread → closer to z. Past 100 df, z is a good approximation.</p>
+        <div class="terms" style="grid-template-columns:1fr">
+          <div class="card term" style="padding:12px 14px">
+            <div class="label">t distribution</div>
+            <p class="def">A family of probability distributions that can be used to develop an interval estimate of a population mean whenever σ is unknown and is estimated by the sample standard deviation s.</p>
+            <p class="src">Textbook Ch 8 key terms</p>
+          </div>
+          <div class="card term" style="padding:12px 14px">
+            <div class="label">Degrees of freedom</div>
+            <p class="def">A parameter of the t distribution. For an interval estimate of a population mean, the t distribution has n − 1 degrees of freedom.</p>
+            <p class="src">Textbook Ch 8 key terms</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="stop" id="tareas">
+    <div class="stop-head"><div class="stop-num">STOP 4 · PRACTICE</div><h2>Reading areas under a t curve (Question 5, 16 df)</h2>
+      <p class="muted">The t table gives upper-tail areas. Find the t value in the 16 df row and read the area from the column heading.</p></div>
+    <div class="card ttable">
+      <table>
+        <thead><tr><th>Upper-tail area</th><th>0.20</th><th>0.10</th><th>0.05</th><th>0.025</th><th>0.01</th><th>0.005</th></tr></thead>
+        <tbody><tr><th>df = 16</th><td data-tv="0.865">0.865</td><td data-tv="1.337">1.337</td><td data-tv="1.746">1.746</td><td data-tv="2.120">2.120</td><td data-tv="2.583">2.583</td><td data-tv="2.921">2.921</td></tr></tbody>
+      </table>
+    </div>
+    <div class="two">
+      <div class="card">
+        <div class="parts" role="group" aria-label="Question 5 parts">
+          <button type="button" class="btn" data-part="0">(a) right of 2.120</button>
+          <button type="button" class="btn" data-part="1">(b) left of 1.337</button>
+          <button type="button" class="btn" data-part="2">(c) left of −1.746</button>
+          <button type="button" class="btn" data-part="3">(d) right of 2.583</button>
+          <button type="button" class="btn" data-part="4">(e) between ±2.120</button>
+          <button type="button" class="btn" data-part="5">(f) between ±1.746</button>
+        </div>
+        <canvas id="aChart" aria-label="t curve with 16 degrees of freedom and the selected area shaded"></canvas>
+      </div>
+      <div class="card">
+        <h3 id="p-title">(a) To the right of 2.120</h3>
+        <p id="p-hint" class="muted">Find 2.120 in the df = 16 row. Which column is it in?</p>
+        <button type="button" class="btn" id="p-reveal" aria-expanded="false" aria-controls="p-ans">Show answer</button>
+        <div class="ans" id="p-ans" hidden>
+          <p>Area = <b class="m" id="p-area">0.025</b></p>
+          <p id="p-why" class="muted"></p>
+          <div class="xl" id="p-xl"></div>
+        </div>
+        <p class="callout"><b>Watch for:</b> Excel's <span class="mono">T.DIST</span> gives the area to the <b>left</b>; <span class="mono">T.DIST.RT</span> gives the area to the <b>right</b>. Mixing them up turns 0.025 into 0.975.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="stop" id="formula">
+    <div class="stop-head"><div class="stop-num">STOP 5</div><h2>Interval estimate of a population mean, σ unknown</h2></div>
+    <div class="card">
+      <div class="formula" aria-label="x-bar plus or minus t alpha over 2 times s over square root of n">
+        <div class="part"><span class="sym a"><span class="xb">x</span></span><span class="lab">point estimate</span></div>
+        <div class="part"><span>±</span></div>
+        <div class="part"><span class="sym b">t<sub>α/2</sub></span><span class="lab">t table, n − 1 df (Stop 3)</span></div>
+        <div class="part"><span class="sym b"><span class="frac"><span class="top">s</span><span>√n</span></span></span><span class="lab">estimated standard error</span></div>
+      </div>
+      <div class="cmp">
+        <table>
+          <thead><tr><th></th><th>8.1 · <span style="text-transform:none">σ</span> known</th><th>8.2 · <span style="text-transform:none">σ</span> unknown</th></tr></thead>
+          <tbody>
+            <tr><td>Spread used</td><td>σ (given)</td><td class="diff">s (from the sample)</td></tr>
+            <tr><td>Cutoff</td><td>z<sub>α/2</sub></td><td class="diff">t<sub>α/2</sub> with n − 1 df</td></tr>
+            <tr><td>Formula</td><td><span class="xb">x</span> ± z<sub>α/2</sub> σ/√n</td><td class="diff"><span class="xb">x</span> ± t<sub>α/2</sub> s/√n</td></tr>
+            <tr><td>Excel margin of error</td><td class="mono">=CONFIDENCE.NORM(α, σ, n)</td><td class="diff mono">=CONFIDENCE.T(α, s, n)</td></tr>
+            <tr><td>Excel cutoff</td><td class="mono">=NORM.S.INV(1−α/2)</td><td class="diff mono">=T.INV.2T(α, n−1)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="callout">Everything else is the same as 8.1: point estimate ± margin of error, and the same meaning of “95% confident.”</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="stop" id="hongkong">
+    <div class="stop-head"><div class="stop-num">STOP 6 · APPLY</div><h2>Solve the Hong Kong problem in six steps</h2>
+      <p class="muted">Computed from hongkongmeals.xlsx, A2:A43, at 95% confidence.</p></div>
+    <div class="grid6" id="grid6"></div>
+    <div class="two">
+      <div class="card">
+        <span class="answer">Answer (c)</span>
+        <h3>Compare with Tokyo's $40</h3>
+        <p>The whole interval, <b class="m" id="c-int"></b>, lies <b>below</b> $40. So $40 is not a plausible value for the Hong Kong mean: a comparable meal for two costs roughly <b class="m" id="c-diff"></b> less in Hong Kong.</p>
+        <div class="xl">=IF(AND(40&gt;=lower,40&lt;=upper),"Yes","No: Tokyo is outside")</div>
+      </div>
+      <div class="card">
+        <h3>Is n = 42 big enough for t?</h3>
+        <p>n = 42 ≥ 30, and the data are roughly symmetric: mean <b class="m" id="c-mean"></b> vs. median <b class="m" id="c-med"></b>, from <b class="m" id="c-range"></b>. The t interval is appropriate.</p>
+        <p class="note">Excel shortcut: Data → Data Analysis → Descriptive Statistics, check “Confidence Level for Mean: 95%.” The “Confidence Level(95.0%)” row is the margin of error.</p>
+      </div>
+    </div>
+    <div class="stop-head"><h3>Say it right</h3></div>
+    <div class="two">
+      <div class="card">
+        <div class="label" style="color:var(--hit)">Right</div>
+        <p>We are 95% confident that the mean cost of a meal for two at <b>all</b> Hong Kong mid-range restaurants is between <span id="sr-int"></span>.</p>
+      </div>
+      <div class="card">
+        <div class="label" style="color:var(--miss)">Wrong</div>
+        <p>95% of Hong Kong meals cost between <span id="sw-int"></span>.</p>
+        <p class="note">The interval is about the mean, not individual meals. The 42 meals run from <span id="sw-range"></span>.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  // hongkongmeals.xlsx, column Meal Price ($), A2:A43
+  const HK = [22.78,33.89,22.77,18.04,23.29,35.28,42.38,36.88,38.55,41.68,25.73,34.19,31.75,25.24,26.32,19.57,36.57,32.97,36.83,30.17,37.29,25.37,24.71,28.79,32.83,43,35.23,34.76,33.06,27.73,31.89,38.47,39.42,40.72,43.92,36.51,45.25,33.51,29.17,30.54,26.74,37.93];
+  const MU = 32, SIGMA = 7, VISIBLE = 100, Z = 1.959964;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const $ = id => document.getElementById(id);
+  const fmt = (v, d) => (+v.toFixed(d)).toString();
+
+  // ---------- t distribution math ----------
+  function lgamma(x) {
+    const g = [676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+    if (x < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * x)) - lgamma(1 - x);
+    x -= 1; let a = 0.99999999999980993; const t = x + 7.5;
+    for (let i = 0; i < 8; i++) a += g[i] / (x + i + 1);
+    return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(a);
+  }
+  function betacf(a, b, x) {
+    let qab = a + b, qap = a + 1, qam = a - 1, c = 1, d = 1 - qab * x / qap;
+    if (Math.abs(d) < 1e-300) d = 1e-300; d = 1 / d; let h = d;
+    for (let m = 1; m <= 300; m++) {
+      const m2 = 2 * m; let aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+      d = 1 + aa * d; if (Math.abs(d) < 1e-300) d = 1e-300; c = 1 + aa / c; if (Math.abs(c) < 1e-300) c = 1e-300; d = 1 / d; h *= d * c;
+      aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+      d = 1 + aa * d; if (Math.abs(d) < 1e-300) d = 1e-300; c = 1 + aa / c; if (Math.abs(c) < 1e-300) c = 1e-300; d = 1 / d;
+      const del = d * c; h *= del; if (Math.abs(del - 1) < 1e-12) break;
+    }
+    return h;
+  }
+  function ibeta(x, a, b) {
+    if (x <= 0) return 0; if (x >= 1) return 1;
+    const bt = Math.exp(lgamma(a + b) - lgamma(a) - lgamma(b) + a * Math.log(x) + b * Math.log(1 - x));
+    return x < (a + 1) / (a + b + 2) ? bt * betacf(a, b, x) / a : 1 - bt * betacf(b, a, 1 - x) / b;
+  }
+  const tcdf = (t, df) => { const p = 0.5 * ibeta(df / (df + t * t), df / 2, 0.5); return t > 0 ? 1 - p : p; };
+  const tpdf = (t, df) => Math.exp(lgamma((df + 1) / 2) - lgamma(df / 2) - 0.5 * Math.log(df * Math.PI) - (df + 1) / 2 * Math.log(1 + t * t / df));
+  function tinv(p, df) { let lo = -60, hi = 60; for (let i = 0; i < 100; i++) { const m = (lo + hi) / 2; tcdf(m, df) < p ? lo = m : hi = m; } return (lo + hi) / 2; }
+  const npdf = v => Math.exp(-0.5 * v * v) / Math.sqrt(2 * Math.PI);
+  function rnorm() { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+
+  // ---------- canvas helpers ----------
+  const tok = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const colors = () => ({ ink: tok("--ink"), muted: tok("--muted"), line: tok("--line"), hit: tok("--hit"), miss: tok("--miss"),
+    soft: tok("--hit-soft"), missSoft: tok("--miss-soft"), mu: tok("--mu"), z: tok("--zline"), mono: tok("--mono"), body: tok("--body") });
+  function setup(cv, H) {
+    const dpr = window.devicePixelRatio || 1, W = cv.clientWidth;
+    cv.style.height = H + "px"; cv.width = W * dpr; cv.height = H * dpr;
+    const ctx = cv.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+    return { ctx, W, H };
+  }
+
+  // ================= STOP 2: z-with-s vs t =================
+  const sim = { n: 5, method: "t", samples: [] };
+  let queue = 0, timer = null;
+  function draw1(n) { let s = 0, ss = 0; const xs = []; for (let i = 0; i < n; i++) { const v = MU + SIGMA * rnorm(); xs.push(v); s += v; }
+    const m = s / n; for (const v of xs) ss += (v - m) ** 2; return { m, s: Math.sqrt(ss / (n - 1)) }; }
+  const tcut = () => tinv(0.975, sim.n - 1);
+  const cut = () => sim.method === "z" ? Z : tcut();
+  const hitWith = (smp, c) => Math.abs(smp.m - MU) <= c * smp.s / Math.sqrt(sim.n);
+  function drawSim() {
+    const cv = $("sim"), W0 = cv.clientWidth, Hh = Math.max(420, Math.min(600, Math.round(W0 * 0.68)));
+    const { ctx, W, H } = setup(cv, Hh), C = colors();
+    const se = SIGMA / Math.sqrt(sim.n), half = sim.n <= 5 ? 9 * se : sim.n <= 10 ? 6.5 * se : 5 * se, L = 12, R = W - 12;
+    const x = v => L + (v - (MU - half)) / (2 * half) * (R - L);
+    const top = 10, axisY = H - 28, bot = axisY - 10, c = cut();
+    const vis = sim.samples.slice(-VISIBLE), rowH = (bot - top) / VISIBLE, lw = Math.max(1.5, Math.min(4, rowH * 0.55));
+    vis.forEach((smp, i) => {
+      const e = c * smp.s / Math.sqrt(sim.n), hit = Math.abs(smp.m - MU) <= e, y = top + rowH * (i + 0.5);
+      ctx.strokeStyle = hit ? C.hit : C.miss; ctx.lineWidth = hit ? lw : lw + 0.8;
+      ctx.beginPath(); ctx.moveTo(Math.max(L, x(smp.m - e)), y); ctx.lineTo(Math.min(R, x(smp.m + e)), y); ctx.stroke();
+      ctx.fillStyle = hit ? C.hit : C.miss; ctx.beginPath(); ctx.arc(x(smp.m), y, Math.max(1.6, lw * 0.75), 0, Math.PI * 2); ctx.fill();
+    });
+    if (!vis.length) { ctx.fillStyle = C.muted; ctx.font = "15px " + C.body; ctx.textAlign = "center"; ctx.fillText("No samples yet. Press +1, +20 or +100.", (L + R) / 2, (top + bot) / 2); }
+    ctx.strokeStyle = C.mu; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x(MU), top - 4); ctx.lineTo(x(MU), axisY); ctx.stroke();
+    ctx.strokeStyle = C.line; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(L, axisY); ctx.lineTo(R, axisY); ctx.stroke();
+    ctx.fillStyle = C.muted; ctx.font = "12px " + C.mono; ctx.textAlign = "center";
+    const step = half > 10 ? 4 : half > 5 ? 2 : 1;
+    for (let v = Math.ceil((MU - half) / step) * step; v <= MU + half + 1e-9; v += step) {
+      const px = x(v); ctx.beginPath(); ctx.moveTo(px, axisY); ctx.lineTo(px, axisY + 4); ctx.stroke();
+      if (px > L + 18 && px < R - 18) ctx.fillText("$" + v, px, axisY + 17);
+    }
+  }
+  function updateSim() {
+    const t = tcut(), tot = sim.samples.length;
+    $("r-df").textContent = sim.n - 1; $("r-t").textContent = t.toFixed(3);
+    const hz = sim.samples.filter(s => hitWith(s, Z)).length, ht = sim.samples.filter(s => hitWith(s, t)).length;
+    const rz = tot ? 100 * hz / tot : null, rt = tot ? 100 * ht / tot : null;
+    $("s-z").textContent = tot ? rz.toFixed(1) + "%" : "–"; $("s-t").textContent = tot ? rt.toFixed(1) + "%" : "–";
+    $("s-z").classList.toggle("bad", tot >= 50 && rz < 93);
+    $("tile-z").classList.toggle("sel", sim.method === "z"); $("tile-t").classList.toggle("sel", sim.method === "t");
+    $("sim-title").textContent = "Intervals using " + (sim.method === "z" ? "z = 1.96 with s (wrong)" : "t = " + t.toFixed(3) + " with s") + " · n = " + sim.n;
+    document.querySelectorAll("[data-m]").forEach(b => b.setAttribute("aria-pressed", b.dataset.m === sim.method));
+    document.querySelectorAll("[data-n]").forEach(b => b.setAttribute("aria-pressed", +b.dataset.n === sim.n));
+    drawSim();
+  }
+  function add(k) {
+    if (reduce || k === 1) { for (let i = 0; i < k; i++) sim.samples.push(draw1(sim.n)); updateSim(); return; }
+    queue += k; if (timer) return;
+    timer = setInterval(() => {
+      const batch = Math.max(1, Math.ceil(queue / 40));
+      for (let i = 0; i < batch && queue > 0; i++, queue--) sim.samples.push(draw1(sim.n));
+      updateSim(); if (queue <= 0) { clearInterval(timer); timer = null; }
+    }, 22);
+  }
+  function stopQueue() { queue = 0; if (timer) { clearInterval(timer); timer = null; } }
+  function clearSim() { stopQueue(); sim.samples = []; updateSim(); }
+  document.querySelectorAll("[data-m]").forEach(b => b.addEventListener("click", () => { sim.method = b.dataset.m; updateSim(); }));
+  document.querySelectorAll("[data-n]").forEach(b => b.addEventListener("click", () => {
+    if (+b.dataset.n === sim.n) return; stopQueue(); sim.n = +b.dataset.n; sim.samples = []; updateSim(); add(100);
+  }));
+  $("d1").addEventListener("click", () => add(1));
+  $("d20").addEventListener("click", () => add(20));
+  $("d100").addEventListener("click", () => add(100));
+  $("clear").addEventListener("click", clearSim);
+  document.addEventListener("keydown", e => {
+    if (e.target.tagName === "INPUT" || e.ctrlKey || e.metaKey || e.altKey) return;
+    const k = e.key.toLowerCase();
+    if (k === "d") add(1); else if (k === "t") add(20); else if (k === "h") add(100); else if (k === "c") clearSim();
+  });
+
+  // ================= STOP 3: t vs z =================
+  let df = 5;
+  function drawT() {
+    const cv = $("tChart"), { ctx, W, H } = setup(cv, 280), C = colors();
+    const L = 12, R = W - 12, base = H - 30, top = 12, half = 4.5, ymax = npdf(0) * 1.08;
+    const x = v => L + (v + half) / (2 * half) * (R - L), y = d => base - d / ymax * (base - top);
+    const tc = tinv(0.975, df);
+    // shade t tails beyond ±t.025
+    const tail = (a, b) => { ctx.beginPath(); ctx.moveTo(x(a), base); for (let v = a; v <= b; v += 0.02) ctx.lineTo(x(v), y(tpdf(v, df))); ctx.lineTo(x(b), base); ctx.closePath(); ctx.fillStyle = C.missSoft; ctx.fill(); };
+    tail(-half, -tc); tail(tc, half);
+    // z curve
+    ctx.beginPath(); for (let v = -half, f = true; v <= half; v += 0.02, f = false) f ? ctx.moveTo(x(v), y(npdf(v))) : ctx.lineTo(x(v), y(npdf(v)));
+    ctx.strokeStyle = C.z; ctx.lineWidth = 2; ctx.setLineDash([6, 5]); ctx.stroke(); ctx.setLineDash([]);
+    // t curve
+    ctx.beginPath(); for (let v = -half, f = true; v <= half; v += 0.02, f = false) f ? ctx.moveTo(x(v), y(tpdf(v, df))) : ctx.lineTo(x(v), y(tpdf(v, df)));
+    ctx.strokeStyle = C.hit; ctx.lineWidth = 2.5; ctx.stroke();
+    ctx.strokeStyle = C.line; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(L, base); ctx.lineTo(R, base); ctx.stroke();
+    ctx.font = "12px " + C.mono; ctx.textAlign = "center"; ctx.fillStyle = C.muted;
+    for (let k = -4; k <= 4; k++) { const px = x(k); ctx.beginPath(); ctx.moveTo(px, base); ctx.lineTo(px, base + 4); ctx.stroke(); if (Math.abs(Math.abs(k) - tc) > 0.4) ctx.fillText(k, px, base + 17); }
+    ctx.strokeStyle = C.hit; ctx.lineWidth = 2;
+    [-tc, tc].forEach(v => { ctx.beginPath(); ctx.moveTo(x(v), base); ctx.lineTo(x(v), y(tpdf(v, df)) - 14); ctx.stroke(); });
+    ctx.fillStyle = C.hit; ctx.font = "600 13px " + C.mono;
+    ctx.fillText("−" + tc.toFixed(3), x(-tc), base + 17); ctx.fillText("+" + tc.toFixed(3), x(tc), base + 17);
+    ctx.fillStyle = C.miss; ctx.font = "600 12px " + C.mono;
+    ctx.fillText("0.025", x(-(tc + half) / 2), base - 14); ctx.fillText("0.025", x((tc + half) / 2), base - 14);
+    const tc2 = tc;
+    $("dfval").textContent = df; $("df").value = df; $("k-df").textContent = df;
+    $("k-t").textContent = tc2.toFixed(3); $("k-x").textContent = Math.round(100 * (tc2 / Z - 1)) + "%";
+    $("k-xl").textContent = "=T.INV.2T(0.05," + df + ")";
+    document.querySelectorAll("[data-df]").forEach(b => b.setAttribute("aria-pressed", +b.dataset.df === df));
+  }
+  $("df").addEventListener("input", e => { df = +e.target.value; drawT(); });
+  document.querySelectorAll("[data-df]").forEach(b => b.addEventListener("click", () => { df = +b.dataset.df; drawT(); }));
+
+  // ================= STOP 4: Q5 areas =================
+  const DF5 = 16;
+  const PARTS = [
+    { t: "(a) To the right of 2.120", kind: "right", a: 2.120, hint: "Find 2.120 in the df = 16 row. Which column is it in?", why: "2.120 sits under the 0.025 column heading, and the table gives upper-tail areas directly.", xl: "=T.DIST.RT(2.12,16)" },
+    { t: "(b) To the left of 1.337", kind: "left", a: 1.337, hint: "The table gives the area to the right of 1.337. How do you get the area to the left?", why: "1.337 is under the 0.10 heading, so the area to the left is 1 − 0.10.", xl: "=T.DIST(1.337,16,TRUE)" },
+    { t: "(c) To the left of −1.746", kind: "left", a: -1.746, hint: "The t curve is symmetric around 0. What area is to the right of +1.746?", why: "By symmetry, left of −1.746 equals right of +1.746, which is the 0.05 heading.", xl: "=T.DIST(-1.746,16,TRUE)" },
+    { t: "(d) To the right of 2.583", kind: "right", a: 2.583, hint: "Find 2.583 in the df = 16 row.", why: "2.583 sits under the 0.01 column heading.", xl: "=T.DIST.RT(2.583,16)" },
+    { t: "(e) Between −2.120 and 2.120", kind: "between", a: 2.120, hint: "Each tail beyond ±2.120 holds the same area. What is it, and what is left in the middle?", why: "Each tail is 0.025, so the middle is 1 − 2(0.025).", xl: "=1-2*T.DIST.RT(2.12,16)" },
+    { t: "(f) Between −1.746 and 1.746", kind: "between", a: 1.746, hint: "Same idea as (e), with the 1.746 column.", why: "Each tail is 0.05, so the middle is 1 − 2(0.05).", xl: "=1-2*T.DIST.RT(1.746,16)" },
+  ];
+  let part = 0;
+  const areaOf = p => p.kind === "right" ? 1 - tcdf(p.a, DF5) : p.kind === "left" ? tcdf(p.a, DF5) : 1 - 2 * (1 - tcdf(p.a, DF5));
+  function drawA() {
+    const p = PARTS[part], cv = $("aChart"), { ctx, W, H } = setup(cv, 250), C = colors();
+    const L = 12, R = W - 12, base = H - 30, top = 12, half = 4, ymax = tpdf(0, DF5) * 1.08;
+    const x = v => L + (v + half) / (2 * half) * (R - L), y = d => base - d / ymax * (base - top);
+    const shade = (a, b) => { ctx.beginPath(); ctx.moveTo(x(a), base); for (let v = a; v <= b; v += 0.02) ctx.lineTo(x(v), y(tpdf(v, DF5))); ctx.lineTo(x(b), base); ctx.closePath(); ctx.fillStyle = C.soft; ctx.fill(); };
+    if (p.kind === "right") shade(p.a, half); else if (p.kind === "left") shade(-half, p.a); else shade(-p.a, p.a);
+    ctx.beginPath(); for (let v = -half, f = true; v <= half; v += 0.02, f = false) f ? ctx.moveTo(x(v), y(tpdf(v, DF5))) : ctx.lineTo(x(v), y(tpdf(v, DF5)));
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 1.8; ctx.stroke();
+    ctx.strokeStyle = C.line; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(L, base); ctx.lineTo(R, base); ctx.stroke();
+    const marks = p.kind === "between" ? [-p.a, p.a] : [p.a];
+    ctx.font = "12px " + C.mono; ctx.textAlign = "center"; ctx.fillStyle = C.muted;
+    for (let k = -4; k <= 4; k++) { const px = x(k); ctx.beginPath(); ctx.moveTo(px, base); ctx.lineTo(px, base + 4); ctx.stroke(); if (marks.every(m => Math.abs(m - k) > 0.45)) ctx.fillText(k, px, base + 17); }
+    ctx.strokeStyle = C.hit; ctx.lineWidth = 2; ctx.fillStyle = C.hit; ctx.font = "600 13px " + C.mono;
+    marks.forEach(m => { ctx.beginPath(); ctx.moveTo(x(m), base); ctx.lineTo(x(m), y(tpdf(m, DF5)) - 10); ctx.stroke(); ctx.fillText(m.toFixed(3), x(m), base + 17); });
+    ctx.fillStyle = C.muted; ctx.font = "12px " + C.body; ctx.textAlign = "left"; ctx.fillText("t distribution, 16 df", L, top + 8);
+    $("p-title").textContent = p.t; $("p-hint").textContent = p.hint;
+    $("p-area").textContent = areaOf(p).toFixed(3); $("p-why").textContent = p.why; $("p-xl").textContent = p.xl + "   → " + areaOf(p).toFixed(4);
+    document.querySelectorAll("[data-part]").forEach(b => b.setAttribute("aria-pressed", +b.dataset.part === part));
+    document.querySelectorAll("[data-tv]").forEach(td => td.classList.toggle("hl", Math.abs(+td.dataset.tv - Math.abs(p.a)) < 1e-6));
+  }
+  function setReveal(open) { $("p-ans").hidden = !open; $("p-reveal").setAttribute("aria-expanded", open); $("p-reveal").textContent = open ? "Hide answer" : "Show answer"; }
+  document.querySelectorAll("[data-part]").forEach(b => b.addEventListener("click", () => { part = +b.dataset.part; setReveal(false); drawA(); }));
+  $("p-reveal").addEventListener("click", () => setReveal($("p-ans").hidden));
+
+  // ================= STOP 6: Hong Kong =================
+  const n = HK.length, xbar = HK.reduce((a, b) => a + b, 0) / n;
+  const s = Math.sqrt(HK.reduce((a, v) => a + (v - xbar) ** 2, 0) / (n - 1));
+  const sorted = [...HK].sort((a, b) => a - b), med = (sorted[n / 2 - 1] + sorted[n / 2]) / 2;
+  const t41 = tinv(0.975, n - 1), se = s / Math.sqrt(n), E = t41 * se, lo = xbar - E, hi = xbar + E;
+  const money = v => "$" + v.toFixed(2);
+  const steps = [
+    { h: "Point estimate", m: '<span class="xb">x</span> = <b>' + money(xbar) + "</b>", xl: "=AVERAGE(A2:A43)", w: "Our best single guess for μ, from n = " + n + " meals." },
+    { h: "Sample standard deviation", m: "s = <b>" + money(s) + "</b>", xl: "=STDEV.S(A2:A43)", w: "No σ is given, so we estimate it with s." },
+    { h: "Degrees of freedom", m: "df = n − 1 = <b>" + (n - 1) + "</b>", xl: "=COUNT(A2:A43)-1", w: "One less than the sample size." },
+    { h: "Critical value", m: "t<sub>0.025</sub> = <b>" + t41.toFixed(3) + "</b>", xl: "=T.INV.2T(0.05,41)", w: "95% leaves 0.025 per tail. Table row 41, column 0.025." },
+    { h: "Margin of error", a: "Answer (a)", m: "E = " + t41.toFixed(3) + " × " + s.toFixed(2) + "/√42 = <b>" + money(E) + "</b>", xl: "=CONFIDENCE.T(0.05,STDEV.S(A2:A43),42)", w: "s/√n = " + se.toFixed(3) + " is the estimated standard error." },
+    { h: "Interval estimate", a: "Answer (b)", m: money(xbar) + " ± " + E.toFixed(2) + " → <b>" + money(lo) + " to " + money(hi) + "</b>", xl: "=AVERAGE(A2:A43)-CONFIDENCE.T(0.05,STDEV.S(A2:A43),42)", w: "Upper limit: same formula with + instead of −." },
+  ];
+  $("grid6").innerHTML = steps.map((st, i) =>
+    '<article class="card step"><span class="n">STEP ' + (i + 1) + "</span>" + (st.a ? '<span class="answer">' + st.a + "</span>" : "") +
+    "<h3>" + st.h + '</h3><div class="math">' + st.m + '</div><div class="xl">' + st.xl + '</div><p class="why">' + st.w + "</p></article>").join("");
+  const intTxt = money(lo) + " and " + money(hi);
+  $("c-int").textContent = money(lo) + " to " + money(hi);
+  $("c-diff").textContent = money(40 - hi) + " to " + money(40 - lo);
+  $("c-mean").textContent = money(xbar); $("c-med").textContent = money(med);
+  $("c-range").textContent = money(sorted[0]) + " to " + money(sorted[n - 1]);
+  $("sr-int").textContent = intTxt; $("sw-int").textContent = intTxt;
+  $("sw-range").textContent = money(sorted[0]) + " to " + money(sorted[n - 1]);
+
+  // ================= boot =================
+  function drawAll() { drawSim(); drawT(); drawA(); }
+  for (let i = 0; i < 100; i++) sim.samples.push(draw1(sim.n));
+  sim.method = "z";
+  updateSim(); drawT(); drawA();
+  let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(drawAll, 80); });
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawAll);
+  new MutationObserver(drawAll).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+})();
+</script>
+
+</body>
+</html>
