@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Coffee Can z Test Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: a projected lesson in six numbered stops (the teaching order), each a full-width band; simulators get a controls rail + large chart.
+   Brand: MSU navy #162860 + gold #F3B324, Aptos (from BlankMSUPowerPoint_2026.04.15.pptx and the BMGT 240IS course card). */
+:root {
+  --navy: #162860;
+  --navy-deep: #0f1c48;
+  --gold: #F3B324;
+  --bg: #f3f5fa;
+  --panel: #ffffff;
+  --ink: #111a30;
+  --muted: #4a5570;
+  --line: #d5dae7;
+  --hit: #162860;
+  --hit-soft: rgba(22,40,96,.13);
+  --miss: #c8432f;
+  --miss-soft: rgba(200,67,47,.14);
+  --zline: #8a6100;
+  --mu: #111a30;
+  --chip: #e7ebf4;
+  --focus: #F3B324;
+  --on-accent: #ffffff;
+  --display: Aptos, "Aptos Display", "Segoe UI", Arial, Helvetica, sans-serif;
+  --body: Aptos, "Segoe UI", Arial, Helvetica, sans-serif;
+  --mono: Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b1433; --panel: #14214d; --ink: #eef1f8; --muted: #a9b3cc; --line: #2a3a6e;
+    --hit: #F3B324; --hit-soft: rgba(243,179,36,.18); --miss: #f07a63; --miss-soft: rgba(240,122,99,.16);
+    --zline: #8fb3ff; --mu: #eef1f8; --chip: #1c2b5c; --focus: #FADA92; --on-accent: #162860;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b1433; --panel: #14214d; --ink: #eef1f8; --muted: #a9b3cc; --line: #2a3a6e;
+  --hit: #F3B324; --hit-soft: rgba(243,179,36,.18); --miss: #f07a63; --miss-soft: rgba(240,122,99,.16);
+  --zline: #8fb3ff; --mu: #eef1f8; --chip: #1c2b5c; --focus: #FADA92; --on-accent: #162860;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 56px;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 1280px; margin: 0 auto; display: grid; gap: 28px; }
+header.brand {
+  margin-top: 20px; border-radius: 12px; padding: 26px clamp(18px, 3vw, 36px) 24px;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-deep) 100%); color: #ffffff;
+  display: grid; gap: 8px; border: 1px solid var(--line);
+}
+header.brand .bar { width: 52px; height: 4px; border-radius: 2px; background: var(--gold); }
+header.brand .course { font-size: 14px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); }
+header.brand h1 { color: #ffffff; }
+header.brand .meta { font-size: 14px; color: #b9c3dc; }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(30px, 4.2vw, 44px); line-height: 1.1; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--display); font-size: clamp(22px, 2.6vw, 28px); line-height: 1.2; margin: 0; text-wrap: balance; }
+h3 { font-family: var(--display); font-size: 18px; margin: 0; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+b.m, .mono { font-family: var(--mono); font-weight: 500; font-variant-numeric: tabular-nums; }
+.xb { display: inline-block; position: relative; font-weight: 700; font-style: italic; line-height: 1; padding: 0 .06em; }
+.xb::before { content: ""; position: absolute; left: .1em; right: .02em; top: .1em; height: .1em; min-height: 2px; border-radius: 1px; background: currentColor; }
+
+nav.stops {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg);
+  display: flex; gap: 6px; overflow-x: auto; padding-block: 10px; border-bottom: 1px solid var(--line);
+}
+nav.stops a {
+  flex: 0 0 auto; text-decoration: none; color: var(--ink); background: var(--chip); border: 1px solid var(--line);
+  border-radius: 999px; padding: 5px 12px; font-size: 14px; font-weight: 500; white-space: nowrap;
+}
+nav.stops a span { font-family: var(--mono); color: var(--hit); margin-right: 6px; }
+nav.stops a:hover { border-color: var(--hit); }
+
+section.stop { display: grid; gap: 14px; scroll-margin-top: 64px; }
+.stop-head { display: grid; gap: 4px; }
+.stop-num { font: 700 13px var(--body); color: var(--hit); letter-spacing: .14em; display: flex; align-items: center; gap: 10px; }
+.stop-num::before { content: ""; width: 28px; height: 3px; border-radius: 2px; background: var(--gold); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; min-width: 0; align-content: start; }
+.two { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 860px) { .two { grid-template-columns: 1fr; } }
+.problem .tag { display: inline-block; font: 600 12px var(--mono); background: var(--chip); border-radius: 4px; padding: 1px 6px; margin-right: 6px; }
+.big-claim { font-size: 21px; line-height: 1.4; max-width: 60ch; }
+.big-claim em { font-style: normal; background: var(--hit-soft); padding: 0 4px; border-radius: 4px; }
+.contrast { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 520px) { .contrast { grid-template-columns: 1fr; } }
+.contrast div { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 2px; }
+.contrast div.on { border-color: var(--hit); background: var(--hit-soft); }
+.contrast .k { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; font-weight: 600; color: var(--muted); }
+
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button, .btn {
+  font: 600 15px var(--body); color: var(--ink); background: var(--chip); border: 1px solid var(--line);
+  border-radius: 7px; padding: 8px 12px; cursor: pointer; min-width: 52px;
+}
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+.btn.primary { background: var(--hit); color: var(--on-accent); border-color: var(--hit); }
+button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+button:hover { filter: brightness(1.06); }
+.btnrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+canvas { width: 100%; display: block; }
+
+.kv { display: grid; gap: 6px; font-variant-numeric: tabular-nums; }
+.kv div { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; border-bottom: 1px dashed var(--line); padding-bottom: 4px; }
+.kv div:last-child { border-bottom: 0; }
+.kv span:first-child { color: var(--muted); }
+.kv b { font: 500 17px var(--mono); }
+.xl { font: 14px var(--mono); background: var(--chip); border-radius: 6px; padding: 6px 8px; overflow-x: auto; white-space: nowrap; }
+.callout { border-left: 4px solid var(--hit); padding: 4px 0 4px 12px; }
+.ans { background: var(--hit-soft); border-radius: 8px; padding: 10px 12px; }
+.label { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.note { font-size: 14px; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 14px; color: var(--muted); }
+.legend i { display: inline-block; width: 22px; height: 4px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+.row { display: flex; align-items: center; gap: 10px; }
+input[type="range"] { flex: 1; accent-color: var(--hit); }
+.val { font: 600 20px var(--mono); min-width: 64px; text-align: right; font-variant-numeric: tabular-nums; }
+
+.bench { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 900px) { .bench { grid-template-columns: 1fr; } }
+.rail { display: grid; gap: 18px; }
+.group { display: grid; gap: 8px; }
+.draws { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.draws .btn { padding: 10px 6px; }
+.versus { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tile { background: var(--chip); border-radius: 8px; padding: 8px 12px; display: grid; border: 2px solid transparent; }
+.tile.sel { border-color: var(--hit); }
+.tile .num { font: 600 26px var(--display); font-variant-numeric: tabular-nums; line-height: 1.15; }
+.tile .cap { font-size: 13px; color: var(--muted); }
+.tile .num.bad { color: var(--miss); }
+kbd { font: 12px var(--mono); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--panel); }
+.stage-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; align-items: baseline; }
+
+.terms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 900px) { .terms { grid-template-columns: 1fr; } }
+.term .def { font-size: 15px; }
+.term .src { font-size: 12px; color: var(--muted); }
+
+.ttable { overflow-x: auto; }
+.ttable table { border-collapse: collapse; font-variant-numeric: tabular-nums; min-width: 460px; width: 100%; }
+.ttable th, .ttable td { border: 1px solid var(--line); padding: 6px 10px; text-align: center; font-family: var(--mono); font-size: 15px; }
+.ttable th { background: var(--chip); font-family: var(--body); font-size: 13px; }
+.ttable td.hl { background: var(--hit-soft); font-weight: 700; }
+
+.parts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.parts button { text-align: left; }
+@media (max-width: 520px) { .parts { grid-template-columns: 1fr 1fr; } }
+
+.formula { font-family: var(--mono); font-size: clamp(24px, 4vw, 40px); display: flex; flex-wrap: wrap; align-items: flex-start; gap: 4px 14px; padding-block: 8px; }
+.formula .part { display: grid; justify-items: center; gap: 6px; }
+.formula .sym { padding: 2px 8px; border-radius: 6px; }
+.formula .sym.a { background: var(--chip); }
+.formula .sym.b { background: var(--hit-soft); }
+.formula .lab { font: 500 13px var(--body); color: var(--muted); text-align: center; max-width: 18ch; }
+.frac { display: inline-grid; justify-items: center; line-height: 1.05; vertical-align: middle; }
+.frac .top { border-bottom: 2px solid currentColor; padding: 0 4px; }
+.cmp { overflow-x: auto; }
+.cmp table { border-collapse: collapse; width: 100%; min-width: 520px; }
+.cmp th, .cmp td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; font-size: 15px; }
+.cmp th { background: var(--chip); font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.cmp td.diff { background: var(--hit-soft); font-weight: 600; }
+
+.grid6 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 960px) { .grid6 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .grid6 { grid-template-columns: 1fr; } }
+.step { gap: 8px; }
+.step .n { font: 600 13px var(--mono); color: var(--hit); letter-spacing: .04em; }
+.math { font-size: 17px; font-variant-numeric: tabular-nums; }
+.math b { font-family: var(--mono); font-weight: 500; }
+.answer { font-size: 13px; font-weight: 600; color: var(--miss); text-transform: uppercase; letter-spacing: .06em; }
+.why { font-size: 14px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<style>
+.choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.choice { font: inherit; text-align: center; background: var(--panel); color: var(--ink); border: 2px solid var(--line); border-radius: 10px; padding: 12px; cursor: pointer; font-weight: 600; }
+.choice:hover { border-color: var(--hit); }
+.choice[aria-pressed="true"] { border-color: var(--hit); background: var(--hit-soft); }
+.hyp { font: 600 19px var(--mono); line-height: 1.5; }
+.feedback { border-radius: 8px; padding: 10px 12px; }
+.feedback.good { background: var(--hit-soft); }
+.feedback.bad { background: var(--miss-soft); }
+.steps-list { display: grid; gap: 10px; }
+.qstep { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 8px; background: var(--panel); }
+.qstep .q { font-weight: 600; }
+.qstep .n { font: 600 12px var(--mono); color: var(--hit); letter-spacing: .06em; }
+.qstep .btn { justify-self: start; }
+.stmt { font-size: 18px; }
+.fivestep { display: grid; gap: 8px; counter-reset: st; margin: 0; padding: 0; list-style: none; }
+.fivestep li { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: baseline; }
+.fivestep li::before { counter-increment: st; content: counter(st); font: 700 15px var(--mono); color: var(--on-accent); background: var(--hit); border-radius: 999px; width: 28px; height: 28px; display: grid; place-items: center; }
+.formula-big { font: 600 clamp(22px, 3.4vw, 32px) var(--mono); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.frac2 { display: inline-grid; justify-items: center; line-height: 1.15; }
+.frac2 .t { border-bottom: 2px solid currentColor; padding: 0 6px; }
+.verdict { font: 700 20px var(--display); border-radius: 8px; padding: 8px 12px; text-align: center; }
+.verdict.rej { background: var(--miss-soft); color: var(--miss); }
+.verdict.keep { background: var(--hit-soft); color: var(--hit); }
+.wrapx { overflow-x: auto; }
+table.rules { border-collapse: collapse; width: 100%; min-width: 560px; }
+table.rules th, table.rules td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; font-size: 15px; vertical-align: top; }
+table.rules th { background: var(--chip); font-size: 13px; color: var(--muted); }
+table.rules td.mono { font-family: var(--mono); font-size: 14px; }
+</style>
+
+<div class="wrap">
+  <header class="brand">
+    <div class="bar"></div>
+    <div class="course">BMGT 240IS · Business Analytics</div>
+    <h1>Coffee Can z Test Lab</h1>
+    <div class="meta">Ch 9.3 · Population mean, σ known · Fall 2026 · Montana State University</div>
+  </header>
+
+  <nav class="stops" aria-label="Lesson stops">
+    <a href="#define"><span>1</span>The key terms</a>
+    <a href="#steps"><span>2</span>The test, step by step</a>
+    <a href="#approaches"><span>3</span>p-value vs. critical value</a>
+    <a href="#twotail"><span>4</span>Two-tailed test</a>
+    <a href="#summary"><span>5</span>Rules &amp; Excel</a>
+    <a href="#q3"><span>6</span>Solve Question 3</a>
+  </nav>
+
+  <!-- 1 -->
+  <section class="stop" id="define">
+    <div class="stop-head"><div class="stop-num">STOP 1 · THE KEY TERMS</div><h2>How we decide whether to reject H₀</h2>
+      <p class="muted">Recall: H<sub>0</sub> is tentatively assumed true; α is the probability of a Type I error that we are willing to accept. Now we need a way to measure the evidence in the sample.</p></div>
+    <div class="two">
+      <div class="card">
+        <div class="label">Test statistic</div>
+        <p class="big-claim" style="font-size:20px">A statistic whose value <em>helps determine whether H<sub>0</sub> should be rejected</em>.</p>
+        <p>For a mean with σ known, it counts how many standard errors x̄ is from μ<sub>0</sub>:</p>
+        <div class="formula-big">z =<span class="frac2"><span class="t"><span class="xb">x</span> − μ<sub>0</sub></span><span>σ / √n</span></span></div>
+        <p class="note">Textbook Ch 9 key terms; equation (9.1).</p>
+      </div>
+      <div class="card">
+        <div class="label">p-value</div>
+        <p class="big-claim" style="font-size:20px">A probability that <em>measures the evidence against H<sub>0</sub></em>. Smaller p-values mean more evidence against H<sub>0</sub>.</p>
+        <p>It is the chance of a test statistic at least as extreme as ours <b>if H<sub>0</sub> were true</b>. Rule: <b>reject H<sub>0</sub> if p-value ≤ α</b>.</p>
+        <p class="note">Textbook Ch 9 key terms; Section 9.3.</p>
+      </div>
+    </div>
+    <div class="two">
+      <div class="card">
+        <div class="label">Critical value</div>
+        <p class="big-claim" style="font-size:20px">A value that is <em>compared with the test statistic</em> to determine whether H<sub>0</sub> should be rejected.</p>
+        <p>It cuts off an area of α in the tail. If z falls beyond it, reject H<sub>0</sub>.</p>
+        <p class="note">Textbook Ch 9 key terms.</p>
+      </div>
+      <div class="card">
+        <div class="label">One-tailed and two-tailed tests</div>
+        <p><b>One-tailed test:</b> H<sub>0</sub> is rejected for values of the test statistic in <b>one tail</b> of its sampling distribution (H<sub>a</sub> uses &lt; or &gt;).</p>
+        <p><b>Two-tailed test:</b> H<sub>0</sub> is rejected for values in <b>either tail</b> (H<sub>a</sub> uses ≠).</p>
+        <p class="note">Textbook Ch 9 key terms.</p>
+      </div>
+    </div>
+    <div class="two">
+      <div class="card">
+        <div class="label">The idea in one sentence</div>
+        <p class="stmt">Assume H<sub>0</sub> is true. If our sample would be <b>very unusual</b> under that assumption (small p-value), we stop believing H<sub>0</sub>.</p>
+        <p>Like the jury: if the evidence would be very unlikely for an innocent person, the jury rejects “innocent.”</p>
+      </div>
+      <div class="card">
+        <div class="label">Quick check · true or false?</div>
+        <div class="steps-list" id="tf"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="stop" id="steps">
+    <div class="stop-head"><div class="stop-num">STOP 2 · THE BOOK'S EXAMPLE · LOWER TAIL</div><h2>Hilltop Coffee: is the FTC right to suspect underfilling?</h2></div>
+    <div class="two">
+      <div class="card">
+        <p>The label says a can holds <b>3 pounds</b>. The FTC treats this as Hilltop's claim that μ ≥ 3 and checks it with a sample of <b>n = 36</b> cans. Past tests show <b>σ = 0.18</b> and normal fill weights. The director will risk a 1% chance of falsely accusing Hilltop: <b>α = 0.01</b>.</p>
+        <ol class="fivestep">
+          <li><span><b>Hypotheses.</b> H<sub>0</sub>: μ ≥ 3 &nbsp; H<sub>a</sub>: μ &lt; 3 (lower tail)</span></li>
+          <li><span><b>Level of significance.</b> α = 0.01</span></li>
+          <li><span><b>Collect the sample and compute the test statistic.</b> σ/√n = 0.18/√36 = 0.03</span></li>
+          <li><span><b>p-value</b> for a lower tail test = area to the <b>left</b> of z.</span></li>
+          <li><span><b>Decide.</b> Reject H<sub>0</sub> if p-value ≤ α.</span></li>
+        </ol>
+      </div>
+      <div class="card">
+        <div class="row"><span class="label" style="min-width:140px">Sample mean <span class="xb" style="text-transform:none">x</span></span>
+          <input type="range" id="hx" min="2.88" max="3.04" step="0.005" value="2.92" aria-label="Sample mean of Hilltop cans"><span class="val" id="hx-v">2.920</span></div>
+        <canvas id="hChart" aria-label="Standard normal curve with the lower-tail p-value shaded"></canvas>
+        <div class="kv">
+          <div><span>z = (x̄ − 3) / 0.03</span><b id="h-z">−2.67</b></div>
+          <div><span>p-value = P(z ≤ test statistic)</span><b id="h-p">0.0038</b></div>
+          <div><span>Compare with α = 0.01</span><b id="h-c">0.0038 ≤ 0.01</b></div>
+        </div>
+        <div class="verdict rej" id="h-v">Reject H₀</div>
+        <p class="note">Start at the book's sample, x̄ = 2.92. Drag x̄ up toward 3: the p-value grows and the evidence weakens.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="stop" id="approaches">
+    <div class="stop-head"><div class="stop-num">STOP 3 · TWO APPROACHES, ONE DECISION</div><h2>p-value approach vs. critical value approach</h2></div>
+    <div class="two">
+      <div class="card">
+        <div class="label">p-value approach</div>
+        <p>Find the tail area beyond <b>our z</b>, then compare it with α.</p>
+        <p class="hyp">p = 0.0038 ≤ α = 0.01<br>→ reject H<sub>0</sub></p>
+        <p>Advantage: the p-value tells you <b>how</b> significant the result is. It is also called the <b>observed level of significance</b>: H<sub>0</sub> would be rejected for any α ≥ 0.0038.</p>
+      </div>
+      <div class="card">
+        <div class="label">Critical value approach</div>
+        <p>Find the z that cuts off <b>α</b> in the tail, then compare <b>our z</b> with it.</p>
+        <p class="hyp">−z<sub>.01</sub> = −2.33<br>z = −2.67 ≤ −2.33 → reject H<sub>0</sub></p>
+        <p>Rejection rule for a lower tail test: reject H<sub>0</sub> if z ≤ −z<sub>α</sub>.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row"><span class="label" style="min-width:150px">Level of significance</span>
+        <div class="seg" role="group" aria-label="Level of significance">
+          <button type="button" data-ha="0.01">0.01</button><button type="button" data-ha="0.05">0.05</button><button type="button" data-ha="0.10">0.10</button>
+        </div></div>
+      <canvas id="cChart" aria-label="The test statistic compared with the critical value"></canvas>
+      <p class="callout">The two approaches <b>always agree</b>: whenever the p-value ≤ α, z is beyond the critical value. The shaded α region and the test statistic tell the same story. Uses the x̄ from Stop 2.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="stop" id="twotail">
+    <div class="stop-head"><div class="stop-num">STOP 4 · THE BOOK'S EXAMPLE · TWO-TAILED</div><h2>MaxFlight golf balls: too short <i>or</i> too long is a problem</h2></div>
+    <div class="two">
+      <div class="card">
+        <p>The process should give a mean driving distance of <b>295 yards</b>. Too short loses sales; too long breaks the USGA standard. Each quality check uses <b>n = 50</b> balls, <b>σ = 12</b>, <b>α = 0.05</b>.</p>
+        <p class="hyp">H<sub>0</sub>: μ = 295 &nbsp; H<sub>a</sub>: μ ≠ 295</p>
+        <p>σ/√n = 12/√50 = 1.7. Because <b>either</b> direction counts as evidence, the p-value adds both tails:</p>
+        <p class="hyp">p-value = 2 × P(z ≥ |test statistic|)</p>
+        <p>Critical values: ±z<sub>.025</sub> = ±1.96. Reject H<sub>0</sub> if z ≤ −1.96 or z ≥ 1.96.</p>
+      </div>
+      <div class="card">
+        <div class="row"><span class="label" style="min-width:140px">Sample mean <span class="xb" style="text-transform:none">x</span></span>
+          <input type="range" id="mx" min="289" max="301" step="0.1" value="297.6" aria-label="Sample mean driving distance"><span class="val" id="mx-v">297.6</span></div>
+        <canvas id="mChart" aria-label="Standard normal curve with both tails shaded for the two-tailed p-value"></canvas>
+        <div class="kv">
+          <div><span>z = (x̄ − 295) / 1.7</span><b id="m-z">1.53</b></div>
+          <div><span>p-value = 2 × one tail</span><b id="m-p">0.1260</b></div>
+          <div><span>Compare with α = 0.05</span><b id="m-c">0.1260 &gt; 0.05</b></div>
+        </div>
+        <div class="verdict keep" id="m-v">Do not reject H₀</div>
+        <p class="note">At the book's sample, x̄ = 297.6, the process is left running. Drag x̄ below about 291.7 or above 298.3 to see it rejected.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="stop" id="summary">
+    <div class="stop-head"><div class="stop-num">STOP 5 · SUMMARY</div><h2>The three tests on one page</h2></div>
+    <div class="card wrapx">
+      <table class="rules">
+        <thead><tr><th></th><th>Lower tail</th><th>Upper tail</th><th>Two-tailed</th></tr></thead>
+        <tbody>
+          <tr><td>Hypotheses</td><td>H<sub>0</sub>: μ ≥ μ<sub>0</sub><br>H<sub>a</sub>: μ &lt; μ<sub>0</sub></td><td>H<sub>0</sub>: μ ≤ μ<sub>0</sub><br>H<sub>a</sub>: μ &gt; μ<sub>0</sub></td><td>H<sub>0</sub>: μ = μ<sub>0</sub><br>H<sub>a</sub>: μ ≠ μ<sub>0</sub></td></tr>
+          <tr><td>Test statistic</td><td colspan="3" style="text-align:center">z = (x̄ − μ<sub>0</sub>) / (σ/√n)</td></tr>
+          <tr><td>p-value</td><td>area to the left of z</td><td>area to the right of z</td><td>2 × area beyond |z|</td></tr>
+          <tr><td>Reject H<sub>0</sub> (p-value)</td><td colspan="3" style="text-align:center">if p-value ≤ α</td></tr>
+          <tr><td>Reject H<sub>0</sub> (critical value)</td><td>if z ≤ −z<sub>α</sub></td><td>if z ≥ z<sub>α</sub></td><td>if z ≤ −z<sub>α/2</sub> or z ≥ z<sub>α/2</sub></td></tr>
+          <tr><td>Excel p-value</td><td class="mono">=NORM.S.DIST(z,TRUE)</td><td class="mono">=1-NORM.S.DIST(z,TRUE)</td><td class="mono">=2*(1-NORM.S.DIST(ABS(z),TRUE))</td></tr>
+          <tr><td>Excel critical value</td><td class="mono">=NORM.S.INV(α)</td><td class="mono">=NORM.S.INV(1-α)</td><td class="mono">=NORM.S.INV(1-α/2)</td></tr>
+        </tbody>
+      </table>
+      <p class="note">The table gives p-values from z rounded to two decimals; Excel uses the exact z, so the last digit can differ (for example 0.0170 vs. 0.0169).</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="stop" id="q3">
+    <div class="stop-head"><div class="stop-num">STOP 6 · APPLY · ASSIGNMENT QUESTION 3</div><h2>Question 3: commit first, then work it through</h2></div>
+    <div class="two">
+      <div class="card problem">
+        <p>Consider the following hypothesis test:</p>
+        <p class="hyp">H<sub>0</sub>: μ ≥ 20<br>H<sub>a</sub>: μ &lt; 20</p>
+        <p>A sample of <b>50</b> provided a sample mean of <b>19.4</b>. The population standard deviation is <b>2</b>.</p>
+        <p>(a) Compute the value of the test statistic. (b) What is the p-value? (c) Using α = 0.05, what is your conclusion? (d) What is the rejection rule using the critical value? What is your conclusion?</p>
+      </div>
+      <div class="card" id="guess">
+        <p class="stmt">Warm-up: 19.4 is only 0.6 below 20. Before computing anything, do you think the test will reject H<sub>0</sub> at α = 0.05?</p>
+        <div class="choices" role="group" aria-label="Prediction">
+          <button type="button" class="choice" data-v="yes">Yes, reject H₀</button>
+          <button type="button" class="choice" data-v="no">No, do not reject</button>
+        </div>
+        <p class="note" id="guess-msg"></p>
+      </div>
+    </div>
+    <p class="muted">Answer each step on paper before you reveal it.</p>
+    <div class="steps-list" id="q3-steps"></div>
+    <div class="card" id="guess-review" hidden></div>
+  </section>
+</div>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  let store = null; try { store = window.localStorage; } catch (e) {}
+  const save = (k, v) => { try { store && store.setItem(k, v); } catch (e) {} };
+  const load = k => { try { return store ? store.getItem(k) : null; } catch (e) { return null; } };
+  const tok = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  // standard normal CDF (Abramowitz–Stegun 7.1.26 via erf), accurate to ~1e-7
+  function Phi(z) { const t = 1 / (1 + 0.3275911 * Math.abs(z) / Math.SQRT2), y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-z * z / 2); return z >= 0 ? 0.5 * (1 + y) : 0.5 * (1 - y); }
+  function zInv(p) { let lo = -8, hi = 8; for (let i = 0; i < 80; i++) { const m = (lo + hi) / 2; Phi(m) < p ? lo = m : hi = m; } return (lo + hi) / 2; }
+  const f2 = v => (v < 0 ? "−" : "") + Math.abs(v).toFixed(2), f4 = v => v.toFixed(4);
+  const round2 = v => Math.round(v * 100) / 100;
+
+  // draws a standard normal curve; shade = [[a,b],...] in z units; marks = [{z,label,color}]
+  function drawZ(cv, shade, marks, shadeCol) {
+    const dpr = window.devicePixelRatio || 1, W = cv.clientWidth, H = 210;
+    cv.style.height = H + "px"; cv.width = W * dpr; cv.height = H * dpr;
+    const ctx = cv.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+    const L = 12, R = W - 12, base = H - 34, top = 30, half = 4;
+    const x = v => L + (Math.max(-half, Math.min(half, v)) + half) / (2 * half) * (R - L), y = v => base - Math.exp(-v * v / 2) * (base - top);
+    shade.forEach(([a, b]) => { a = Math.max(a, -half); b = Math.min(b, half); if (b <= a) return;
+      ctx.beginPath(); ctx.moveTo(x(a), base); for (let v = a; v <= b; v += 0.02) ctx.lineTo(x(v), y(v)); ctx.lineTo(x(b), base); ctx.closePath(); ctx.fillStyle = shadeCol || tok("--miss-soft"); ctx.fill(); });
+    ctx.beginPath(); for (let v = -half, f = true; v <= half; v += 0.02, f = false) f ? ctx.moveTo(x(v), y(v)) : ctx.lineTo(x(v), y(v));
+    ctx.strokeStyle = tok("--ink"); ctx.lineWidth = 1.8; ctx.stroke();
+    ctx.strokeStyle = tok("--line"); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(L, base); ctx.lineTo(R, base); ctx.stroke();
+    ctx.font = "12px " + tok("--mono"); ctx.textAlign = "center"; ctx.fillStyle = tok("--muted");
+    for (let k = -4; k <= 4; k++) { if (marks.some(m => !m.dash && Math.abs(m.z - k) < 0.35)) continue; ctx.fillText(k, x(k), base + 16); }
+    marks.forEach((m, i) => {
+      ctx.strokeStyle = m.color; ctx.lineWidth = m.dash ? 1.8 : 2.6; ctx.setLineDash(m.dash ? [5, 4] : []);
+      ctx.beginPath(); ctx.moveTo(x(m.z), base + 2); ctx.lineTo(x(m.z), top - 8 + i * 14); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = m.color; ctx.font = "600 12px " + tok("--body"); ctx.fillText(m.label, x(m.z), top - 12 + i * 14);
+      if (!m.dash) { ctx.font = "600 12px " + tok("--mono"); ctx.fillText(f2(m.z), x(m.z), base + 16); }
+    });
+    ctx.fillStyle = tok("--muted"); ctx.font = "12px " + tok("--body"); ctx.fillText("z", R - 6, base + 28);
+  }
+
+  // ---------- Stop 1: true / false ----------
+  const TF = [
+    ["A small p-value is evidence against H₀.", true, "True. Smaller p-values mean the sample would be unusual if H₀ were true."],
+    ["We reject H₀ when the p-value is greater than α.", false, "False. Reject H₀ when the p-value is less than or equal to α."],
+    ["The p-value approach and the critical value approach can give different decisions.", false, "False. They always lead to the same decision."],
+    ["Hₐ: μ ≠ 50 calls for a two-tailed test.", true, "True. Evidence in either direction counts, so H₀ is rejected in either tail."],
+  ];
+  $("tf").innerHTML = TF.map((t, i) => '<div class="qstep"><p class="q">' + t[0] + '</p><div class="btnrow"><button type="button" class="btn" data-tf="' + i + '" data-v="1">True</button><button type="button" class="btn" data-tf="' + i + '" data-v="0">False</button></div><div class="feedback" hidden></div></div>').join("");
+  $("tf").querySelectorAll("[data-tf]").forEach(b => b.addEventListener("click", () => {
+    const t = TF[+b.dataset.tf], right = (b.dataset.v === "1") === t[1], fb = b.parentElement.nextElementSibling;
+    fb.hidden = false; fb.className = "feedback " + (right ? "good" : "bad"); fb.textContent = (right ? "Yes. " : "Not quite. ") + t[2];
+  }));
+
+  // ---------- Stop 2 + 3: Hilltop ----------
+  let hAlpha = 0.01;
+  function hilltop() {
+    const xb = +$("hx").value, z = round2((xb - 3) / 0.03), p = Phi(z), rej = p <= 0.01;
+    $("hx-v").textContent = xb.toFixed(3); $("h-z").textContent = f2(z); $("h-p").textContent = f4(p);
+    $("h-c").textContent = f4(p) + (rej ? " ≤ " : " > ") + "0.01";
+    $("h-v").textContent = rej ? "Reject H₀: evidence of underfilling" : "Do not reject H₀: no action against Hilltop";
+    $("h-v").className = "verdict " + (rej ? "rej" : "keep");
+    drawZ($("hChart"), [[-4, z]], [{ z, label: "test statistic", color: tok("--hit") }]);
+    // Stop 3 picture: alpha region and critical value, plus z
+    const zc = zInv(hAlpha), rej2 = z <= zc;
+    document.querySelectorAll("[data-ha]").forEach(b => b.setAttribute("aria-pressed", Math.abs(+b.dataset.ha - hAlpha) < 1e-9));
+    drawZ($("cChart"), [[-4, zc]], [{ z: zc, label: "critical value " + f2(zc) + " (area α = " + hAlpha + ")", color: tok("--miss"), dash: true }, { z, label: rej2 ? "z: reject H₀" : "z: do not reject", color: tok("--hit") }]);
+  }
+  $("hx").addEventListener("input", hilltop);
+  document.querySelectorAll("[data-ha]").forEach(b => b.addEventListener("click", () => { hAlpha = +b.dataset.ha; hilltop(); }));
+
+  // ---------- Stop 4: MaxFlight ----------
+  function maxflight() {
+    const xb = +$("mx").value, se = 12 / Math.sqrt(50), z = round2((xb - 295) / se), p = 2 * (1 - Phi(Math.abs(z))), rej = p <= 0.05;
+    $("mx-v").textContent = xb.toFixed(1); $("m-z").textContent = f2(z); $("m-p").textContent = f4(p);
+    $("m-c").textContent = f4(p) + (rej ? " ≤ " : " > ") + "0.05";
+    $("m-v").textContent = rej ? "Reject H₀: adjust the process" : "Do not reject H₀: keep the process running";
+    $("m-v").className = "verdict " + (rej ? "rej" : "keep");
+    const a = Math.abs(z);
+    drawZ($("mChart"), [[-4, -a], [a, 4]], [{ z: -1.96, label: "−1.96", color: tok("--miss"), dash: true }, { z: 1.96, label: "+1.96", color: tok("--miss"), dash: true }, { z, label: "test statistic", color: tok("--hit") }]);
+  }
+  $("mx").addEventListener("input", maxflight);
+
+  // ---------- Stop 6: Question 3 ----------
+  let guess = load("ht93-guess");
+  const paintGuess = () => {
+    document.querySelectorAll("#guess .choice").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === guess));
+    $("guess-msg").textContent = guess ? "Saved. Step 4 below checks it." : "Pick one. Step 4 below checks it.";
+  };
+  document.querySelectorAll("#guess .choice").forEach(b => b.addEventListener("click", () => { guess = b.dataset.v; save("ht93-guess", guess); paintGuess(); }));
+  paintGuess();
+  const STEPS = [
+    { q: "Which kind of test is this?", a: "Hₐ: μ < 20, so a lower tail (one-tailed) test. σ is known, so the test statistic is z." },
+    { q: "(a) Compute the test statistic.", a: "Standard error σ/√n = 2/√50 = 0.2828. z = (19.4 − 20)/0.2828 = −0.6/0.2828 = <b>−2.12</b>. The sample mean is 2.12 standard errors below 20." },
+    { q: "(b) What is the p-value?", a: "Lower tail: p-value = P(z ≤ −2.12) = <b>0.0170</b> from the z table. Excel: <span class=\"mono\">=NORM.S.DIST(-2.12,TRUE)</span>. With the exact z (−2.1213), Excel gives 0.0169." },
+    { q: "(c) Using α = 0.05, what is your conclusion?", a: "0.0170 ≤ 0.05, so <b>reject H₀</b>. There is enough evidence to conclude that μ &lt; 20.",
+      onOpen: () => { const r = $("guess-review"); r.hidden = false;
+        r.innerHTML = guess === "yes" ? "<p><b>Your warm-up prediction was “reject.”</b> Right. A drop of 0.6 looks small, but it is 2.12 standard errors.</p>"
+          : guess === "no" ? "<p><b>Your warm-up prediction was “do not reject.”</b> 0.6 looks small, but with n = 50 the standard error is only 0.28, so 0.6 is 2.12 standard errors: unusual if μ = 20. Size the gap in standard errors, not in raw units.</p>"
+          : '<p class="muted">You did not make a warm-up prediction. Next time, commit before you reveal.</p>'; } },
+    { q: "(d) What is the rejection rule using the critical value? What is your conclusion?", a: "Lower tail, α = 0.05: −z<sub>.05</sub> = <b>−1.645</b>. Reject H₀ if z ≤ −1.645. Since z = −2.12 ≤ −1.645, <b>reject H₀</b>, the same decision as the p-value approach. Excel: <span class=\"mono\">=NORM.S.INV(0.05)</span>." },
+  ];
+  $("q3-steps").innerHTML = STEPS.map((s, i) => '<div class="qstep"><span class="n">STEP ' + (i + 1) + '</span><p class="q">' + s.q + '</p><button type="button" class="btn" aria-expanded="false">Reveal</button><div class="ans" hidden>' + s.a + "</div></div>").join("");
+  $("q3-steps").querySelectorAll(".qstep .btn").forEach((b, i) => b.addEventListener("click", () => {
+    const a = b.nextElementSibling, open = a.hidden; a.hidden = !open; b.setAttribute("aria-expanded", open); b.textContent = open ? "Hide" : "Reveal";
+    if (open && STEPS[i].onOpen) STEPS[i].onOpen();
+  }));
+
+  function drawAll() { hilltop(); maxflight(); }
+  drawAll();
+  let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(drawAll, 80); });
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawAll);
+  new MutationObserver(drawAll).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+})();
+</script>
+
+</body>
+</html>
