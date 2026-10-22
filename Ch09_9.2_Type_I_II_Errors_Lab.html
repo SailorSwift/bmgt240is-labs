@@ -311,10 +311,19 @@ kbd { font: 12px var(--mono); border: 1px solid var(--line); border-bottom-width
 
   <!-- 3 -->
   <section class="stop" id="alpha">
-    <div class="stop-head"><div class="stop-num">STOP 3 · LEVEL OF SIGNIFICANCE</div><h2>α is the Type I risk you choose. β is not controlled.</h2></div>
-    <p class="quote"><b>Level of significance:</b> the probability of making a Type I error when the null hypothesis is true as an equality. Denoted α; common choices are 0.05 and 0.01.</p>
+    <div class="stop-head"><div class="stop-num">STOP 3 · LEVEL OF SIGNIFICANCE</div><h2>Where α and β come from: a picture of the beer test</h2>
+      <p class="muted">The distributor takes one sample and computes x̄. If x̄ is far enough above 26.9, past a <b>cutoff</b>, the test rejects H<sub>0</sub>. The picture shows how often that goes wrong in each direction.</p></div>
+    <p class="quote"><b>Level of significance (α):</b> the probability of making a Type I error when the null hypothesis is true as an equality. You choose it; common choices are 0.05 and 0.01.</p>
     <div class="bench">
       <div class="card rail">
+        <div class="group">
+          <div class="label" id="v-label">Show</div>
+          <div class="seg" role="group" aria-labelledby="v-label">
+            <button type="button" data-view="h0">If H₀ is true</button>
+            <button type="button" data-view="ha">If Hₐ is true</button>
+            <button type="button" data-view="both">Both</button>
+          </div>
+        </div>
         <div class="group">
           <div class="label" id="a-label">Level of significance <span style="text-transform:none">α</span></div>
           <div class="seg" role="group" aria-labelledby="a-label">
@@ -325,19 +334,26 @@ kbd { font: 12px var(--mono); border: 1px solid var(--line); border-bottom-width
           </div>
         </div>
         <div class="tiles2">
-          <div class="tile"><span class="num err" id="v-a">5%</span><span class="cap">Type I chance (α)</span></div>
-          <div class="tile"><span class="num" id="v-b">–</span><span class="cap">Type II chance (β) in this picture</span></div>
+          <div class="tile"><span class="num err" id="v-a">5%</span><span class="cap">α = chance of a Type I error</span></div>
+          <div class="tile"><span class="num" id="v-b">–</span><span class="cap">β = chance of a Type II error (in this picture)</span></div>
         </div>
-        <p class="note">Pretend numbers for the picture: if Milwaukee's true mean were 28.5 gallons and sample means vary with a standard error of 0.8.</p>
+        <p class="note">Pretend numbers for the picture: if Hₐ is true, Milwaukee's real mean is 28.5 gallons; sample means vary with a standard error of 0.8.</p>
       </div>
       <div class="card">
-        <canvas id="ab" aria-label="Two sampling distributions with the rejection cutoff, alpha and beta areas shaded"></canvas>
-        <div class="legend">
-          <span><i style="background:var(--miss)"></i>α: reject H<sub>0</sub> although μ = 26.9</span>
-          <span><i style="background:var(--hit)"></i>β: do not reject although μ = 28.5</span>
-        </div>
-        <p class="callout">Make α smaller and the cutoff moves right: fewer Type I errors, more Type II errors. If a Type I error is costly, choose a small α.</p>
+        <canvas id="ab" aria-label="Sampling distributions of the sample mean if H0 is true and if Ha is true, with the cutoff, alpha and beta shaded"></canvas>
+        <p id="view-say" class="callout"></p>
       </div>
+    </div>
+    <div class="card">
+      <div class="label">How to read this picture</div>
+      <div class="steps-list">
+        <div class="qstep"><span class="n">1 · RED CURVE</span><p><b>Where x̄ lands if H<sub>0</sub> is true</b> (Milwaukee really averages 26.9). Most samples come out near 26.9, but by chance a few come out higher.</p></div>
+        <div class="qstep"><span class="n">2 · BLACK LINE</span><p><b>The cutoff.</b> If our x̄ is to the right of it, we reject H<sub>0</sub> and conclude Milwaukee drinks more. We place it so that only α of the red curve lies to its right.</p></div>
+        <div class="qstep"><span class="n">3 · RED SHADED TAIL = α</span><p>Samples that land past the cutoff <b>even though H<sub>0</sub> is true</b>. We would reject a true H<sub>0</sub>: a <b>Type I error</b>. Its size is α, the number we chose.</p></div>
+        <div class="qstep"><span class="n">4 · BLUE DASHED CURVE</span><p><b>Where x̄ lands if H<sub>a</sub> is true</b>, here if Milwaukee really averages 28.5.</p></div>
+        <div class="qstep"><span class="n">5 · BLUE SHADED AREA = β</span><p>Samples that land left of the cutoff <b>even though H<sub>a</sub> is true</b>. We would not reject a false H<sub>0</sub>: a <b>Type II error</b>. We did not choose this number; it depends on the real mean, which we do not know. That is why β is usually not controlled.</p></div>
+      </div>
+      <p class="callout">Now press 0.01 and then 0.20. A smaller α pushes the cutoff to the right: the red tail shrinks (fewer Type I errors) but the blue area grows (more Type II errors). If a Type I error is costly, choose a small α and accept more Type II risk.</p>
     </div>
   </section>
 
@@ -470,32 +486,63 @@ kbd { font: 12px var(--mono); border: 1px solid var(--line); border-bottom-width
   }
   function ncdf(z) { const t = 1 / (1 + 0.2316419 * Math.abs(z)), d = 0.3989422804 * Math.exp(-z * z / 2);
     const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))); return z > 0 ? 1 - p : p; }
-  let alpha = 0.05;
+  let alpha = 0.05, view = "h0";
   const tok = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const SAY = {
+    h0: "Showing only the world where H₀ is true. The red tail past the cutoff is α: samples that would make us wrongly reject H₀.",
+    ha: "Showing only the world where Hₐ is true. The blue area left of the cutoff is β: samples that would make us miss the real increase.",
+    both: "Both worlds together. Move α and watch the cutoff trade one error for the other.",
+  };
   function drawAB() {
     const cut = MU0 + normInv(1 - alpha) * SE, beta = ncdf((cut - MU1) / SE);
     $("v-a").textContent = Math.round(alpha * 100) + "%"; $("v-b").textContent = Math.round(beta * 100) + "%";
     document.querySelectorAll("[data-a]").forEach(b => b.setAttribute("aria-pressed", Math.abs(+b.dataset.a - alpha) < 1e-9));
-    const cv = $("ab"), dpr = window.devicePixelRatio || 1, W = cv.clientWidth, H = Math.max(260, Math.min(340, Math.round(W * 0.45)));
+    document.querySelectorAll("[data-view]").forEach(b => b.setAttribute("aria-pressed", b.dataset.view === view));
+    $("view-say").textContent = SAY[view];
+    const showH0 = view !== "ha", showHa = view !== "h0";
+    const cv = $("ab"), dpr = window.devicePixelRatio || 1, W = cv.clientWidth, H = Math.max(300, Math.min(380, Math.round(W * 0.5)));
     cv.style.height = H + "px"; cv.width = W * dpr; cv.height = H * dpr;
     const ctx = cv.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
-    const lo = MU0 - 3.4 * SE, hi = MU1 + 3.4 * SE, L = 14, R = W - 14, base = H - 40, top = 64;
+    const lo = MU0 - 3.4 * SE, hi = MU1 + 3.4 * SE, L = 14, R = W - 14, base = H - 44, top = 92;
     const x = v => L + (v - lo) / (hi - lo) * (R - L), pdf = (v, m) => Math.exp(-0.5 * ((v - m) / SE) ** 2), y = d => base - d * (base - top);
     const fill = (a, b, m, col) => { ctx.beginPath(); ctx.moveTo(x(a), base); for (let v = a; v <= b; v += (hi - lo) / 400) ctx.lineTo(x(v), y(pdf(v, m))); ctx.lineTo(x(b), base); ctx.closePath(); ctx.fillStyle = col; ctx.fill(); };
-    ctx.globalAlpha = 0.85; fill(cut, hi, MU0, tok("--miss-soft")); fill(lo, cut, MU1, tok("--hit-soft")); ctx.globalAlpha = 1;
-    const curve = (m, col, dash) => { ctx.beginPath(); for (let v = lo, f = true; v <= hi; v += (hi - lo) / 400, f = false) f ? ctx.moveTo(x(v), y(pdf(v, m))) : ctx.lineTo(x(v), y(pdf(v, m))); ctx.setLineDash(dash); ctx.strokeStyle = col; ctx.lineWidth = 2.2; ctx.stroke(); ctx.setLineDash([]); };
-    curve(MU0, tok("--miss"), []); curve(MU1, tok("--hit"), [7, 5]);
+    const curve = (m, col, dash) => { ctx.beginPath(); for (let v = lo, f = true; v <= hi; v += (hi - lo) / 400, f = false) f ? ctx.moveTo(x(v), y(pdf(v, m))) : ctx.lineTo(x(v), y(pdf(v, m))); ctx.setLineDash(dash); ctx.strokeStyle = col; ctx.lineWidth = 2.4; ctx.stroke(); ctx.setLineDash([]); };
+    const red = tok("--miss"), blue = tok("--hit");
+    if (showHa) { ctx.globalAlpha = 0.9; fill(lo, cut, MU1, tok("--hit-soft")); ctx.globalAlpha = 1; curve(MU1, blue, [7, 5]); }
+    if (showH0) { ctx.globalAlpha = 0.95; fill(cut, hi, MU0, tok("--miss-soft")); ctx.globalAlpha = 1; curve(MU0, red, []); }
+    // axis
     ctx.strokeStyle = tok("--line"); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(L, base); ctx.lineTo(R, base); ctx.stroke();
-    ctx.strokeStyle = tok("--ink"); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x(cut), 22); ctx.lineTo(x(cut), base); ctx.stroke();
-    ctx.font = "600 12px " + tok("--body"); ctx.textAlign = "center"; ctx.fillStyle = tok("--ink");
-    ctx.fillText("cutoff", x(cut), 16);
-    ctx.textAlign = "left"; ctx.fillText("reject H₀ →", x(cut) + 6, 34); ctx.textAlign = "right"; ctx.fillText("← do not reject H₀", x(cut) - 6, 34);
     ctx.textAlign = "center"; ctx.font = "12px " + tok("--mono"); ctx.fillStyle = tok("--muted");
     for (let v = Math.ceil(lo); v <= hi; v++) { ctx.beginPath(); ctx.moveTo(x(v), base); ctx.lineTo(x(v), base + 4); ctx.stroke(); ctx.fillText(v, x(v), base + 16); }
-    ctx.fillStyle = tok("--miss"); ctx.font = "600 12px " + tok("--body"); ctx.textAlign = "left"; ctx.fillText("— if μ = 26.9 (H₀ true)", L + 4, 54);
-    ctx.fillStyle = tok("--hit"); ctx.textAlign = "right"; ctx.fillText("- - if μ = 28.5 (Hₐ true)", R - 4, 54); ctx.textAlign = "center";
-    ctx.fillStyle = tok("--muted"); ctx.font = "12px " + tok("--body"); ctx.fillText("sample mean x̄ (gallons)", (L + R) / 2, base + 32);
+    ctx.font = "12px " + tok("--body"); ctx.fillText("sample mean x̄ (gallons per person)", (L + R) / 2, base + 34);
+    // cutoff and the two decision zones
+    ctx.strokeStyle = tok("--ink"); ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(x(cut), 42); ctx.lineTo(x(cut), base); ctx.stroke();
+    ctx.fillStyle = tok("--ink"); ctx.font = "700 12px " + tok("--body");
+    ctx.fillText("cutoff " + cut.toFixed(2), x(cut), 18);
+    ctx.font = "600 12px " + tok("--body");
+    ctx.textAlign = "right"; ctx.fillText("x̄ here → do not reject H₀", x(cut) - 8, 36);
+    ctx.textAlign = "left"; ctx.fillText("x̄ here → reject H₀", x(cut) + 8, 36);
+    // boxed labels so text never sits on a curve
+    const box = (text, tx, ty, col, align, bold) => {
+      ctx.font = (bold ? "700 13px " : "600 12px ") + tok("--body"); const w = ctx.measureText(text).width + 12, h = 20;
+      const bx = align === "right" ? tx - w : align === "center" ? tx - w / 2 : tx;
+      ctx.fillStyle = tok("--panel"); ctx.strokeStyle = col; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.roundRect ? ctx.roundRect(bx, ty - h + 5, w, h, 4) : ctx.rect(bx, ty - h + 5, w, h); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = col; ctx.textAlign = "left"; ctx.fillText(text, bx + 6, ty); return { bx, w };
+    };
+    const lead = (ax, ay, tx, ty, col) => { ctx.strokeStyle = col; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(tx, ty); ctx.stroke();
+      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(ax, ay, 3, 0, Math.PI * 2); ctx.fill(); };
+    // curve names: above each peak, pushed away from the cutoff
+    if (showH0) box("If H₀ true: μ = 26.9", x(MU0) - 6, top - 12, red, "right", true);
+    if (showHa) box("If Hₐ true: μ = 28.5", x(MU1) + 6, top - 12, blue, "left", true);
+    // area labels in the clear lower corners, with leader lines into the shaded areas
+    const ly = base - 110;
+    if (showH0) { const ax = cut + 0.45 * SE, ay = base - (base - y(pdf(ax, MU0))) * 0.35, t = "α = " + Math.round(alpha * 100) + "% · Type I error";
+      lead(ax === ax ? x(ax) : 0, ay, R - 70, ly + 6, red); box(t, R - 4, ly, red, "right", true); }
+    if (showHa) { const bx = cut - 0.6 * SE, by = base - (base - y(pdf(bx, MU1))) * 0.45, t = "β = " + Math.round(beta * 100) + "% · Type II error";
+      lead(x(bx), by, L + 80, ly + 6, blue); box(t, L + 4, ly, blue, "left", true); }
   }
+  document.querySelectorAll("[data-view]").forEach(b => b.addEventListener("click", () => { view = b.dataset.view; drawAB(); }));
   document.querySelectorAll("[data-a]").forEach(b => b.addEventListener("click", () => { alpha = +b.dataset.a; drawAB(); }));
 
   // ---------- Stop 4 ----------
