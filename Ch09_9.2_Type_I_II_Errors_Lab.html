@@ -311,49 +311,55 @@ kbd { font: 12px var(--mono); border: 1px solid var(--line); border-bottom-width
 
   <!-- 3 -->
   <section class="stop" id="alpha">
-    <div class="stop-head"><div class="stop-num">STOP 3 · LEVEL OF SIGNIFICANCE</div><h2>Where α and β come from: a picture of the beer test</h2>
-      <p class="muted">The distributor takes one sample and computes x̄. If x̄ is far enough above 26.9, past a <b>cutoff</b>, the test rejects H<sub>0</sub>. The picture shows how often that goes wrong in each direction.</p></div>
-    <p class="quote"><b>Level of significance (α):</b> the probability of making a Type I error when the null hypothesis is true as an equality. You choose it; common choices are 0.05 and 0.01.</p>
+    <div class="stop-head"><div class="stop-num">STOP 3 · LEVEL OF SIGNIFICANCE</div><h2>A super simple test: is this coin rigged?</h2>
+      <p class="muted">You suspect a coin lands heads too often. You flip it <b>20 times</b>. If you get <b>at least the cutoff</b> number of heads, you call the coin rigged.</p></div>
+    <div class="two">
+      <div class="card">
+        <p class="hyp">H<sub>0</sub>: the coin is fair (heads 50%)<br>H<sub>a</sub>: the coin is rigged toward heads</p>
+        <p>Even a fair coin sometimes gives a lot of heads, and even a rigged coin sometimes gives few. So the decision can be wrong in two ways:</p>
+        <p><b style="color:var(--miss)">Type I error:</b> the coin is fair, but you call it rigged (a false alarm).<br>
+           <b style="color:var(--hit)">Type II error:</b> the coin is rigged, but you call it fair (a miss).</p>
+      </div>
+      <div class="card">
+        <p class="quote" style="margin:0"><b>Level of significance (α):</b> the probability of making a Type I error when the null hypothesis is true as an equality.</p>
+        <p>Here: α = the chance that a <b>fair</b> coin gives at least the cutoff number of heads. You pick the cutoff, so <b>you choose α</b>.</p>
+      </div>
+    </div>
     <div class="bench">
       <div class="card rail">
         <div class="group">
           <div class="label" id="v-label">Show</div>
           <div class="seg" role="group" aria-labelledby="v-label">
-            <button type="button" data-view="h0">If H₀ is true</button>
-            <button type="button" data-view="ha">If Hₐ is true</button>
+            <button type="button" data-view="h0">Fair coin</button>
+            <button type="button" data-view="ha">Rigged coin</button>
             <button type="button" data-view="both">Both</button>
           </div>
         </div>
         <div class="group">
-          <div class="label" id="a-label">Level of significance <span style="text-transform:none">α</span></div>
-          <div class="seg" role="group" aria-labelledby="a-label">
-            <button type="button" data-a="0.01">0.01</button>
-            <button type="button" data-a="0.05">0.05</button>
-            <button type="button" data-a="0.10">0.10</button>
-            <button type="button" data-a="0.20">0.20</button>
-          </div>
+          <div class="label">Call it rigged if heads ≥</div>
+          <div class="row"><input type="range" id="kcut" min="11" max="19" step="1" value="15" aria-label="Cutoff number of heads"><span class="val" id="kcut-v">15</span></div>
         </div>
         <div class="tiles2">
-          <div class="tile"><span class="num err" id="v-a">5%</span><span class="cap">α = chance of a Type I error</span></div>
-          <div class="tile"><span class="num" id="v-b">–</span><span class="cap">β = chance of a Type II error (in this picture)</span></div>
+          <div class="tile"><span class="num err" id="v-a">2%</span><span class="cap">α = chance of a Type I error</span></div>
+          <div class="tile"><span class="num" id="v-b">38%</span><span class="cap">β = chance of a Type II error</span></div>
         </div>
-        <p class="note">Pretend numbers for the picture: if Hₐ is true, Milwaukee's real mean is 28.5 gallons; sample means vary with a standard error of 0.8.</p>
+        <p class="note">For the picture, the rigged coin lands heads 75% of the time. In real life we would not know that number.</p>
       </div>
       <div class="card">
-        <canvas id="ab" aria-label="Sampling distributions of the sample mean if H0 is true and if Ha is true, with the cutoff, alpha and beta shaded"></canvas>
+        <canvas id="ab" aria-label="Bar charts of the number of heads in 20 flips for a fair coin and a rigged coin, with the cutoff"></canvas>
         <p id="view-say" class="callout"></p>
       </div>
     </div>
     <div class="card">
       <div class="label">How to read this picture</div>
       <div class="steps-list">
-        <div class="qstep"><span class="n">1 · RED CURVE</span><p><b>Where x̄ lands if H<sub>0</sub> is true</b> (Milwaukee really averages 26.9). Most samples come out near 26.9, but by chance a few come out higher.</p></div>
-        <div class="qstep"><span class="n">2 · BLACK LINE</span><p><b>The cutoff.</b> If our x̄ is to the right of it, we reject H<sub>0</sub> and conclude Milwaukee drinks more. We place it so that only α of the red curve lies to its right.</p></div>
-        <div class="qstep"><span class="n">3 · RED SHADED TAIL = α</span><p>Samples that land past the cutoff <b>even though H<sub>0</sub> is true</b>. We would reject a true H<sub>0</sub>: a <b>Type I error</b>. Its size is α, the number we chose.</p></div>
-        <div class="qstep"><span class="n">4 · BLUE DASHED CURVE</span><p><b>Where x̄ lands if H<sub>a</sub> is true</b>, here if Milwaukee really averages 28.5.</p></div>
-        <div class="qstep"><span class="n">5 · BLUE SHADED AREA = β</span><p>Samples that land left of the cutoff <b>even though H<sub>a</sub> is true</b>. We would not reject a false H<sub>0</sub>: a <b>Type II error</b>. We did not choose this number; it depends on the real mean, which we do not know. That is why β is usually not controlled.</p></div>
+        <div class="qstep"><span class="n">1 · RED BARS</span><p><b>A fair coin, flipped 20 times, over and over.</b> Each bar is how often you would get that many heads. Most runs give about 10.</p></div>
+        <div class="qstep"><span class="n">2 · BLACK LINE</span><p><b>Your cutoff.</b> Heads at or past this line → you call the coin rigged (reject H<sub>0</sub>).</p></div>
+        <div class="qstep"><span class="n">3 · DARK RED BARS = α</span><p>A <b>fair</b> coin that, by luck, lands past the cutoff. You would call a fair coin rigged: a <b>Type I error</b>. Add up these bars and you get α.</p></div>
+        <div class="qstep"><span class="n">4 · BLUE BARS</span><p><b>A rigged coin, flipped 20 times, over and over.</b> Most runs give about 15 heads.</p></div>
+        <div class="qstep"><span class="n">5 · DARK BLUE BARS = β</span><p>A <b>rigged</b> coin that lands below the cutoff. You would call it fair: a <b>Type II error</b>. Its size depends on how rigged the coin really is, which you don't know. That is why β is usually not controlled.</p></div>
       </div>
-      <p class="callout">Now press 0.01 and then 0.20. A smaller α pushes the cutoff to the right: the red tail shrinks (fewer Type I errors) but the blue area grows (more Type II errors). If a Type I error is costly, choose a small α and accept more Type II risk.</p>
+      <p class="callout">Slide the cutoff to 18: a fair coin almost never gets there (tiny α), but you now miss most rigged coins (big β). Slide it to 12: you catch rigged coins, but call many fair coins rigged. A stricter cutoff means a smaller α and a larger β. The beer test in Stop 6 works the same way, with x̄ in place of the number of heads.</p>
     </div>
   </section>
 
@@ -473,77 +479,69 @@ kbd { font: 12px var(--mono); border: 1px solid var(--line); border-bottom-width
   showStmt();
 
   // ---------- Stop 3: alpha / beta picture ----------
-  const MU0 = 26.9, MU1 = 28.5, SE = 0.8;
-  function normInv(p) {
-    const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.3577518672690,-30.66479806614716,2.506628277459239];
-    const b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572];
-    const c=[-0.007784894002430293,-0.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783];
-    const d=[0.007784695709041462,0.3224671290700398,2.445134137142996,3.754408661907416];
-    const pl=0.02425; let q,r;
-    if (p<pl){q=Math.sqrt(-2*Math.log(p));return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
-    if (p>1-pl){q=Math.sqrt(-2*Math.log(1-p));return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
-    q=p-0.5;r=q*q;return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);
-  }
-  function ncdf(z) { const t = 1 / (1 + 0.2316419 * Math.abs(z)), d = 0.3989422804 * Math.exp(-z * z / 2);
-    const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))); return z > 0 ? 1 - p : p; }
-  let alpha = 0.05, view = "h0";
+  // ---------- Stop 3: the coin test ----------
+  const N = 20, PFAIR = 0.5, PRIG = 0.75;
+  const choose = (n, k) => { let c = 1; for (let i = 1; i <= k; i++) c = c * (n - k + i) / i; return c; };
+  const pmf = (k, p) => choose(N, k) * Math.pow(p, k) * Math.pow(1 - p, N - k);
+  let kc = 15, view = "h0";
   const tok = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   const SAY = {
-    h0: "Showing only the world where H₀ is true. The red tail past the cutoff is α: samples that would make us wrongly reject H₀.",
-    ha: "Showing only the world where Hₐ is true. The blue area left of the cutoff is β: samples that would make us miss the real increase.",
-    both: "Both worlds together. Move α and watch the cutoff trade one error for the other.",
+    h0: "Only the fair coin. The dark red bars at or past the cutoff are α: a fair coin you would wrongly call rigged.",
+    ha: "Only the rigged coin. The dark blue bars below the cutoff are β: a rigged coin you would miss.",
+    both: "Both coins together. Slide the cutoff and watch one error shrink while the other grows.",
   };
+  const pct = v => (v < 0.01 && v > 0 ? "<1" : Math.round(v * 100)) + "%";
   function drawAB() {
-    const cut = MU0 + normInv(1 - alpha) * SE, beta = ncdf((cut - MU1) / SE);
-    $("v-a").textContent = Math.round(alpha * 100) + "%"; $("v-b").textContent = Math.round(beta * 100) + "%";
-    document.querySelectorAll("[data-a]").forEach(b => b.setAttribute("aria-pressed", Math.abs(+b.dataset.a - alpha) < 1e-9));
+    let alpha = 0, beta = 0;
+    for (let k = kc; k <= N; k++) alpha += pmf(k, PFAIR);
+    for (let k = 0; k < kc; k++) beta += pmf(k, PRIG);
+    $("kcut-v").textContent = kc; $("v-a").textContent = pct(alpha); $("v-b").textContent = pct(beta);
     document.querySelectorAll("[data-view]").forEach(b => b.setAttribute("aria-pressed", b.dataset.view === view));
     $("view-say").textContent = SAY[view];
-    const showH0 = view !== "ha", showHa = view !== "h0";
+    const showF = view !== "ha", showR = view !== "h0";
     const cv = $("ab"), dpr = window.devicePixelRatio || 1, W = cv.clientWidth, H = Math.max(300, Math.min(380, Math.round(W * 0.5)));
     cv.style.height = H + "px"; cv.width = W * dpr; cv.height = H * dpr;
     const ctx = cv.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
-    const lo = MU0 - 3.4 * SE, hi = MU1 + 3.4 * SE, L = 14, R = W - 14, base = H - 44, top = 92;
-    const x = v => L + (v - lo) / (hi - lo) * (R - L), pdf = (v, m) => Math.exp(-0.5 * ((v - m) / SE) ** 2), y = d => base - d * (base - top);
-    const fill = (a, b, m, col) => { ctx.beginPath(); ctx.moveTo(x(a), base); for (let v = a; v <= b; v += (hi - lo) / 400) ctx.lineTo(x(v), y(pdf(v, m))); ctx.lineTo(x(b), base); ctx.closePath(); ctx.fillStyle = col; ctx.fill(); };
-    const curve = (m, col, dash) => { ctx.beginPath(); for (let v = lo, f = true; v <= hi; v += (hi - lo) / 400, f = false) f ? ctx.moveTo(x(v), y(pdf(v, m))) : ctx.lineTo(x(v), y(pdf(v, m))); ctx.setLineDash(dash); ctx.strokeStyle = col; ctx.lineWidth = 2.4; ctx.stroke(); ctx.setLineDash([]); };
-    const red = tok("--miss"), blue = tok("--hit");
-    if (showHa) { ctx.globalAlpha = 0.9; fill(lo, cut, MU1, tok("--hit-soft")); ctx.globalAlpha = 1; curve(MU1, blue, [7, 5]); }
-    if (showH0) { ctx.globalAlpha = 0.95; fill(cut, hi, MU0, tok("--miss-soft")); ctx.globalAlpha = 1; curve(MU0, red, []); }
-    // axis
+    const L = 14, R = W - 14, base = H - 46, top = 78, slot = (R - L) / (N + 1);
+    const ymax = 0.21, y = v => base - v / ymax * (base - top), xs = k => L + slot * k;
+    const red = tok("--miss"), redS = tok("--miss-soft"), blue = tok("--hit"), blueS = tok("--hit-soft");
+    for (let k = 0; k <= N; k++) {
+      const both = showF && showR, w = both ? slot * 0.4 : slot * 0.7;
+      if (showF) { const pf = pmf(k, PFAIR), x0 = xs(k) + (both ? slot * 0.08 : slot * 0.15);
+        ctx.fillStyle = k >= kc ? red : redS; ctx.fillRect(x0, y(pf), w, base - y(pf));
+        if (k < kc) { ctx.strokeStyle = red; ctx.lineWidth = 1; ctx.strokeRect(x0, y(pf), w, base - y(pf)); } }
+      if (showR) { const pr = pmf(k, PRIG), x0 = xs(k) + (both ? slot * 0.52 : slot * 0.15);
+        ctx.fillStyle = k < kc ? blue : blueS; ctx.fillRect(x0, y(pr), w, base - y(pr));
+        if (k >= kc) { ctx.strokeStyle = blue; ctx.lineWidth = 1; ctx.strokeRect(x0, y(pr), w, base - y(pr)); } }
+    }
     ctx.strokeStyle = tok("--line"); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(L, base); ctx.lineTo(R, base); ctx.stroke();
-    ctx.textAlign = "center"; ctx.font = "12px " + tok("--mono"); ctx.fillStyle = tok("--muted");
-    for (let v = Math.ceil(lo); v <= hi; v++) { ctx.beginPath(); ctx.moveTo(x(v), base); ctx.lineTo(x(v), base + 4); ctx.stroke(); ctx.fillText(v, x(v), base + 16); }
-    ctx.font = "12px " + tok("--body"); ctx.fillText("sample mean x̄ (gallons per person)", (L + R) / 2, base + 34);
-    // cutoff and the two decision zones
-    ctx.strokeStyle = tok("--ink"); ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(x(cut), 42); ctx.lineTo(x(cut), base); ctx.stroke();
-    ctx.fillStyle = tok("--ink"); ctx.font = "700 12px " + tok("--body");
-    ctx.fillText("cutoff " + cut.toFixed(2), x(cut), 18);
+    // zone bars under the axis: where alpha lives (red) and where beta lives (blue)
+    if (showF) { ctx.fillStyle = red; ctx.fillRect(xs(kc), base + 1, R - xs(kc), 4); }
+    if (showR) { ctx.fillStyle = blue; ctx.fillRect(L, base + 1, xs(kc) - L, 4); }
+    ctx.fillStyle = tok("--muted"); ctx.font = "12px " + tok("--mono"); ctx.textAlign = "center";
+    for (let k = 0; k <= N; k += (W < 520 ? 2 : 1)) ctx.fillText(k, xs(k) + slot / 2, base + 19);
+    ctx.font = "12px " + tok("--body"); ctx.fillText("number of heads in 20 flips", (L + R) / 2, base + 34);
+    // cutoff line between kc-1 and kc
+    const cx = xs(kc);
+    ctx.strokeStyle = tok("--ink"); ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(cx, 42); ctx.lineTo(cx, base); ctx.stroke();
+    ctx.fillStyle = tok("--ink"); ctx.font = "700 12px " + tok("--body"); ctx.fillText("cutoff: " + kc + " or more heads", cx, 18);
     ctx.font = "600 12px " + tok("--body");
-    ctx.textAlign = "right"; ctx.fillText("x̄ here → do not reject H₀", x(cut) - 8, 36);
-    ctx.textAlign = "left"; ctx.fillText("x̄ here → reject H₀", x(cut) + 8, 36);
-    // boxed labels so text never sits on a curve
-    const box = (text, tx, ty, col, align, bold) => {
-      ctx.font = (bold ? "700 13px " : "600 12px ") + tok("--body"); const w = ctx.measureText(text).width + 12, h = 20;
-      const bx = align === "right" ? tx - w : align === "center" ? tx - w / 2 : tx;
+    ctx.textAlign = "right"; ctx.fillText("← call it fair", cx - 8, 36);
+    ctx.textAlign = "left"; ctx.fillText("call it rigged →", cx + 8, 36);
+    const box = (text, tx, ty, col, align) => {
+      ctx.font = "700 13px " + tok("--body"); const w = ctx.measureText(text).width + 12, h = 20;
+      const bx = align === "right" ? tx - w : tx;
       ctx.fillStyle = tok("--panel"); ctx.strokeStyle = col; ctx.lineWidth = 1.2;
       ctx.beginPath(); ctx.roundRect ? ctx.roundRect(bx, ty - h + 5, w, h, 4) : ctx.rect(bx, ty - h + 5, w, h); ctx.fill(); ctx.stroke();
-      ctx.fillStyle = col; ctx.textAlign = "left"; ctx.fillText(text, bx + 6, ty); return { bx, w };
+      ctx.fillStyle = col; ctx.textAlign = "left"; ctx.fillText(text, bx + 6, ty);
     };
-    const lead = (ax, ay, tx, ty, col) => { ctx.strokeStyle = col; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(tx, ty); ctx.stroke();
-      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(ax, ay, 3, 0, Math.PI * 2); ctx.fill(); };
-    // curve names: above each peak, pushed away from the cutoff
-    if (showH0) box("If H₀ true: μ = 26.9", x(MU0) - 6, top - 12, red, "right", true);
-    if (showHa) box("If Hₐ true: μ = 28.5", x(MU1) + 6, top - 12, blue, "left", true);
-    // area labels in the clear lower corners, with leader lines into the shaded areas
-    const ly = base - 110;
-    if (showH0) { const ax = cut + 0.45 * SE, ay = base - (base - y(pdf(ax, MU0))) * 0.35, t = "α = " + Math.round(alpha * 100) + "% · Type I error";
-      lead(ax === ax ? x(ax) : 0, ay, R - 70, ly + 6, red); box(t, R - 4, ly, red, "right", true); }
-    if (showHa) { const bx = cut - 0.6 * SE, by = base - (base - y(pdf(bx, MU1))) * 0.45, t = "β = " + Math.round(beta * 100) + "% · Type II error";
-      lead(x(bx), by, L + 80, ly + 6, blue); box(t, L + 4, ly, blue, "left", true); }
+    if (showF) box("Fair coin: about 10 heads", xs(10) + slot / 2 - 6, top - 14, red, "right");
+    if (showR) box("Rigged coin: about 15 heads", xs(15) + slot / 2 + 6, top - 14, blue, "left");
+    if (showF) box("α = " + pct(alpha) + " · Type I", R - 4, base - 120, red, "right");
+    if (showR) box("β = " + pct(beta) + " · Type II", L + 4, base - 120, blue, "left");
   }
   document.querySelectorAll("[data-view]").forEach(b => b.addEventListener("click", () => { view = b.dataset.view; drawAB(); }));
-  document.querySelectorAll("[data-a]").forEach(b => b.addEventListener("click", () => { alpha = +b.dataset.a; drawAB(); }));
+  $("kcut").addEventListener("input", e => { kc = +e.target.value; drawAB(); });
 
   // ---------- Stop 4 ----------
   $("fda-btn").addEventListener("click", e => { const a = $("fda-ans"), open = a.hidden; a.hidden = !open; e.currentTarget.setAttribute("aria-expanded", open); });
