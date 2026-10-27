@@ -1,0 +1,724 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Airport Rating t Test Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: a projected lesson in six numbered stops (the teaching order), each a full-width band; simulators get a controls rail + large chart.
+   Brand: MSU navy #162860 + gold #F3B324, Aptos (from BlankMSUPowerPoint_2026.04.15.pptx and the BMGT 240IS course card). */
+:root {
+  --navy: #162860;
+  --navy-deep: #0f1c48;
+  --gold: #F3B324;
+  --bg: #f3f5fa;
+  --panel: #ffffff;
+  --ink: #111a30;
+  --muted: #4a5570;
+  --line: #d5dae7;
+  --hit: #162860;
+  --hit-soft: rgba(22,40,96,.13);
+  --miss: #c8432f;
+  --miss-soft: rgba(200,67,47,.14);
+  --zline: #8a6100;
+  --mu: #111a30;
+  --chip: #e7ebf4;
+  --focus: #F3B324;
+  --on-accent: #ffffff;
+  --display: Aptos, "Aptos Display", "Segoe UI", Arial, Helvetica, sans-serif;
+  --body: Aptos, "Segoe UI", Arial, Helvetica, sans-serif;
+  --mono: Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b1433; --panel: #14214d; --ink: #eef1f8; --muted: #a9b3cc; --line: #2a3a6e;
+    --hit: #F3B324; --hit-soft: rgba(243,179,36,.18); --miss: #f07a63; --miss-soft: rgba(240,122,99,.16);
+    --zline: #8fb3ff; --mu: #eef1f8; --chip: #1c2b5c; --focus: #FADA92; --on-accent: #162860;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b1433; --panel: #14214d; --ink: #eef1f8; --muted: #a9b3cc; --line: #2a3a6e;
+  --hit: #F3B324; --hit-soft: rgba(243,179,36,.18); --miss: #f07a63; --miss-soft: rgba(240,122,99,.16);
+  --zline: #8fb3ff; --mu: #eef1f8; --chip: #1c2b5c; --focus: #FADA92; --on-accent: #162860;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 56px;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 1280px; margin: 0 auto; display: grid; gap: 28px; }
+header.brand {
+  margin-top: 20px; border-radius: 12px; padding: 26px clamp(18px, 3vw, 36px) 24px;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-deep) 100%); color: #ffffff;
+  display: grid; gap: 8px; border: 1px solid var(--line);
+}
+header.brand .bar { width: 52px; height: 4px; border-radius: 2px; background: var(--gold); }
+header.brand .course { font-size: 14px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); }
+header.brand h1 { color: #ffffff; }
+header.brand .meta { font-size: 14px; color: #b9c3dc; }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(30px, 4.2vw, 44px); line-height: 1.1; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--display); font-size: clamp(22px, 2.6vw, 28px); line-height: 1.2; margin: 0; text-wrap: balance; }
+h3 { font-family: var(--display); font-size: 18px; margin: 0; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+b.m, .mono { font-family: var(--mono); font-weight: 500; font-variant-numeric: tabular-nums; }
+.xb { display: inline-block; position: relative; font-weight: 700; font-style: italic; line-height: 1; padding: 0 .06em; }
+.xb::before { content: ""; position: absolute; left: .1em; right: .02em; top: .1em; height: .1em; min-height: 2px; border-radius: 1px; background: currentColor; }
+
+nav.stops {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg);
+  display: flex; gap: 6px; overflow-x: auto; padding-block: 10px; border-bottom: 1px solid var(--line);
+}
+nav.stops a {
+  flex: 0 0 auto; text-decoration: none; color: var(--ink); background: var(--chip); border: 1px solid var(--line);
+  border-radius: 999px; padding: 5px 12px; font-size: 14px; font-weight: 500; white-space: nowrap;
+}
+nav.stops a span { font-family: var(--mono); color: var(--hit); margin-right: 6px; }
+nav.stops a:hover { border-color: var(--hit); }
+
+section.stop { display: grid; gap: 14px; scroll-margin-top: 64px; }
+.stop-head { display: grid; gap: 4px; }
+.stop-num { font: 700 13px var(--body); color: var(--hit); letter-spacing: .14em; display: flex; align-items: center; gap: 10px; }
+.stop-num::before { content: ""; width: 28px; height: 3px; border-radius: 2px; background: var(--gold); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; min-width: 0; align-content: start; }
+.two { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 860px) { .two { grid-template-columns: 1fr; } }
+.problem .tag { display: inline-block; font: 600 12px var(--mono); background: var(--chip); border-radius: 4px; padding: 1px 6px; margin-right: 6px; }
+.big-claim { font-size: 21px; line-height: 1.4; max-width: 60ch; }
+.big-claim em { font-style: normal; background: var(--hit-soft); padding: 0 4px; border-radius: 4px; }
+.contrast { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.contrast.three { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 520px) { .contrast, .contrast.three { grid-template-columns: 1fr; } }
+.contrast div { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+.contrast div.on { border-color: var(--hit); background: var(--hit-soft); }
+.nc { text-transform: none; }
+.contrast .k { display: block; margin-bottom: 2px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; font-weight: 600; color: var(--muted); }
+
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button, .btn {
+  font: 600 15px var(--body); color: var(--ink); background: var(--chip); border: 1px solid var(--line);
+  border-radius: 7px; padding: 8px 12px; cursor: pointer; min-width: 52px;
+}
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+.btn.primary { background: var(--hit); color: var(--on-accent); border-color: var(--hit); }
+button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+button:hover { filter: brightness(1.06); }
+.btnrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+canvas { width: 100%; display: block; }
+
+.kv { display: grid; gap: 6px; font-variant-numeric: tabular-nums; }
+.kv div { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; border-bottom: 1px dashed var(--line); padding-bottom: 4px; }
+.kv div:last-child { border-bottom: 0; }
+.kv span:first-child { color: var(--muted); }
+.kv b { font: 500 17px var(--mono); }
+.xl { font: 14px var(--mono); background: var(--chip); border-radius: 6px; padding: 6px 8px; overflow-x: auto; white-space: nowrap; }
+.callout { border-left: 4px solid var(--hit); padding: 4px 0 4px 12px; }
+.ans { background: var(--hit-soft); border-radius: 8px; padding: 10px 12px; }
+.label { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.note { font-size: 14px; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 14px; color: var(--muted); }
+.legend i { display: inline-block; width: 22px; height: 4px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+.row { display: flex; align-items: center; gap: 10px; }
+input[type="range"] { flex: 1; accent-color: var(--hit); }
+.val { font: 600 20px var(--mono); min-width: 64px; text-align: right; font-variant-numeric: tabular-nums; }
+
+.bench { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 900px) { .bench { grid-template-columns: 1fr; } }
+.rail { display: grid; gap: 18px; }
+.group { display: grid; gap: 8px; }
+.draws { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.draws .btn { padding: 10px 6px; }
+.versus { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tile { background: var(--chip); border-radius: 8px; padding: 8px 12px; display: grid; border: 2px solid transparent; }
+.tile.sel { border-color: var(--hit); }
+.tile .num { font: 600 26px var(--display); font-variant-numeric: tabular-nums; line-height: 1.15; }
+.tile .cap { font-size: 13px; color: var(--muted); }
+.tile .num.bad { color: var(--miss); }
+kbd { font: 12px var(--mono); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--panel); }
+.stage-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; align-items: baseline; }
+
+.terms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 900px) { .terms { grid-template-columns: 1fr; } }
+.term .def { font-size: 15px; }
+.term .src { font-size: 12px; color: var(--muted); }
+
+.ttable { overflow-x: auto; }
+.ttable table { border-collapse: collapse; font-variant-numeric: tabular-nums; min-width: 460px; width: 100%; }
+.ttable th, .ttable td { border: 1px solid var(--line); padding: 6px 10px; text-align: center; font-family: var(--mono); font-size: 15px; }
+.ttable th { background: var(--chip); font-family: var(--body); font-size: 13px; }
+.ttable td.hl { background: var(--hit-soft); font-weight: 700; }
+
+.parts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.parts button { text-align: left; }
+@media (max-width: 520px) { .parts { grid-template-columns: 1fr 1fr; } }
+
+.formula { font-family: var(--mono); font-size: clamp(24px, 4vw, 40px); display: flex; flex-wrap: wrap; align-items: flex-start; gap: 4px 14px; padding-block: 8px; }
+.formula .part { display: grid; justify-items: center; gap: 6px; }
+.formula .sym { padding: 2px 8px; border-radius: 6px; }
+.formula .sym.a { background: var(--chip); }
+.formula .sym.b { background: var(--hit-soft); }
+.formula .lab { font: 500 13px var(--body); color: var(--muted); text-align: center; max-width: 18ch; }
+.frac { display: inline-grid; justify-items: center; line-height: 1.05; vertical-align: middle; }
+.frac .top { border-bottom: 2px solid currentColor; padding: 0 4px; }
+.cmp { overflow-x: auto; }
+.cmp table { border-collapse: collapse; width: 100%; min-width: 520px; }
+.cmp th, .cmp td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; font-size: 15px; }
+.cmp th { background: var(--chip); font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.cmp td.diff { background: var(--hit-soft); font-weight: 600; }
+
+.grid6 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 960px) { .grid6 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .grid6 { grid-template-columns: 1fr; } }
+.step { gap: 8px; }
+.step .n { font: 600 13px var(--mono); color: var(--hit); letter-spacing: .04em; }
+.math { font-size: 17px; font-variant-numeric: tabular-nums; }
+.math b { font-family: var(--mono); font-weight: 500; }
+.answer { font-size: 13px; font-weight: 600; color: var(--miss); text-transform: uppercase; letter-spacing: .06em; }
+.why { font-size: 14px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<style>
+.choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.choice { font: inherit; text-align: center; background: var(--panel); color: var(--ink); border: 2px solid var(--line); border-radius: 10px; padding: 12px; cursor: pointer; font-weight: 600; }
+.choice:hover { border-color: var(--hit); }
+.choice[aria-pressed="true"] { border-color: var(--hit); background: var(--hit-soft); }
+.hyp { font: 600 19px var(--mono); line-height: 1.5; }
+.feedback { border-radius: 8px; padding: 10px 12px; }
+.feedback.good { background: var(--hit-soft); }
+.feedback.bad { background: var(--miss-soft); }
+.steps-list { display: grid; gap: 10px; }
+.qstep { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 8px; background: var(--panel); }
+.qstep .q { font-weight: 600; }
+.qstep .n { font: 600 12px var(--mono); color: var(--hit); letter-spacing: .06em; }
+.qstep .btn { justify-self: start; }
+.stmt { font-size: 18px; }
+.fivestep { display: grid; gap: 8px; counter-reset: st; margin: 0; padding: 0; list-style: none; }
+.fivestep li { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: baseline; }
+.fivestep li::before { counter-increment: st; content: counter(st); font: 700 15px var(--mono); color: var(--on-accent); background: var(--hit); border-radius: 999px; width: 28px; height: 28px; display: grid; place-items: center; }
+.formula-big { font: 600 clamp(22px, 3.4vw, 32px) var(--mono); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.frac2 { display: inline-grid; justify-items: center; line-height: 1.15; }
+.frac2 .t { border-bottom: 2px solid currentColor; padding: 0 6px; }
+.verdict { font: 700 20px var(--display); border-radius: 8px; padding: 8px 12px; text-align: center; }
+.verdict.rej { background: var(--miss-soft); color: var(--miss); }
+.verdict.keep { background: var(--hit-soft); color: var(--hit); }
+.wrapx { overflow-x: auto; }
+table.rules { border-collapse: collapse; width: 100%; min-width: 560px; }
+table.rules th, table.rules td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; font-size: 15px; vertical-align: top; }
+table.rules th { background: var(--chip); font-size: 13px; color: var(--muted); }
+table.rules td.mono { font-family: var(--mono); font-size: 14px; }
+</style>
+
+<div class="wrap">
+  <header class="brand">
+    <div class="bar"></div>
+    <div class="course">BMGT 240IS · Business Analytics</div>
+    <h1>Airport Rating t Test Lab</h1>
+    <div class="meta">Ch 9.4 · Population mean, σ unknown · Fall 2026 · Montana State University</div>
+  </header>
+
+  <nav class="stops" aria-label="Lesson stops">
+    <a href="#why"><span>1</span>Why t, not z</a>
+    <a href="#heathrow"><span>2</span>Heathrow: upper tail</a>
+    <a href="#table"><span>3</span>Reading the t table</a>
+    <a href="#toys"><span>4</span>Holiday Toys: two-tailed</a>
+    <a href="#summary"><span>5</span>Rules &amp; Excel</a>
+    <a href="#q5"><span>6</span>Solve Question 5</a>
+  </nav>
+
+  <!-- 1 -->
+  <section class="stop" id="why">
+    <div class="stop-head"><div class="stop-num">STOP 1 · WHAT CHANGES WHEN σ IS UNKNOWN</div><h2>No σ? Use the sample's s, and switch from z to t</h2>
+      <p class="muted">In 9.3 we knew σ from past data (Hilltop's cans, MaxFlight's balls). Usually we don't. A new product or a new survey has no history, so we have to estimate the spread from the sample itself.</p></div>
+    <div class="two">
+      <div class="card">
+        <div class="label">The one change in the formula</div>
+        <p>Replace σ with the <b>sample standard deviation s</b>. Everything else stays the same.</p>
+        <div class="formula-big">t =<span class="frac2"><span class="t"><span class="xb">x</span> − μ<sub>0</sub></span><span>s / √n</span></span></div>
+        <p>Like z, t counts <b>how many standard errors</b> the sample mean is from μ<sub>0</sub>. It is called t because it follows the <b>t distribution</b>, not the standard normal.</p>
+        <div class="wrapx">
+          <table class="rules">
+            <thead><tr><th></th><th>σ known (9.3)</th><th>σ unknown (9.4)</th></tr></thead>
+            <tbody>
+              <tr><td>Spread we use</td><td>σ, from past data</td><td>s, from this sample</td></tr>
+              <tr><td>Test statistic</td><td>z = (x̄ − μ<sub>0</sub>) / (σ/√n)</td><td>t = (x̄ − μ<sub>0</sub>) / (s/√n)</td></tr>
+              <tr><td>Curve</td><td>standard normal</td><td>t with <b>n − 1</b> degrees of freedom</td></tr>
+              <tr><td>Table</td><td>z table: exact p-value</td><td>t table: only a <b>range</b> for the p-value</td></tr>
+              <tr><td>Excel p-value</td><td class="mono">NORM.S.DIST(z,TRUE)</td><td class="mono">T.DIST(t,df,TRUE)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">Textbook equation (9.2), Section 9.4.</p>
+      </div>
+      <div class="card">
+        <div class="row"><span class="label" style="min-width:150px">Degrees of freedom</span>
+          <div class="seg" role="group" aria-label="Degrees of freedom">
+            <button type="button" data-df="2">2</button><button type="button" data-df="5">5</button><button type="button" data-df="10">10</button><button type="button" data-df="24">24</button><button type="button" data-df="59">59</button>
+          </div></div>
+        <canvas id="wChart" aria-label="t curve compared with the standard normal curve"></canvas>
+        <div class="legend"><span><i style="background:var(--ink)"></i>t curve</span><span><i style="background:var(--muted)"></i>standard normal (z), dashed</span></div>
+        <div class="kv">
+          <div><span>Upper 5% cutoff, z</span><b>1.645</b></div>
+          <div><span>Upper 5% cutoff, t</span><b id="w-t">2.015</b></div>
+        </div>
+        <p class="ans" id="w-say"></p>
+      </div>
+    </div>
+    <div class="two">
+      <div class="card">
+        <div class="label">Why <span class="nc">t</span> has thicker tails, in plain English</div>
+        <p>s is itself an estimate: a different sample would give a different s. That extra uncertainty makes extreme t values a bit more common than extreme z values, so the t curve is <b>lower in the middle and thicker in the tails</b>.</p>
+        <p>Result: a sample has to land a little <b>farther out</b> before t calls it rare.</p>
+        <div class="label">Degrees of freedom: <span class="nc">df = n − 1</span></div>
+        <p>df tells you <b>which t curve</b> to use, and which row of the t table to read. Bigger samples give a better s, so the t curve gets closer to z. With 60 travelers, df = 59 and t is almost z.</p>
+      </div>
+      <div class="card">
+        <div class="label">Quick check · true or false?</div>
+        <div class="steps-list" id="tf"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="stop" id="heathrow">
+    <div class="stop-head"><div class="stop-num">STOP 2 · THE BOOK'S EXAMPLE · UPPER TAIL</div><h2>Is Heathrow a “superior service” airport?</h2></div>
+    <div class="two">
+      <div class="card">
+        <p>A business travel magazine rates transatlantic airports on a scale from <b>0 to 10</b>. An airport earns the label <b>superior service</b> only if the mean rating from <b>all</b> business travelers, μ, is <b>greater than 7</b>.</p>
+        <p>The magazine surveyed <b>60</b> business travelers at London's Heathrow Airport. There is no past data on how much ratings vary, so σ is unknown and the sample's s stands in for it.</p>
+        <p class="callout"><b>The question:</b> the sample averages 7.25, which is above 7. Is that enough evidence that the mean of <i>all</i> travelers is above 7, or could 60 people give 7.25 just by luck?</p>
+      </div>
+      <div class="card">
+        <div class="label">What we know</div>
+        <div class="kv">
+          <div><span>Cutoff for “superior”</span><b>7</b></div>
+          <div><span>Sample size, n</span><b>60 travelers</b></div>
+          <div><span>Sample mean, <span class="xb">x</span></span><b>7.25</b></div>
+          <div><span>Sample std. dev., s</span><b>1.052</b></div>
+          <div><span>Level of significance, α</span><b>0.05</b></div>
+          <div><span>Population std. dev., σ</span><b>unknown</b></div>
+        </div>
+        <p class="note">Data: the textbook's AirRating file.</p>
+      </div>
+    </div>
+    <div class="two">
+      <div class="card">
+        <div class="label">Step 1 · State the hypotheses</div>
+        <div class="qstep">
+          <p class="hyp">H<sub>0</sub>: μ ≤ 7</p>
+          <p>Heathrow's mean rating is <b>7 or less</b>. It does <b>not</b> earn the label.</p>
+        </div>
+        <div class="qstep">
+          <p class="hyp">H<sub>a</sub>: μ &gt; 7</p>
+          <p>Heathrow's mean rating is <b>above 7</b>. It is a superior service airport.</p>
+        </div>
+        <p>The magazine wants <b>evidence</b> before it hands out the label, so “superior” goes in H<sub>a</sub>. H<sub>0</sub> holds the equal sign. Because only a <b>high</b> rating counts as evidence, this is an <b>upper tail test</b>.</p>
+
+        <div class="label">Step 2 · Level of significance in plain English</div>
+        <p>α = 0.05 means: if Heathrow is really <b>not</b> superior, there's at most a <b>5% chance</b> (1 in 20) that the test wrongly awards it the label. That mistake is a Type I error. (“At most” because H<sub>0</sub> covers every mean up to 7. The risk is exactly 5% when μ = 7 and smaller below that.)</p>
+
+        <div class="label">Step 3 · Compute <span class="nc">t</span> and the degrees of freedom</div>
+        <p class="math">s/√n = 1.052/√60 = <b>0.1358</b> (one standard error)</p>
+        <div class="formula-big">t =<span class="frac2"><span class="t">7.25 − 7</span><span>0.1358</span></span>= 1.84</div>
+        <p class="math">df = n − 1 = 60 − 1 = <b>59</b></p>
+        <p>The sample mean sits <b>1.84 standard errors above</b> the cutoff of 7.</p>
+      </div>
+      <div class="card">
+        <div class="label">Step 4 · The p-value in plain English</div>
+        <p class="big-claim" style="font-size:19px">If Heathrow's true mean rating is exactly 7, <em>what's the chance that 60 travelers would average 7.25 or higher?</em></p>
+        <p>Upper tail test, so the p-value is the area to the <b>right</b> of t = 1.84 on the t curve with 59 df.</p>
+        <p class="hyp">t table: between .025 and .05<br>Excel: p-value = .0354</p>
+        <p>That is about <b>3.5 samples in every 100</b>. We did get such a sample, so either we hit a 3.5-in-100 stroke of luck, or Heathrow's mean really is above 7. Luck is the harder story to believe.</p>
+
+        <div class="label">Step 5 · Decide</div>
+        <p class="hyp">.0354 ≤ .05 → reject H<sub>0</sub></p>
+        <p><b>In words:</b> the evidence supports labeling Heathrow a superior service airport.</p>
+        <p class="callout">The t table alone was enough here: “between .025 and .05” is already ≤ .05, so we can reject without knowing the exact value.</p>
+
+        <div class="label">Same decision with the critical value</div>
+        <p>The t value with 0.05 in the upper tail and 59 df is t<sub>.05</sub> = <b>1.671</b>. Reject H<sub>0</sub> if t ≥ 1.671. Our t = 1.84 is beyond it, so <b>reject</b>.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="bench">
+        <div class="rail">
+          <div class="group">
+            <div class="row"><span class="label" style="min-width:120px">Sample mean <span class="xb" style="text-transform:none">x</span></span>
+              <input type="range" id="hx" min="6.90" max="7.60" step="0.01" value="7.25" aria-label="Sample mean rating for Heathrow"><span class="val" id="hx-v">7.25</span></div>
+            <p class="note">Keeps n = 60 and s = 1.052 fixed.</p>
+          </div>
+          <div class="kv">
+            <div><span>t = (x̄ − 7) / 0.1358</span><b id="h-t">1.84</b></div>
+            <div><span>t table range (59 df)</span><b id="h-r">.025 to .05</b></div>
+            <div><span>Exact p-value (Excel)</span><b id="h-p">0.035</b></div>
+            <div><span>Compare with α = 0.05</span><b id="h-c">0.035 ≤ 0.05</b></div>
+          </div>
+          <div class="verdict rej" id="h-v">Reject H₀</div>
+        </div>
+        <div class="group">
+          <canvas id="hChart" aria-label="t curve with 59 degrees of freedom and the upper-tail p-value shaded"></canvas>
+          <p class="ans" id="h-say"></p>
+          <p class="note">The shaded area <b>is</b> the p-value; the dashed line is the critical value 1.671. Drag x̄ down toward 7 and watch the area grow until it passes α.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="stop" id="table">
+    <div class="stop-head"><div class="stop-num">STOP 3 · READING THE <span class="nc">t</span> TABLE</div><h2>The t table gives a range for the p-value, not an exact number</h2>
+      <p class="muted">The t table lists only a few tail areas for each df, so most t values fall <b>between</b> two columns. That is good enough when the whole range is on one side of α.</p></div>
+    <div class="card">
+      <div class="label">Four steps</div>
+      <ol class="fivestep">
+        <li><span><b>Find the row</b> for your degrees of freedom, df = n − 1.</span></li>
+        <li><span><b>Find where |t| falls</b> between two values in that row. The table lists only positive t; the curve is symmetric, so use the size of t and ignore the sign.</span></li>
+        <li><span><b>Read the two tail areas above them.</b> That is the range for a one-tailed p-value.</span></li>
+        <li><span><b>Two-tailed test? Double both ends</b> of the range.</span></li>
+      </ol>
+    </div>
+    <div class="two">
+      <div class="card">
+        <div class="label">Heathrow · <span class="nc">t = 1.84, df = 59</span> · upper tail</div>
+        <div class="ttable"><table>
+          <thead><tr><th>Area in upper tail</th><th>.20</th><th>.10</th><th>.05</th><th>.025</th><th>.01</th><th>.005</th></tr></thead>
+          <tbody><tr><th>t value (59 df)</th><td>.848</td><td>1.296</td><td class="hl">1.671</td><td class="hl">2.001</td><td>2.391</td><td>2.662</td></tr></tbody>
+        </table></div>
+        <p>1.84 is between 1.671 and 2.001, so the upper tail area is <b>between .025 and .05</b>.</p>
+        <p class="hyp">.025 &lt; p-value &lt; .05</p>
+        <p>The largest the p-value could be is .05, so p ≤ α = .05: <b>reject H<sub>0</sub></b>.</p>
+      </div>
+      <div class="card">
+        <div class="label">Holiday Toys · <span class="nc">t = −1.10, df = 24</span> · two-tailed</div>
+        <div class="ttable"><table>
+          <thead><tr><th>Area in upper tail</th><th>.20</th><th>.10</th><th>.05</th><th>.025</th><th>.01</th><th>.005</th></tr></thead>
+          <tbody><tr><th>t value (24 df)</th><td class="hl">.857</td><td class="hl">1.318</td><td>1.711</td><td>2.064</td><td>2.492</td><td>2.797</td></tr></tbody>
+        </table></div>
+        <p>Use |t| = 1.10. It is between .857 and 1.318, so one tail is <b>between .10 and .20</b>. Two-tailed: double both ends.</p>
+        <p class="hyp">.20 &lt; p-value &lt; .40</p>
+        <p>The smallest the p-value could be is .20, which is &gt; α = .05: <b>do not reject H<sub>0</sub></b>.</p>
+      </div>
+    </div>
+    <p class="note">Rows from the textbook's Table 2, Appendix B, as printed in Section 9.4.</p>
+  </section>
+
+  <!-- 4 -->
+  <section class="stop" id="toys">
+    <div class="stop-head"><div class="stop-num">STOP 4 · THE BOOK'S EXAMPLE · TWO-TAILED</div><h2>Holiday Toys: will retailers order about 40 units?</h2></div>
+    <div class="two">
+      <div class="card">
+        <p>Holiday Toys sells through more than 1,000 stores. It must decide how many units of this year's big new toy to make <b>before</b> it knows real demand. The marketing director expects stores to order an average of <b>40 units</b> each.</p>
+        <p>To check, Holiday asks a sample of <b>25 retailers</b> how many they plan to order. It's a new product with no history, so σ is unknown and s is used.</p>
+        <div class="contrast">
+          <div><span class="k">Orders too low (<span class="nc">μ &lt; 40</span>)</span>Holiday would make too many and be stuck with unsold toys.</div>
+          <div><span class="k">Orders too high (<span class="nc">μ &gt; 40</span>)</span>Holiday would make too few and miss sales.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">What we know</div>
+        <div class="kv">
+          <div><span>Director's estimate</span><b>40 units</b></div>
+          <div><span>Sample size, n</span><b>25 retailers</b></div>
+          <div><span>Sample mean, <span class="xb">x</span></span><b>37.4</b></div>
+          <div><span>Sample std. dev., s</span><b>11.79</b></div>
+          <div><span>Level of significance, α</span><b>0.05</b></div>
+        </div>
+        <p class="callout"><b>The question:</b> 37.4 is 2.6 units below 40. Is the director's estimate wrong, or is that just the luck of which 25 stores answered?</p>
+        <p class="note">Data: the textbook's Orders file.</p>
+      </div>
+    </div>
+    <div class="two">
+      <div class="card">
+        <div class="label">Step 1 · State the hypotheses</div>
+        <div class="qstep">
+          <p class="hyp">H<sub>0</sub>: μ = 40</p>
+          <p>The director is right: stores will order <b>40 units</b> on average. Keep the production plan.</p>
+        </div>
+        <div class="qstep">
+          <p class="hyp">H<sub>a</sub>: μ ≠ 40</p>
+          <p>The average order is <b>not 40</b>, too low or too high. Rethink the production plan.</p>
+        </div>
+        <p>Either direction is a problem, so H<sub>a</sub> uses ≠ and this is a <b>two-tailed test</b>.</p>
+
+        <div class="label">Step 2 · Level of significance in plain English</div>
+        <p>Even if stores really average 40, 25 random stores won't average exactly 40. Now and then luck alone makes the test say “not 40.”</p>
+        <p>α = 0.05 means: if the true mean order really is 40, the test will wrongly say “rethink the plan” <b>5% of the time</b>, about 1 survey in 20. That false alarm is a Type I error.</p>
+
+        <div class="label">Step 3 · Check the shape, then compute <span class="nc">t</span></div>
+        <p>With only 25 stores, the t test needs a population that is roughly normal. The analyst drew a histogram of the 25 orders: <b>no strong skew and no extreme outliers</b>, so t with 24 df is fine.</p>
+        <p class="math">s/√n = 11.79/√25 = 11.79/5 = <b>2.358</b></p>
+        <div class="formula-big">t =<span class="frac2"><span class="t">37.4 − 40</span><span>2.358</span></span>= −1.10</div>
+        <p class="math">df = 25 − 1 = <b>24</b></p>
+        <p>The sample mean sits <b>1.10 standard errors below</b> 40.</p>
+      </div>
+      <div class="card">
+        <div class="label">Step 4 · The p-value in plain English</div>
+        <p class="big-claim" style="font-size:19px">If stores really average 40 units, <em>what's the chance that 25 stores would average at least 2.6 units away from 40, in either direction?</em></p>
+        <p>A sample at 42.6 would be just as much evidence against “40” as our 37.4, so the p-value counts <b>both tails</b>:</p>
+        <p class="hyp">t table: between .20 and .40<br>Excel: p-value = 2 × .1406 = .2811</p>
+        <p>That is about <b>28 samples in every 100</b>, more than 1 in 4. A gap like ours is <b>common</b> from luck alone, so it is not surprising.</p>
+
+        <div class="label">Step 5 · Decide</div>
+        <p class="hyp">.2811 &gt; .05 → do not reject H<sub>0</sub></p>
+        <p><b>In words:</b> there isn't enough evidence that the average order differs from 40, so Holiday keeps planning production around 40 units per store.</p>
+        <p class="callout">This does <b>not</b> prove the mean is exactly 40. The sample just can't rule it out.</p>
+
+        <div class="label">Same decision with critical values</div>
+        <p>Split α: 0.025 in each tail. With 24 df, ±t<sub>.025</sub> = <b>±2.064</b>. Reject H<sub>0</sub> if t ≤ −2.064 or t ≥ 2.064. Our t = −1.10 is between them, so <b>do not reject</b>.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="bench">
+        <div class="rail">
+          <div class="group">
+            <div class="row"><span class="label" style="min-width:120px">Sample mean <span class="xb" style="text-transform:none">x</span></span>
+              <input type="range" id="tx" min="33" max="47" step="0.1" value="37.4" aria-label="Sample mean order quantity"><span class="val" id="tx-v">37.4</span></div>
+            <p class="note">Keeps n = 25 and s = 11.79 fixed.</p>
+          </div>
+          <div class="kv">
+            <div><span>t = (x̄ − 40) / 2.358</span><b id="t-t">−1.10</b></div>
+            <div><span>t table range (24 df)</span><b id="t-r">.20 to .40</b></div>
+            <div><span>Exact p-value (Excel)</span><b id="t-p">0.281</b></div>
+            <div><span>Compare with α = 0.05</span><b id="t-c">0.281 &gt; 0.05</b></div>
+          </div>
+          <div class="verdict keep" id="t-v">Do not reject H₀</div>
+        </div>
+        <div class="group">
+          <canvas id="tChart" aria-label="t curve with 24 degrees of freedom and both tails shaded for the two-tailed p-value"></canvas>
+          <p class="ans" id="t-say"></p>
+          <p class="note">Both shaded tails together <b>are</b> the p-value; the dashed lines are ±2.064. Drag x̄ below about 35.1 or above 44.9 to see H<sub>0</sub> rejected.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="stop" id="summary">
+    <div class="stop-head"><div class="stop-num">STOP 5 · SUMMARY</div><h2>The t test on one page</h2></div>
+    <div class="card wrapx">
+      <table class="rules">
+        <thead><tr><th></th><th>Lower tail</th><th>Upper tail</th><th>Two-tailed</th></tr></thead>
+        <tbody>
+          <tr><td>Hypotheses</td><td>H<sub>0</sub>: μ ≥ μ<sub>0</sub><br>H<sub>a</sub>: μ &lt; μ<sub>0</sub></td><td>H<sub>0</sub>: μ ≤ μ<sub>0</sub><br>H<sub>a</sub>: μ &gt; μ<sub>0</sub></td><td>H<sub>0</sub>: μ = μ<sub>0</sub><br>H<sub>a</sub>: μ ≠ μ<sub>0</sub></td></tr>
+          <tr><td>Test statistic</td><td colspan="3" style="text-align:center">t = (x̄ − μ<sub>0</sub>) / (s/√n), with df = n − 1</td></tr>
+          <tr><td>p-value</td><td>area to the left of t</td><td>area to the right of t</td><td>2 × area beyond |t|</td></tr>
+          <tr><td>Reject H<sub>0</sub> (p-value)</td><td colspan="3" style="text-align:center">if p-value ≤ α</td></tr>
+          <tr><td>Reject H<sub>0</sub> (critical value)</td><td>if t ≤ −t<sub>α</sub></td><td>if t ≥ t<sub>α</sub></td><td>if t ≤ −t<sub>α/2</sub> or t ≥ t<sub>α/2</sub></td></tr>
+          <tr><td>Excel p-value (book's method)</td><td class="mono">=T.DIST(t,df,TRUE)</td><td class="mono">=1-T.DIST(t,df,TRUE)</td><td class="mono">=2*MIN(lower,upper)</td></tr>
+          <tr><td>Excel critical value</td><td class="mono">=T.INV(α,df)</td><td class="mono">=T.INV(1-α,df)</td><td class="mono">=T.INV(1-α/2,df)</td></tr>
+        </tbody>
+      </table>
+      <p class="note">s in Excel: <span class="mono">=STDEV.S(range)</span>. The textbook's Orders file has a ready-made Template sheet for this test.</p>
+    </div>
+    <div class="two">
+      <div class="card">
+        <div class="label">When is the <span class="nc">t</span> test safe to use?</div>
+        <ul style="margin:0;padding-left:20px;display:grid;gap:4px">
+          <li>Population roughly <b>normal</b>: any sample size works; even n &lt; 15 can be fine.</li>
+          <li>Not normal: <b>n ≥ 30</b> gives good results in most cases.</li>
+          <li>Highly <b>skewed or with outliers</b>: aim for n close to <b>50</b>.</li>
+        </ul>
+        <p class="note">Textbook Section 9.4, Summary and Practical Advice.</p>
+      </div>
+      <div class="card">
+        <div class="label"><span class="nc">z</span> or <span class="nc">t</span>? Ask one question</div>
+        <p class="stmt">Does the problem give the <b>population</b> standard deviation σ?</p>
+        <div class="contrast">
+          <div><span class="k">Yes: <span class="nc">σ</span> is given</span>z test (9.3). Look for “population standard deviation is…”</div>
+          <div class="on"><span class="k">No: only <span class="nc">s</span></span>t test (9.4). Look for “sample standard deviation s = …”</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="stop" id="q5">
+    <div class="stop-head"><div class="stop-num">STOP 6 · APPLY · ASSIGNMENT QUESTION 5</div><h2>Question 5: commit first, then work it through</h2></div>
+    <div class="two">
+      <div class="card problem">
+        <p>Consider the following hypothesis test:</p>
+        <p class="hyp">H<sub>0</sub>: μ ≤ 12<br>H<sub>a</sub>: μ &gt; 12</p>
+        <p>A sample of <b>25</b> provided a sample mean x̄ = <b>14</b> and a sample standard deviation s = <b>4.32</b>.</p>
+        <p>(a) Compute the value of the test statistic. (b) Use the t distribution table (Table 2 in online Appendix B) to compute a range for the p-value. (c) At α = 0.05, what is your conclusion? (d) What is the rejection rule using the critical value? What is your conclusion?</p>
+      </div>
+      <div class="card" id="guess">
+        <p class="stmt">Warm-up: the problem gives <b>s</b>, not σ. Which test is this?</p>
+        <div class="choices" role="group" aria-label="Prediction">
+          <button type="button" class="choice" data-v="z">z test (σ known)</button>
+          <button type="button" class="choice" data-v="t">t test (σ unknown)</button>
+        </div>
+        <p class="note" id="guess-msg"></p>
+      </div>
+    </div>
+    <p class="muted">Answer each step on paper before you reveal it.</p>
+    <div class="steps-list" id="q5-steps"></div>
+  </section>
+</div>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  let store = null; try { store = window.localStorage; } catch (e) {}
+  const save = (k, v) => { try { store && store.setItem(k, v); } catch (e) {} };
+  const load = k => { try { return store ? store.getItem(k) : null; } catch (e) { return null; } };
+  const tok = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const f2 = v => (v < 0 ? "−" : "") + Math.abs(v).toFixed(2), f3 = v => v.toFixed(3);
+
+  // t distribution via the regularized incomplete beta function (Numerical Recipes 6.4)
+  function lgamma(x) {
+    const c = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+    if (x < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * x)) - lgamma(1 - x);
+    x -= 1; let a = c[0]; const t = x + 7.5; for (let i = 1; i < 9; i++) a += c[i] / (x + i);
+    return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(a);
+  }
+  function betacf(a, b, x) {
+    const TINY = 1e-300; let c = 1, d = 1 - (a + b) * x / (a + 1); if (Math.abs(d) < TINY) d = TINY; d = 1 / d; let h = d;
+    for (let m = 1; m <= 300; m++) {
+      const m2 = 2 * m; let aa = m * (b - m) * x / ((a - 1 + m2) * (a + m2));
+      d = 1 + aa * d; if (Math.abs(d) < TINY) d = TINY; c = 1 + aa / c; if (Math.abs(c) < TINY) c = TINY; d = 1 / d; h *= d * c;
+      aa = -(a + m) * (a + b + m) * x / ((a + m2) * (a + 1 + m2));
+      d = 1 + aa * d; if (Math.abs(d) < TINY) d = TINY; c = 1 + aa / c; if (Math.abs(c) < TINY) c = TINY; d = 1 / d;
+      const del = d * c; h *= del; if (Math.abs(del - 1) < 3e-14) break;
+    }
+    return h;
+  }
+  function ibeta(a, b, x) {
+    if (x <= 0) return 0; if (x >= 1) return 1;
+    const bt = Math.exp(lgamma(a + b) - lgamma(a) - lgamma(b) + a * Math.log(x) + b * Math.log(1 - x));
+    return x < (a + 1) / (a + b + 2) ? bt * betacf(a, b, x) / a : 1 - bt * betacf(b, a, 1 - x) / b;
+  }
+  const tCdf = (t, v) => { const tail = 0.5 * ibeta(v / 2, 0.5, v / (v + t * t)); return t >= 0 ? 1 - tail : tail; };
+  const tPdf = (t, v) => Math.exp(lgamma((v + 1) / 2) - lgamma(v / 2) - ((v + 1) / 2) * Math.log(1 + t * t / v)) / Math.sqrt(v * Math.PI);
+  const zPdf = z => Math.exp(-z * z / 2) / Math.sqrt(2 * Math.PI);
+  function tInv(p, v) { let lo = -60, hi = 60; for (let i = 0; i < 90; i++) { const m = (lo + hi) / 2; tCdf(m, v) < p ? lo = m : hi = m; } return (lo + hi) / 2; }
+
+  // book's Table 2 rows (Section 9.4); returns the one-tailed range for |t|
+  const AREAS = [".20", ".10", ".05", ".025", ".01", ".005"];
+  const ROWS = { 59: [0.848, 1.296, 1.671, 2.001, 2.391, 2.662], 24: [0.857, 1.318, 1.711, 2.064, 2.492, 2.797] };
+  function tableRange(t, df, twoTail) {
+    const a = Math.abs(t), row = ROWS[df], A = twoTail ? [".40", ".20", ".10", ".05", ".02", ".01"] : AREAS;
+    if (a < row[0]) return "greater than " + A[0];
+    for (let i = 1; i < row.length; i++) if (a < row[i]) return A[i] + " to " + A[i - 1];
+    return "less than " + A[A.length - 1];
+  }
+
+  // draws a t curve (optionally with the z curve dashed); shade = [[a,b],...]; marks = [{x,label,color,dash}]
+  function drawT(cv, df, shade, marks, withZ) {
+    const dpr = window.devicePixelRatio || 1, W = cv.clientWidth, H = 220;
+    cv.style.height = H + "px"; cv.width = W * dpr; cv.height = H * dpr;
+    const ctx = cv.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+    const L = 24, R = W - 12, base = H - 34, top = 44, half = 4, peak = zPdf(0);
+    const x = v => L + (Math.max(-half, Math.min(half, v)) + half) / (2 * half) * (R - L), y = d => base - d / peak * (base - top);
+    shade.forEach(([a, b]) => { a = Math.max(a, -half); b = Math.min(b, half); if (b <= a) return;
+      ctx.beginPath(); ctx.moveTo(x(a), base); for (let v = a; v <= b; v += 0.02) ctx.lineTo(x(v), y(tPdf(v, df))); ctx.lineTo(x(b), y(tPdf(b, df))); ctx.lineTo(x(b), base); ctx.closePath(); ctx.fillStyle = tok("--miss-soft"); ctx.fill(); });
+    if (withZ) { ctx.beginPath(); for (let v = -half, f = true; v <= half; v += 0.02, f = false) f ? ctx.moveTo(x(v), y(zPdf(v))) : ctx.lineTo(x(v), y(zPdf(v)));
+      ctx.strokeStyle = tok("--muted"); ctx.lineWidth = 1.6; ctx.setLineDash([6, 5]); ctx.stroke(); ctx.setLineDash([]); }
+    ctx.beginPath(); for (let v = -half, f = true; v <= half; v += 0.02, f = false) f ? ctx.moveTo(x(v), y(tPdf(v, df))) : ctx.lineTo(x(v), y(tPdf(v, df)));
+    ctx.strokeStyle = tok("--ink"); ctx.lineWidth = 1.8; ctx.stroke();
+    ctx.strokeStyle = tok("--line"); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(L, base); ctx.lineTo(R, base); ctx.stroke();
+    ctx.font = "12px " + tok("--mono"); ctx.textAlign = "center"; ctx.fillStyle = tok("--muted");
+    for (let k = -4; k <= 4; k++) { if (marks.some(m => !m.dash && Math.abs(m.x - k) < 0.35)) continue; ctx.fillText(k, x(k), base + 16); }
+    marks.forEach((m, i) => {
+      ctx.strokeStyle = m.color; ctx.lineWidth = m.dash ? 1.8 : 2.6; ctx.setLineDash(m.dash ? [5, 4] : []);
+      ctx.beginPath(); ctx.moveTo(x(m.x), base + 2); ctx.lineTo(x(m.x), top - 22 + i * 14); ctx.stroke(); ctx.setLineDash([]);
+      // a nearby mark would collide: push this label away from it
+      const near = marks.find(o => o !== m && Math.abs(o.x - m.x) < 0.9), side = near ? (m.x <= near.x ? -1 : 1) : 0;
+      ctx.fillStyle = m.color; ctx.font = "600 12px " + tok("--body"); ctx.textAlign = side < 0 ? "right" : side > 0 ? "left" : "center";
+      ctx.fillText(m.label, x(m.x) + side * 5, top - 26 + i * 14); ctx.textAlign = "center";
+      if (!m.dash) { ctx.font = "600 12px " + tok("--mono"); ctx.fillText(f2(m.x), x(m.x), base + 16); }
+    });
+    ctx.fillStyle = tok("--muted"); ctx.font = "12px " + tok("--body"); ctx.fillText("t", R - 6, base + 28);
+  }
+
+  // ---------- Stop 1: t vs z ----------
+  let wDf = 5;
+  function why() {
+    const tc = tInv(0.95, wDf);
+    document.querySelectorAll("[data-df]").forEach(b => b.setAttribute("aria-pressed", +b.dataset.df === wDf));
+    $("w-t").textContent = f3(tc);
+    $("w-say").innerHTML = "<b>In words:</b> with " + wDf + " df (a sample of " + (wDf + 1) + "), t must reach <b>" + f3(tc) + "</b> to land in the top 5%, compared with 1.645 for z. "
+      + (wDf >= 24 ? "With this many observations, t is already close to z." : "Small samples need a sample mean farther out before it counts as rare.");
+    drawT($("wChart"), wDf, [[tc, 4]], [{ x: 1.645, label: "z: 1.645", color: tok("--muted"), dash: true }, { x: tc, label: "t: " + f3(tc), color: tok("--miss"), dash: true }], true);
+  }
+  document.querySelectorAll("[data-df]").forEach(b => b.addEventListener("click", () => { wDf = +b.dataset.df; why(); }));
+
+  const TF = [
+    ["When σ is unknown, we use s and the t distribution.", true, "True. s estimates σ, and the test statistic follows the t distribution with n − 1 df."],
+    ["For a sample of 25, the degrees of freedom are 25.", false, "False. df = n − 1 = 24."],
+    ["The t curve has thinner tails than the standard normal curve.", false, "False. Using s adds uncertainty, so t has thicker tails."],
+    ["The t table usually gives only a range for the p-value.", true, "True. Excel's T.DIST gives the exact value."],
+  ];
+  $("tf").innerHTML = TF.map((t, i) => '<div class="qstep"><p class="q">' + t[0] + '</p><div class="btnrow"><button type="button" class="btn" data-tf="' + i + '" data-v="1">True</button><button type="button" class="btn" data-tf="' + i + '" data-v="0">False</button></div><div class="feedback" hidden></div></div>').join("");
+  $("tf").querySelectorAll("[data-tf]").forEach(b => b.addEventListener("click", () => {
+    const t = TF[+b.dataset.tf], right = (b.dataset.v === "1") === t[1], fb = b.parentElement.nextElementSibling;
+    fb.hidden = false; fb.className = "feedback " + (right ? "good" : "bad"); fb.textContent = (right ? "Yes. " : "Not quite. ") + t[2];
+  }));
+
+  // ---------- Stop 2: Heathrow (upper tail, df 59) ----------
+  function heathrow() {
+    const xb = +$("hx").value, se = 1.052 / Math.sqrt(60), t = (xb - 7) / se, p = 1 - tCdf(t, 59), rej = p <= 0.05;
+    $("hx-v").textContent = xb.toFixed(2); $("h-t").textContent = f2(t); $("h-r").textContent = t < 0 ? "greater than .20" : tableRange(t, 59, false);
+    $("h-p").textContent = f3(p); $("h-c").textContent = f3(p) + (rej ? " ≤ " : " > ") + "0.05";
+    $("h-v").textContent = rej ? "Reject H₀: Heathrow is superior" : "Do not reject H₀: no “superior” label";
+    $("h-v").className = "verdict " + (rej ? "rej" : "keep");
+    $("h-say").innerHTML = "<b>In words:</b> if Heathrow's true mean rating is 7, about <b>" + (p * 100).toFixed(1) + "%</b> of samples of 60 travelers would average "
+      + xb.toFixed(2) + " or higher. " + (rej ? "That is rarer than α = 1 in 20, so the sample is strong evidence the mean is above 7." : "That is not rare enough to beat α = 1 in 20, so there isn't enough evidence the mean is above 7.");
+    drawT($("hChart"), 59, [[t, 4]], [{ x: 1.671, label: "t.05 = 1.671", color: tok("--miss"), dash: true }, { x: t, label: "test statistic", color: tok("--hit") }]);
+  }
+  $("hx").addEventListener("input", heathrow);
+
+  // ---------- Stop 4: Holiday Toys (two-tailed, df 24) ----------
+  function toys() {
+    const xb = +$("tx").value, se = 11.79 / Math.sqrt(25), t = (xb - 40) / se, p = 2 * Math.min(tCdf(t, 24), 1 - tCdf(t, 24)), rej = p <= 0.05;
+    $("tx-v").textContent = xb.toFixed(1); $("t-t").textContent = f2(t); $("t-r").textContent = tableRange(t, 24, true);
+    $("t-p").textContent = f3(p); $("t-c").textContent = f3(p) + (rej ? " ≤ " : " > ") + "0.05";
+    $("t-v").textContent = rej ? "Reject H₀: rethink the production plan" : "Do not reject H₀: keep planning on 40";
+    $("t-v").className = "verdict " + (rej ? "rej" : "keep");
+    $("t-say").innerHTML = "<b>In words:</b> if stores really average 40 units, about <b>" + (p * 100).toFixed(1) + "%</b> of samples of 25 stores would land at least "
+      + Math.abs(xb - 40).toFixed(1) + " units away from 40, too low or too high. " + (rej ? "That is rarer than α = 1 in 20, so the sample is strong evidence the mean is not 40." : "That is not rare enough to beat α = 1 in 20, so there isn't enough evidence the mean differs from 40.");
+    const a = Math.abs(t);
+    drawT($("tChart"), 24, [[-4, -a], [a, 4]], [{ x: -2.064, label: "−2.064", color: tok("--miss"), dash: true }, { x: 2.064, label: "+2.064", color: tok("--miss"), dash: true }, { x: t, label: "test statistic", color: tok("--hit") }]);
+  }
+  $("tx").addEventListener("input", toys);
+
+  // ---------- Stop 6: Question 5 ----------
+  let guess = load("ht94-guess");
+  const paintGuess = () => {
+    document.querySelectorAll("#guess .choice").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === guess));
+    $("guess-msg").textContent = guess === "t" ? "Right: only s is given, so σ is unknown. Use t with df = 24."
+      : guess === "z" ? "Not quite. 4.32 is the sample standard deviation s, not σ. When only s is given, use t." : "Pick one before you start.";
+  };
+  document.querySelectorAll("#guess .choice").forEach(b => b.addEventListener("click", () => { guess = b.dataset.v; save("ht94-guess", guess); paintGuess(); }));
+  paintGuess();
+  const STEPS = [
+    { q: "Which kind of test is this, and how many degrees of freedom?", a: "Only s is given, so σ is unknown: a <b>t test</b>. Hₐ: μ &gt; 12, so it is an <b>upper tail</b> test. df = n − 1 = 25 − 1 = <b>24</b>." },
+    { q: "(a) Compute the value of the test statistic.", a: "Standard error s/√n = 4.32/√25 = 4.32/5 = 0.864. t = (14 − 12)/0.864 = 2/0.864 = <b>2.31</b>. The sample mean is 2.31 standard errors above 12." },
+    { q: "(b) Use the t table to compute a range for the p-value.", a: "Row for 24 df: 2.064 (area .025) &lt; 2.31 &lt; 2.492 (area .01). Upper tail test, so <b>.01 &lt; p-value &lt; .025</b>. Excel: <span class=\"mono\">=1-T.DIST(2.31,24,TRUE)</span> = 0.0149 (0.0147 with the unrounded t)." },
+    { q: "(c) At α = 0.05, what is your conclusion?", a: "Even the largest possible p-value, .025, is ≤ .05, so <b>reject H₀</b>. There is enough evidence to conclude that μ &gt; 12." },
+    { q: "(d) What is the rejection rule using the critical value? What is your conclusion?", a: "Upper tail, α = .05, 24 df: t<sub>.05</sub> = <b>1.711</b>. Reject H₀ if t ≥ 1.711. Since t = 2.31 ≥ 1.711, <b>reject H₀</b>, the same decision as the p-value approach. Excel: <span class=\"mono\">=T.INV(0.95,24)</span>." },
+  ];
+  $("q5-steps").innerHTML = STEPS.map((s, i) => '<div class="qstep"><span class="n">STEP ' + (i + 1) + '</span><p class="q">' + s.q + '</p><button type="button" class="btn" aria-expanded="false">Reveal</button><div class="ans" hidden>' + s.a + "</div></div>").join("");
+  $("q5-steps").querySelectorAll(".qstep .btn").forEach(b => b.addEventListener("click", () => {
+    const a = b.nextElementSibling, open = a.hidden; a.hidden = !open; b.setAttribute("aria-expanded", open); b.textContent = open ? "Hide" : "Reveal";
+  }));
+
+  function drawAll() { why(); heathrow(); toys(); }
+  drawAll();
+  let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(drawAll, 80); });
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawAll);
+  new MutationObserver(drawAll).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+})();
+</script>
+
+</body>
+</html>

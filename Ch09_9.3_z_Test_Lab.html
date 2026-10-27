@@ -96,10 +96,12 @@ section.stop { display: grid; gap: 14px; scroll-margin-top: 64px; }
 .big-claim { font-size: 21px; line-height: 1.4; max-width: 60ch; }
 .big-claim em { font-style: normal; background: var(--hit-soft); padding: 0 4px; border-radius: 4px; }
 .contrast { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-@media (max-width: 520px) { .contrast { grid-template-columns: 1fr; } }
-.contrast div { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 2px; }
+.contrast.three { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 520px) { .contrast, .contrast.three { grid-template-columns: 1fr; } }
+.contrast div { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
 .contrast div.on { border-color: var(--hit); background: var(--hit-soft); }
-.contrast .k { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; font-weight: 600; color: var(--muted); }
+.nc { text-transform: none; }
+.contrast .k { display: block; margin-bottom: 2px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; font-weight: 600; color: var(--muted); }
 
 .seg { display: flex; flex-wrap: wrap; gap: 6px; }
 .seg button, .btn {
@@ -226,30 +228,171 @@ table.rules td.mono { font-family: var(--mono); font-size: 14px; }
   </header>
 
   <nav class="stops" aria-label="Lesson stops">
-    <a href="#define"><span>1</span>The key terms</a>
-    <a href="#steps"><span>2</span>The test, step by step</a>
-    <a href="#approaches"><span>3</span>p-value vs. critical value</a>
-    <a href="#twotail"><span>4</span>Two-tailed test</a>
-    <a href="#summary"><span>5</span>Rules &amp; Excel</a>
-    <a href="#q3"><span>6</span>Solve Question 3</a>
+    <a href="#coffee"><span>1</span>The coffee question</a>
+    <a href="#hyp"><span>2</span>State H₀ and Hₐ</a>
+    <a href="#alpha"><span>3</span>Level of significance</a>
+    <a href="#pvalue"><span>4</span>The p-value</a>
+    <a href="#define"><span>5</span>Name the terms</a>
+    <a href="#approaches"><span>6</span>p-value vs. critical value</a>
+    <a href="#twotail"><span>7</span>Two-tailed test</a>
+    <a href="#summary"><span>8</span>Rules &amp; Excel</a>
+    <a href="#q3"><span>9</span>Solve Question 3</a>
   </nav>
 
   <!-- 1 -->
+  <section class="stop" id="coffee">
+    <div class="stop-head"><div class="stop-num">STOP 1 · THE BOOK'S EXAMPLE · HILLTOP COFFEE</div><h2>Is Hilltop Coffee underfilling its cans?</h2></div>
+    <div class="two">
+      <div class="card">
+        <p>Every can of Hilltop Coffee says it holds <b>3 pounds</b>. The Federal Trade Commission (FTC) checks claims like this.</p>
+        <p>No filling machine is perfect: some cans come out a little heavy, some a little light. The FTC does not care about one can. It cares about the <b>average weight of all the cans Hilltop fills</b>, which is the population mean <b>μ</b>.</p>
+        <p>The FTC can't weigh every can, so it weighs a sample of 36.</p>
+        <p class="callout"><b>The question:</b> the sample averages 2.92 pounds, which is below 3. Is that just luck in which 36 cans were picked, or is it evidence that the average of <i>all</i> cans is below 3?</p>
+      </div>
+      <div class="card">
+        <div class="label">What we know</div>
+        <div class="kv">
+          <div><span>Label claim</span><b>3 lb</b></div>
+          <div><span>Sample size, n</span><b>36 cans</b></div>
+          <div><span>Population std. dev., σ (from past tests)</span><b>0.18 lb</b></div>
+          <div><span>Shape of fill weights</span><b>normal</b></div>
+          <div><span>Sample mean, <span class="xb">x</span></span><b>2.92 lb</b></div>
+        </div>
+        <div class="label">We answer it in four moves</div>
+        <ol class="fivestep">
+          <li><span><b>State the hypotheses</b> H<sub>0</sub> and H<sub>a</sub> (Stop 2).</span></li>
+          <li><span><b>Choose the level of significance</b> α (Stop 3).</span></li>
+          <li><span><b>Measure the evidence:</b> the test statistic z and the p-value (Stop 4).</span></li>
+          <li><span><b>Decide:</b> reject H<sub>0</sub> if the p-value ≤ α (Stop 4).</span></li>
+        </ol>
+        <p class="note">In practice, moves 1 and 2 are decided <b>before</b> anyone weighs a can.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="stop" id="hyp">
+    <div class="stop-head"><div class="stop-num">STOP 2 · STATE THE HYPOTHESES</div><h2>H<sub>0</sub>: Hilltop is honest until the sample says otherwise</h2></div>
+    <div class="two">
+      <div class="card">
+        <div class="label">The hypotheses, in symbols and in words</div>
+        <div class="qstep">
+          <p class="hyp">H<sub>0</sub>: μ ≥ 3</p>
+          <p>On average, Hilltop's cans hold <b>at least 3 pounds</b>. The label is honest.</p>
+        </div>
+        <div class="qstep">
+          <p class="hyp">H<sub>a</sub>: μ &lt; 3</p>
+          <p>On average, the cans hold <b>less than 3 pounds</b>. Hilltop is underfilling.</p>
+        </div>
+        <p>Hilltop gets the benefit of the doubt, just like a defendant in court. We <b>assume H<sub>0</sub> is true</b> and reject it only if the sample gives strong evidence against it. H<sub>a</sub> is what the FTC would have to show before it takes action.</p>
+      </div>
+      <div class="card">
+        <div class="label">Three rules for writing H<sub>0</sub></div>
+        <ol class="fivestep">
+          <li><span><b>H<sub>0</sub> is about μ, never about x̄.</b> We already know x̄ = 2.92, so there's nothing to test about it. The unknown is the mean of <i>all</i> cans.</span></li>
+          <li><span><b>H<sub>0</sub> always holds the equal sign:</b> =, ≥, or ≤. H<sub>a</sub> gets the strict sign: &lt;, &gt;, or ≠.</span></li>
+          <li><span><b>H<sub>a</sub> is the claim that needs evidence.</b> The FTC needs evidence of underfilling, so μ &lt; 3 goes in H<sub>a</sub>.</span></li>
+        </ol>
+        <div class="contrast">
+          <div class="on"><span class="k">If we reject H<sub>0</sub></span>The FTC has evidence that the cans average less than 3 lb and can act against Hilltop.</div>
+          <div><span class="k">If we do not reject H<sub>0</sub></span>There isn't enough evidence of underfilling. This does <b>not</b> prove the cans are full. The sample just couldn't show otherwise.</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="label">Quick check · which H<sub>0</sub> is stated correctly?</div>
+      <div class="choices" role="group" aria-label="Pick the correct null hypothesis" id="h0check">
+        <button type="button" class="choice" data-h0="0">H₀: μ ≥ 3</button>
+        <button type="button" class="choice" data-h0="1">H₀: x̄ ≥ 3</button>
+        <button type="button" class="choice" data-h0="2">H₀: μ &lt; 3</button>
+        <button type="button" class="choice" data-h0="3">H₀: μ ≥ 2.92</button>
+      </div>
+      <div class="feedback" id="h0-msg" hidden></div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="stop" id="alpha">
+    <div class="stop-head"><div class="stop-num">STOP 3 · CHOOSE THE LEVEL OF SIGNIFICANCE</div><h2>α: how much risk of a false accusation will we accept?</h2></div>
+    <div class="two">
+      <div class="card">
+        <div class="label"><span class="nc">α = 0.01</span> in plain English</div>
+        <p class="big-claim">If Hilltop is filling its cans correctly, there's <em>at most a 1% chance that our test wrongly accuses them</em> of underfilling.</p>
+        <p>Imagine the FTC running this test 100 times, each time with 36 new cans from an <b>honest</b> Hilltop. Just by bad luck, a few samples will come out light. With α = 0.01, at most about <b>1 of those 100 tests</b> would wrongly conclude “underfilling.”</p>
+        <p>Rejecting H<sub>0</sub> when it is actually true is a <b>Type I error</b>. α is the probability of a Type I error that we are willing to accept. It is figured at μ = 3, the edge of H<sub>0</sub>. If the cans actually average more than 3 pounds, the risk is even smaller.</p>
+      </div>
+      <div class="card">
+        <div class="label">Who picks <span class="nc">α</span>, and when?</div>
+        <p>The decision maker picks α <b>before</b> looking at the data. The FTC director chose 0.01 because falsely accusing a company is serious and could mean fines or a lawsuit against a firm that did nothing wrong.</p>
+        <div class="contrast three">
+          <div><span class="k"><span class="nc">α = 0.10</span></span>willing to be wrong 1 time in 10</div>
+          <div><span class="k"><span class="nc">α = 0.05</span></span>1 time in 20 (the most common choice)</div>
+          <div class="on"><span class="k"><span class="nc">α = 0.01</span> · Hilltop</span>1 time in 100</div>
+        </div>
+        <p class="callout">A smaller α makes it harder to reject H<sub>0</sub>, so it takes <b>stronger evidence</b> to accuse Hilltop.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="stop" id="pvalue">
+    <div class="stop-head"><div class="stop-num">STOP 4 · MEASURE THE EVIDENCE AND DECIDE</div><h2>The p-value: how surprising is 2.92 if Hilltop is honest?</h2></div>
+    <div class="two">
+      <div class="card">
+        <div class="label">Step A · How far below 3 is 2.92?</div>
+        <p>The raw gap (0.08 lb) means little by itself. We measure it in <b>standard errors</b>, the typical amount a 36-can average moves around just by chance.</p>
+        <p class="math">σ/√n = 0.18/√36 = 0.18/6 = <b>0.03 lb</b></p>
+        <div class="formula-big">z =<span class="frac2"><span class="t">2.92 − 3</span><span>0.03</span></span>= −2.67</div>
+        <p>The sample mean sits <b>2.67 standard errors below 3</b>. This z is the <b>test statistic</b>.</p>
+
+        <div class="label">Step B · The p-value in plain English</div>
+        <p class="big-claim" style="font-size:19px">The p-value answers one question: <em>if Hilltop's cans really average 3 pounds, what is the chance that 36 randomly chosen cans would average 2.92 pounds or less?</em></p>
+        <p class="hyp">p-value = P(z ≤ −2.67) = 0.0038</p>
+        <p>That is about <b>4 samples in every 1,000</b>. But we actually got such a sample. So there are only two explanations:</p>
+        <div class="contrast">
+          <div><span class="k">Explanation 1</span>Hilltop is honest, and the FTC hit a 4-in-1,000 stroke of bad luck.</div>
+          <div class="on"><span class="k">Explanation 2</span>Hilltop is not honest: the cans really average less than 3 pounds.</div>
+        </div>
+        <p>Explanation 2 is far easier to believe, so the sample is strong evidence against H<sub>0</sub>. Explanation 1 is still possible, though. If it is the truth, rejecting H<sub>0</sub> is a <b>Type I error</b>, and α caps how often that happens.</p>
+        <p class="callout"><b>What the p-value is not:</b> it is <i>not</i> the chance that Hilltop is honest. It <i>starts</i> by assuming Hilltop is honest and then asks how unusual our sample would be.</p>
+
+        <div class="label">Step C · Decide: compare the p-value with <span class="nc">α</span></div>
+        <p class="hyp">0.0038 ≤ 0.01 → reject H<sub>0</sub></p>
+        <p>The sample is rarer than the 1-in-100 line the director drew. <b>In words:</b> the FTC has strong evidence that Hilltop's cans average less than 3 pounds.</p>
+      </div>
+      <div class="card">
+        <div class="row"><span class="label" style="min-width:140px">Sample mean <span class="xb" style="text-transform:none">x</span></span>
+          <input type="range" id="hx" min="2.88" max="3.04" step="0.005" value="2.92" aria-label="Sample mean of Hilltop cans"><span class="val" id="hx-v">2.920</span></div>
+        <canvas id="hChart" aria-label="Standard normal curve with the lower-tail p-value shaded"></canvas>
+        <div class="kv">
+          <div><span>z = (x̄ − 3) / 0.03</span><b id="h-z">−2.67</b></div>
+          <div><span>p-value = P(z ≤ test statistic)</span><b id="h-p">0.0038</b></div>
+          <div><span>Compare with α = 0.01</span><b id="h-c">0.0038 ≤ 0.01</b></div>
+        </div>
+        <p class="ans" id="h-say"></p>
+        <div class="verdict rej" id="h-v">Reject H₀</div>
+        <p class="note">The shaded area <b>is</b> the p-value. Start at the book's sample, x̄ = 2.92, then drag x̄ up toward 3: the shaded area grows, the sample looks less surprising, and the evidence weakens.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
   <section class="stop" id="define">
-    <div class="stop-head"><div class="stop-num">STOP 1 · THE KEY TERMS</div><h2>How we decide whether to reject H₀</h2>
-      <p class="muted">Recall: H<sub>0</sub> is tentatively assumed true; α is the probability of a Type I error that we are willing to accept. Now we need a way to measure the evidence in the sample.</p></div>
+    <div class="stop-head"><div class="stop-num">STOP 5 · NAME WHAT YOU JUST DID</div><h2>The key terms behind the coffee test</h2>
+      <p class="muted">Each term below is a step you just took with Hilltop.</p></div>
     <div class="two">
       <div class="card">
         <div class="label">Test statistic</div>
         <p class="big-claim" style="font-size:20px">A statistic whose value <em>helps determine whether H<sub>0</sub> should be rejected</em>.</p>
         <p>For a mean with σ known, it counts how many standard errors x̄ is from μ<sub>0</sub>:</p>
         <div class="formula-big">z =<span class="frac2"><span class="t"><span class="xb">x</span> − μ<sub>0</sub></span><span>σ / √n</span></span></div>
+        <p>Hilltop: z = −2.67.</p>
         <p class="note">Textbook Ch 9 key terms; equation (9.1).</p>
       </div>
       <div class="card">
         <div class="label">p-value</div>
         <p class="big-claim" style="font-size:20px">A probability that <em>measures the evidence against H<sub>0</sub></em>. Smaller p-values mean more evidence against H<sub>0</sub>.</p>
-        <p>It is the chance of a test statistic at least as extreme as ours <b>if H<sub>0</sub> were true</b>. Rule: <b>reject H<sub>0</sub> if p-value ≤ α</b>.</p>
+        <p>It is the chance of a test statistic at least as extreme as ours <b>if H<sub>0</sub> were true</b>. Rule: <b>reject H<sub>0</sub> if p-value ≤ α</b>. Hilltop: 0.0038.</p>
         <p class="note">Textbook Ch 9 key terms; Section 9.3.</p>
       </div>
     </div>
@@ -257,13 +400,13 @@ table.rules td.mono { font-family: var(--mono); font-size: 14px; }
       <div class="card">
         <div class="label">Critical value</div>
         <p class="big-claim" style="font-size:20px">A value that is <em>compared with the test statistic</em> to determine whether H<sub>0</sub> should be rejected.</p>
-        <p>It cuts off an area of α in the tail. If z falls beyond it, reject H<sub>0</sub>.</p>
+        <p>It cuts off an area of α in the tail. If z falls beyond it, reject H<sub>0</sub>. Hilltop: −2.33 (Stop 6).</p>
         <p class="note">Textbook Ch 9 key terms.</p>
       </div>
       <div class="card">
         <div class="label">One-tailed and two-tailed tests</div>
-        <p><b>One-tailed test:</b> H<sub>0</sub> is rejected for values of the test statistic in <b>one tail</b> of its sampling distribution (H<sub>a</sub> uses &lt; or &gt;).</p>
-        <p><b>Two-tailed test:</b> H<sub>0</sub> is rejected for values in <b>either tail</b> (H<sub>a</sub> uses ≠).</p>
+        <p><b>One-tailed test:</b> H<sub>0</sub> is rejected for values of the test statistic in <b>one tail</b> of its sampling distribution (H<sub>a</sub> uses &lt; or &gt;). Hilltop is a lower tail test.</p>
+        <p><b>Two-tailed test:</b> H<sub>0</sub> is rejected for values in <b>either tail</b> (H<sub>a</sub> uses ≠). See Stop 7.</p>
         <p class="note">Textbook Ch 9 key terms.</p>
       </div>
     </div>
@@ -280,38 +423,9 @@ table.rules td.mono { font-family: var(--mono); font-size: 14px; }
     </div>
   </section>
 
-  <!-- 2 -->
-  <section class="stop" id="steps">
-    <div class="stop-head"><div class="stop-num">STOP 2 · THE BOOK'S EXAMPLE · LOWER TAIL</div><h2>Hilltop Coffee: is the FTC right to suspect underfilling?</h2></div>
-    <div class="two">
-      <div class="card">
-        <p>The label says a can holds <b>3 pounds</b>. The FTC treats this as Hilltop's claim that μ ≥ 3 and checks it with a sample of <b>n = 36</b> cans. Past tests show <b>σ = 0.18</b> and normal fill weights. The director will risk a 1% chance of falsely accusing Hilltop: <b>α = 0.01</b>.</p>
-        <ol class="fivestep">
-          <li><span><b>Hypotheses.</b> H<sub>0</sub>: μ ≥ 3 &nbsp; H<sub>a</sub>: μ &lt; 3 (lower tail)</span></li>
-          <li><span><b>Level of significance.</b> α = 0.01</span></li>
-          <li><span><b>Collect the sample and compute the test statistic.</b> σ/√n = 0.18/√36 = 0.03</span></li>
-          <li><span><b>p-value</b> for a lower tail test = area to the <b>left</b> of z.</span></li>
-          <li><span><b>Decide.</b> Reject H<sub>0</sub> if p-value ≤ α.</span></li>
-        </ol>
-      </div>
-      <div class="card">
-        <div class="row"><span class="label" style="min-width:140px">Sample mean <span class="xb" style="text-transform:none">x</span></span>
-          <input type="range" id="hx" min="2.88" max="3.04" step="0.005" value="2.92" aria-label="Sample mean of Hilltop cans"><span class="val" id="hx-v">2.920</span></div>
-        <canvas id="hChart" aria-label="Standard normal curve with the lower-tail p-value shaded"></canvas>
-        <div class="kv">
-          <div><span>z = (x̄ − 3) / 0.03</span><b id="h-z">−2.67</b></div>
-          <div><span>p-value = P(z ≤ test statistic)</span><b id="h-p">0.0038</b></div>
-          <div><span>Compare with α = 0.01</span><b id="h-c">0.0038 ≤ 0.01</b></div>
-        </div>
-        <div class="verdict rej" id="h-v">Reject H₀</div>
-        <p class="note">Start at the book's sample, x̄ = 2.92. Drag x̄ up toward 3: the p-value grows and the evidence weakens.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- 3 -->
+  <!-- 6 -->
   <section class="stop" id="approaches">
-    <div class="stop-head"><div class="stop-num">STOP 3 · TWO APPROACHES, ONE DECISION</div><h2>p-value approach vs. critical value approach</h2></div>
+    <div class="stop-head"><div class="stop-num">STOP 6 · TWO APPROACHES, ONE DECISION</div><h2>p-value approach vs. critical value approach</h2></div>
     <div class="two">
       <div class="card">
         <div class="label">p-value approach</div>
@@ -332,20 +446,80 @@ table.rules td.mono { font-family: var(--mono); font-size: 14px; }
           <button type="button" data-ha="0.01">0.01</button><button type="button" data-ha="0.05">0.05</button><button type="button" data-ha="0.10">0.10</button>
         </div></div>
       <canvas id="cChart" aria-label="The test statistic compared with the critical value"></canvas>
-      <p class="callout">The two approaches <b>always agree</b>: whenever the p-value ≤ α, z is beyond the critical value. The shaded α region and the test statistic tell the same story. Uses the x̄ from Stop 2.</p>
+      <p class="callout">The two approaches <b>always agree</b>: whenever the p-value ≤ α, z is beyond the critical value. The shaded α region and the test statistic tell the same story. Uses the x̄ from Stop 4.</p>
     </div>
   </section>
 
-  <!-- 4 -->
+  <!-- 7 -->
   <section class="stop" id="twotail">
-    <div class="stop-head"><div class="stop-num">STOP 4 · THE BOOK'S EXAMPLE · TWO-TAILED</div><h2>MaxFlight golf balls: too short <i>or</i> too long is a problem</h2></div>
+    <div class="stop-head"><div class="stop-num">STOP 7 · THE BOOK'S EXAMPLE · TWO-TAILED</div><h2>MaxFlight golf balls: too short <i>or</i> too long is a problem</h2></div>
     <div class="two">
       <div class="card">
-        <p>The process should give a mean driving distance of <b>295 yards</b>. Too short loses sales; too long breaks the USGA standard. Each quality check uses <b>n = 50</b> balls, <b>σ = 12</b>, <b>α = 0.05</b>.</p>
-        <p class="hyp">H<sub>0</sub>: μ = 295 &nbsp; H<sub>a</sub>: μ ≠ 295</p>
-        <p>σ/√n = 12/√50 = 1.7. Because <b>either</b> direction counts as evidence, the p-value adds both tails:</p>
-        <p class="hyp">p-value = 2 × P(z ≥ |test statistic|)</p>
-        <p>Critical values: ±z<sub>.025</sub> = ±1.96. Reject H<sub>0</sub> if z ≤ −1.96 or z ≥ 1.96.</p>
+        <p>MaxFlight makes golf balls. Its production process is set so that the balls fly an average of <b>295 yards</b> off the tee. Both directions are a problem:</p>
+        <div class="contrast">
+          <div><span class="k">Too short (<span class="nc">μ &lt; 295</span>)</span>Golfers buy a ball that goes farther. MaxFlight loses sales.</div>
+          <div><span class="k">Too long (<span class="nc">μ &gt; 295</span>)</span>The balls break the USGA distance standard and can't be used in official play.</div>
+        </div>
+        <p>So the quality team regularly checks the process by testing a sample of <b>n = 50</b> balls. Past data give <b>σ = 12 yards</b>.</p>
+      </div>
+      <div class="card">
+        <div class="label">What we know</div>
+        <div class="kv">
+          <div><span>Target mean</span><b>295 yd</b></div>
+          <div><span>Sample size, n</span><b>50 balls</b></div>
+          <div><span>Population std. dev., σ</span><b>12 yd</b></div>
+          <div><span>Level of significance, α</span><b>0.05</b></div>
+          <div><span>Sample mean, <span class="xb">x</span></span><b>297.6 yd</b></div>
+        </div>
+        <p class="callout"><b>The question:</b> 297.6 is 2.6 yards above the target. Is that just the luck of which 50 balls were picked, or is the process off target?</p>
+      </div>
+    </div>
+    <div class="two">
+      <div class="card">
+        <div class="label">Step 1 · State the hypotheses</div>
+        <div class="qstep">
+          <p class="hyp">H<sub>0</sub>: μ = 295</p>
+          <p>The process is <b>on target</b>: the balls average 295 yards. Keep it running.</p>
+        </div>
+        <div class="qstep">
+          <p class="hyp">H<sub>a</sub>: μ ≠ 295</p>
+          <p>The process is <b>off target</b>, either too short or too long. Stop it and adjust.</p>
+        </div>
+        <p>H<sub>0</sub> holds the equal sign, and we assume the process is fine until the sample shows otherwise. H<sub>a</sub> uses ≠ because <b>either direction</b> is a problem. That is what makes this a <b>two-tailed test</b>.</p>
+
+        <div class="label">Step 2 · Level of significance in plain English</div>
+        <p>Even when the process works perfectly, 50 random balls won't average exactly 295 yards. Luck pushes the sample average a little up or down. Once in a while, luck alone pushes it far enough that the test says “off target” even though nothing is wrong. That mistake is a <b>Type I error</b>.</p>
+        <p class="big-claim" style="font-size:19px">α = 0.05 means: <em>if the process really is on target, the test will wrongly say “off target” 5% of the time</em>, about 1 check in every 20.</p>
+        <p>Each false alarm means MaxFlight shuts down and adjusts a process that was fine. α is the false-alarm rate the quality team agrees to live with.</p>
+
+        <div class="label">Step 3 · How far from 295 is 297.6?</div>
+        <p class="math">σ/√n = 12/√50 = <b>1.7 yards</b> (one standard error)</p>
+        <div class="formula-big">z =<span class="frac2"><span class="t">297.6 − 295</span><span>1.7</span></span>= 1.53</div>
+        <p>The sample mean sits <b>1.53 standard errors above</b> the target.</p>
+      </div>
+      <div class="card">
+        <div class="label">Step 4 · The p-value in plain English</div>
+        <p class="big-claim" style="font-size:19px">If the process really averages 295 yards, <em>what's the chance that 50 balls would average at least 2.6 yards away from 295, in either direction?</em></p>
+        <p><b>Why “either direction”?</b> A sample at 292.4 (2.6 yards <i>short</i>) would be just as much evidence that the process is off target as our 297.6. H<sub>a</sub> doesn't care which way, so the p-value counts <b>both tails</b>:</p>
+        <p class="hyp">upper tail: P(z ≥ 1.53) = 0.0630<br>lower tail: P(z ≤ −1.53) = 0.0630<br>p-value = 2 × 0.0630 = 0.1260</p>
+        <p>That is about <b>1 sample in 8</b>. A gap like ours happens all the time from luck alone when the process is on target, so it is <b>not surprising</b>.</p>
+
+        <div class="label">Step 5 · Decide</div>
+        <p class="hyp">0.1260 &gt; 0.05 → do not reject H<sub>0</sub></p>
+        <p><b>In words:</b> the sample does not give enough evidence that the process is off target, so MaxFlight keeps it running.</p>
+        <p class="callout">This does <b>not</b> prove the mean is exactly 295. It only means a 2.6-yard gap is too easy to get by chance to justify stopping the line.</p>
+
+        <div class="label">Same decision with critical values</div>
+        <p>A two-tailed test splits α in half: 0.025 in each tail, so the critical values are ±z<sub>.025</sub> = <b>±1.96</b>. Reject H<sub>0</sub> if z ≤ −1.96 or z ≥ 1.96. Our z = 1.53 is between them, so <b>do not reject</b>.</p>
+      </div>
+    </div>
+    <div class="two">
+      <div class="card">
+        <div class="label">Hilltop vs. MaxFlight</div>
+        <div class="contrast">
+          <div><span class="k">Hilltop · lower tail</span>Only <b>underfilling</b> matters (H<sub>a</sub>: μ &lt; 3). The p-value is <b>one</b> tail, to the left of z. Critical value −2.33 at α = 0.01.</div>
+          <div class="on"><span class="k">MaxFlight · two-tailed</span><b>Too short or too long</b> matters (H<sub>a</sub>: μ ≠ 295). The p-value is <b>both</b> tails: 2 × the tail beyond |z|. Critical values ±1.96 at α = 0.05.</div>
+        </div>
       </div>
       <div class="card">
         <div class="row"><span class="label" style="min-width:140px">Sample mean <span class="xb" style="text-transform:none">x</span></span>
@@ -356,15 +530,16 @@ table.rules td.mono { font-family: var(--mono); font-size: 14px; }
           <div><span>p-value = 2 × one tail</span><b id="m-p">0.1260</b></div>
           <div><span>Compare with α = 0.05</span><b id="m-c">0.1260 &gt; 0.05</b></div>
         </div>
+        <p class="ans" id="m-say"></p>
         <div class="verdict keep" id="m-v">Do not reject H₀</div>
-        <p class="note">At the book's sample, x̄ = 297.6, the process is left running. Drag x̄ below about 291.7 or above 298.3 to see it rejected.</p>
+        <p class="note">Both shaded tails together <b>are</b> the p-value. At the book's sample, x̄ = 297.6, the process is left running. Drag x̄ below about 291.7 or above 298.3 to see it rejected.</p>
       </div>
     </div>
   </section>
 
-  <!-- 5 -->
+  <!-- 8 -->
   <section class="stop" id="summary">
-    <div class="stop-head"><div class="stop-num">STOP 5 · SUMMARY</div><h2>The three tests on one page</h2></div>
+    <div class="stop-head"><div class="stop-num">STOP 8 · SUMMARY</div><h2>The three tests on one page</h2></div>
     <div class="card wrapx">
       <table class="rules">
         <thead><tr><th></th><th>Lower tail</th><th>Upper tail</th><th>Two-tailed</th></tr></thead>
@@ -382,9 +557,9 @@ table.rules td.mono { font-family: var(--mono); font-size: 14px; }
     </div>
   </section>
 
-  <!-- 6 -->
+  <!-- 9 -->
   <section class="stop" id="q3">
-    <div class="stop-head"><div class="stop-num">STOP 6 · APPLY · ASSIGNMENT QUESTION 3</div><h2>Question 3: commit first, then work it through</h2></div>
+    <div class="stop-head"><div class="stop-num">STOP 9 · APPLY · ASSIGNMENT QUESTION 3</div><h2>Question 3: commit first, then work it through</h2></div>
     <div class="two">
       <div class="card problem">
         <p>Consider the following hypothesis test:</p>
@@ -443,7 +618,20 @@ table.rules td.mono { font-family: var(--mono); font-size: 14px; }
     ctx.fillStyle = tok("--muted"); ctx.font = "12px " + tok("--body"); ctx.fillText("z", R - 6, base + 28);
   }
 
-  // ---------- Stop 1: true / false ----------
+  // ---------- Stop 2: which H0 is correct? ----------
+  const H0 = [
+    [true, "Yes. H₀ is about μ, the mean of all cans; it holds the equal sign; and it gives Hilltop's label the benefit of the doubt."],
+    [false, "Not quite. x̄ is the sample mean, and we already know it is 2.92. Hypotheses are always about the population mean μ."],
+    [false, "Not quite. μ < 3 is what the FTC must find evidence for, so it belongs in Hₐ. H₀ holds the equal sign."],
+    [false, "Not quite. 2.92 is the sample result. The value being tested is the label's claim, 3 pounds."],
+  ];
+  document.querySelectorAll("#h0check .choice").forEach(b => b.addEventListener("click", () => {
+    const [right, msg] = H0[+b.dataset.h0], fb = $("h0-msg");
+    document.querySelectorAll("#h0check .choice").forEach(c => c.setAttribute("aria-pressed", c === b));
+    fb.hidden = false; fb.className = "feedback " + (right ? "good" : "bad"); fb.textContent = msg;
+  }));
+
+  // ---------- Stop 5: true / false ----------
   const TF = [
     ["A small p-value is evidence against H₀.", true, "True. Smaller p-values mean the sample would be unusual if H₀ were true."],
     ["We reject H₀ when the p-value is greater than α.", false, "False. Reject H₀ when the p-value is less than or equal to α."],
@@ -456,7 +644,7 @@ table.rules td.mono { font-family: var(--mono); font-size: 14px; }
     fb.hidden = false; fb.className = "feedback " + (right ? "good" : "bad"); fb.textContent = (right ? "Yes. " : "Not quite. ") + t[2];
   }));
 
-  // ---------- Stop 2 + 3: Hilltop ----------
+  // ---------- Stop 4 + 6: Hilltop ----------
   let hAlpha = 0.01;
   function hilltop() {
     const xb = +$("hx").value, z = round2((xb - 3) / 0.03), p = Phi(z), rej = p <= 0.01;
@@ -464,8 +652,12 @@ table.rules td.mono { font-family: var(--mono); font-size: 14px; }
     $("h-c").textContent = f4(p) + (rej ? " ≤ " : " > ") + "0.01";
     $("h-v").textContent = rej ? "Reject H₀: evidence of underfilling" : "Do not reject H₀: no action against Hilltop";
     $("h-v").className = "verdict " + (rej ? "rej" : "keep");
+    const per1000 = Math.round(p * 1000);
+    $("h-say").innerHTML = "<b>In words:</b> if Hilltop's cans really average 3 lb, about <b>" + (p * 100).toFixed(2) + "%</b> of samples of 36 cans would average "
+      + xb.toFixed(3) + " lb or less (" + (per1000 < 1 ? "fewer than 1" : "about " + per1000) + " in 1,000). "
+      + (rej ? "That is rarer than α = 1 in 100, so the sample is strong evidence against H₀." : "That is not rare enough to beat α = 1 in 100, so the sample is not strong enough evidence against H₀.");
     drawZ($("hChart"), [[-4, z]], [{ z, label: "test statistic", color: tok("--hit") }]);
-    // Stop 3 picture: alpha region and critical value, plus z
+    // Stop 6 picture: alpha region and critical value, plus z
     const zc = zInv(hAlpha), rej2 = z <= zc;
     document.querySelectorAll("[data-ha]").forEach(b => b.setAttribute("aria-pressed", Math.abs(+b.dataset.ha - hAlpha) < 1e-9));
     drawZ($("cChart"), [[-4, zc]], [{ z: zc, label: "critical value " + f2(zc) + " (area α = " + hAlpha + ")", color: tok("--miss"), dash: true }, { z, label: rej2 ? "z: reject H₀" : "z: do not reject", color: tok("--hit") }]);
@@ -473,19 +665,22 @@ table.rules td.mono { font-family: var(--mono); font-size: 14px; }
   $("hx").addEventListener("input", hilltop);
   document.querySelectorAll("[data-ha]").forEach(b => b.addEventListener("click", () => { hAlpha = +b.dataset.ha; hilltop(); }));
 
-  // ---------- Stop 4: MaxFlight ----------
+  // ---------- Stop 7: MaxFlight ----------
   function maxflight() {
     const xb = +$("mx").value, se = 12 / Math.sqrt(50), z = round2((xb - 295) / se), p = 2 * (1 - Phi(Math.abs(z))), rej = p <= 0.05;
     $("mx-v").textContent = xb.toFixed(1); $("m-z").textContent = f2(z); $("m-p").textContent = f4(p);
     $("m-c").textContent = f4(p) + (rej ? " ≤ " : " > ") + "0.05";
     $("m-v").textContent = rej ? "Reject H₀: adjust the process" : "Do not reject H₀: keep the process running";
     $("m-v").className = "verdict " + (rej ? "rej" : "keep");
-    const a = Math.abs(z);
+    const a = Math.abs(z), gap = Math.abs(xb - 295).toFixed(1);
+    $("m-say").innerHTML = "<b>In words:</b> if the process really averages 295 yards, about <b>" + (p * 100).toFixed(1) + "%</b> of samples of 50 balls would land at least "
+      + gap + " yards away from 295, too short or too long. "
+      + (rej ? "That is rarer than α = 1 in 20, so the sample is strong evidence the process is off target." : "That is not rare enough to beat α = 1 in 20, so there isn't enough evidence that the process is off target.");
     drawZ($("mChart"), [[-4, -a], [a, 4]], [{ z: -1.96, label: "−1.96", color: tok("--miss"), dash: true }, { z: 1.96, label: "+1.96", color: tok("--miss"), dash: true }, { z, label: "test statistic", color: tok("--hit") }]);
   }
   $("mx").addEventListener("input", maxflight);
 
-  // ---------- Stop 6: Question 3 ----------
+  // ---------- Stop 9: Question 3 ----------
   let guess = load("ht93-guess");
   const paintGuess = () => {
     document.querySelectorAll("#guess .choice").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === guess));
