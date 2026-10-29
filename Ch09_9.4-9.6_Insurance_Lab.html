@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Insurance One-Sample Lab</title>
+<style>
+/* Layout: a projected lesson in seven numbered stops, matching the Ch 9 labs.
+   Brand: MSU navy #162860 + gold #F3B324, Aptos. */
+:root {
+  --navy: #162860; --navy-deep: #0f1c48; --gold: #F3B324;
+  --bg: #f3f5fa; --panel: #ffffff; --ink: #111a30; --muted: #4a5570; --line: #d5dae7;
+  --hit: #162860; --hit-soft: rgba(22,40,96,.13); --miss: #c8432f; --miss-soft: rgba(200,67,47,.14);
+  --chip: #e7ebf4; --focus: #F3B324; --on-accent: #ffffff;
+  --display: Aptos, "Aptos Display", "Segoe UI", Arial, Helvetica, sans-serif;
+  --body: Aptos, "Segoe UI", Arial, Helvetica, sans-serif;
+  --mono: Consolas, "Courier New", monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b1433; --panel: #14214d; --ink: #eef1f8; --muted: #a9b3cc; --line: #2a3a6e;
+    --hit: #F3B324; --hit-soft: rgba(243,179,36,.18); --miss: #f07a63; --miss-soft: rgba(240,122,99,.16);
+    --chip: #1c2b5c; --focus: #FADA92; --on-accent: #162860; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b1433; --panel: #14214d; --ink: #eef1f8; --muted: #a9b3cc; --line: #2a3a6e;
+  --hit: #F3B324; --hit-soft: rgba(243,179,36,.18); --miss: #f07a63; --miss-soft: rgba(240,122,99,.16);
+  --chip: #1c2b5c; --focus: #FADA92; --on-accent: #162860; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 56px;
+}
+.wrap { max-width: 1280px; margin: 0 auto; display: grid; gap: 28px; }
+header.brand {
+  margin-top: 20px; border-radius: 12px; padding: 26px clamp(18px, 3vw, 36px) 24px;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-deep) 100%); color: #ffffff;
+  display: grid; gap: 8px; border: 1px solid var(--line);
+}
+header.brand .bar { width: 52px; height: 4px; border-radius: 2px; background: var(--gold); }
+header.brand .course { font-size: 14px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); }
+header.brand h1 { color: #ffffff; }
+header.brand .meta { font-size: 14px; color: #b9c3dc; }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(30px, 4.2vw, 44px); line-height: 1.1; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--display); font-size: clamp(22px, 2.6vw, 28px); line-height: 1.2; margin: 0; text-wrap: balance; }
+h3 { font-family: var(--display); font-size: 18px; margin: 0; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.mono, b.m { font-family: var(--mono); font-weight: 500; font-variant-numeric: tabular-nums; }
+.xb { display: inline-block; position: relative; font-weight: 700; font-style: italic; line-height: 1; padding: 0 .06em; }
+.xb::before { content: ""; position: absolute; left: .1em; right: .02em; top: .1em; height: .1em; min-height: 2px; border-radius: 1px; background: currentColor; }
+.nc { text-transform: none; }
+.pb { text-decoration: overline; font-style: italic; font-weight: 700; }
+
+nav.stops { position: sticky; top: 0; z-index: 5; background: var(--bg); display: flex; gap: 6px; overflow-x: auto; padding-block: 10px; border-bottom: 1px solid var(--line); }
+nav.stops a { flex: 0 0 auto; text-decoration: none; color: var(--ink); background: var(--chip); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; font-size: 14px; font-weight: 500; white-space: nowrap; }
+nav.stops a span { font-family: var(--mono); color: var(--hit); margin-right: 6px; }
+nav.stops a:hover { border-color: var(--hit); }
+
+section.stop { display: grid; gap: 14px; scroll-margin-top: 64px; }
+.stop-head { display: grid; gap: 4px; }
+.stop-num { font: 700 13px var(--body); color: var(--hit); letter-spacing: .14em; display: flex; align-items: center; gap: 10px; }
+.stop-num::before { content: ""; width: 28px; height: 3px; border-radius: 2px; background: var(--gold); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; min-width: 0; align-content: start; }
+.two { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 860px) { .two { grid-template-columns: 1fr; } }
+.big-claim { font-size: clamp(19px, 2.2vw, 22px); line-height: 1.4; max-width: 64ch; }
+.big-claim em { font-style: normal; background: var(--hit-soft); padding: 0 4px; border-radius: 4px; }
+.label { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.note { font-size: 14px; color: var(--muted); }
+.callout { border-left: 4px solid var(--hit); padding: 4px 0 4px 12px; }
+.ans { background: var(--hit-soft); border-radius: 8px; padding: 10px 12px; }
+.warn { background: var(--miss-soft); border-radius: 8px; padding: 10px 12px; }
+.hyp { font: 600 19px var(--mono); line-height: 1.6; }
+
+.kv { display: grid; gap: 6px; font-variant-numeric: tabular-nums; }
+.kv div { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; border-bottom: 1px dashed var(--line); padding-bottom: 4px; }
+.kv div:last-child { border-bottom: 0; }
+.kv span:first-child { color: var(--muted); }
+.kv b { font: 500 17px var(--mono); }
+
+.fivestep { display: grid; gap: 8px; counter-reset: st; margin: 0; padding: 0; list-style: none; }
+.fivestep li { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: baseline; }
+.fivestep li::before { counter-increment: st; content: counter(st); font: 700 15px var(--mono); color: var(--on-accent); background: var(--hit); border-radius: 999px; width: 28px; height: 28px; display: grid; place-items: center; }
+
+.btn { font: 600 15px var(--body); color: var(--ink); background: var(--chip); border: 1px solid var(--line); border-radius: 7px; padding: 8px 12px; cursor: pointer; }
+.btn[aria-pressed="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+.btn.primary { background: var(--hit); color: var(--on-accent); border-color: var(--hit); }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+button:hover { filter: brightness(1.06); }
+.btnrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.predict { display: grid; gap: 8px; }
+.feedback { border-radius: 8px; padding: 10px 12px; background: var(--chip); }
+
+.wrapx { overflow-x: auto; }
+table.rules { border-collapse: collapse; width: 100%; min-width: 560px; }
+table.rules th, table.rules td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; font-size: 15.5px; vertical-align: top; }
+table.rules th { background: var(--chip); font-size: 13px; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+table.rules td.mono { font-family: var(--mono); font-size: 14.5px; }
+table.rules td.num { font-family: var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+table.rules td.flip { background: var(--hit-soft); font-weight: 700; }
+.verdict { font: 700 18px var(--display); border-radius: 8px; padding: 8px 12px; text-align: center; }
+.verdict.rej { background: var(--miss-soft); color: var(--miss); }
+.verdict.keep { background: var(--hit-soft); color: var(--hit); }
+[data-reveal][hidden] { display: none !important; }
+
+.sim { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 900px) { .sim { grid-template-columns: 1fr; } }
+.row { display: flex; align-items: center; gap: 10px; }
+input[type="range"] { flex: 1; accent-color: var(--hit); }
+.val { font: 600 20px var(--mono); min-width: 80px; text-align: right; font-variant-numeric: tabular-nums; }
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 560px) { .tiles { grid-template-columns: 1fr; } }
+.tile { background: var(--chip); border-radius: 8px; padding: 8px 12px; display: grid; }
+.tile .num { font: 600 26px var(--display); font-variant-numeric: tabular-nums; line-height: 1.15; }
+.tile .cap { font-size: 13px; color: var(--muted); }
+.bar-wrap { display: grid; gap: 4px; }
+.bar-track { height: 16px; border-radius: 8px; background: var(--chip); position: relative; overflow: hidden; }
+.bar-fill { position: absolute; inset: 0 auto 0 0; background: var(--hit); border-radius: 8px; transition: width .15s; }
+.bar-alpha { position: absolute; top: -3px; bottom: -3px; width: 3px; background: var(--miss); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="brand">
+    <div class="bar"></div>
+    <div class="course">BMGT 240IS · Business Analytics</div>
+    <h1>Insurance One-Sample Lab</h1>
+    <div class="meta">Ch 9.4 · Mean, σ unknown · Ch 9.5 · Proportion · Ch 9.6 · Big data · Fall 2026 · Montana State University</div>
+  </header>
+
+  <nav class="stops" aria-label="Lesson stops">
+    <a href="#question"><span>1</span>Bridger's question</a>
+    <a href="#mean"><span>2</span>9.4: average charges</a>
+    <a href="#prop"><span>3</span>9.5: share who smoke</a>
+    <a href="#all"><span>4</span>9.6: all 1,338</a>
+    <a href="#why"><span>5</span>Why it flipped</a>
+    <a href="#matter"><span>6</span>Does it matter?</a>
+    <a href="#wrap"><span>7</span>Summary &amp; your project</a>
+  </nav>
+
+  <!-- 1 -->
+  <section class="stop" id="question">
+    <div class="stop-head"><div class="stop-num">STOP 1 · THE BUSINESS QUESTION</div><h2>Were Bridger's pricing assumptions right?</h2></div>
+    <div class="two">
+      <div class="card">
+        <p>Bridger Health Insurance sells individual health plans. This year's prices were built on two assumptions from the pricing team:</p>
+        <div class="kv">
+          <div><span>Average annual cost per customer</span><b>$12,000</b></div>
+          <div><span>Share of customers who smoke</span><b>15%</b></div>
+        </div>
+        <p>If either is off, every plan is priced wrong. An analyst pulls a <b>random sample of 50 customers</b> from <span class="mono">insurance.csv</span> to check.</p>
+        <p class="note">Bridger and both assumptions are hypothetical, chosen for teaching. The customers are real rows of the course's insurance data.</p>
+      </div>
+      <div class="card">
+        <div class="label">The five steps, same as 9.3</div>
+        <ol class="fivestep">
+          <li><span>State H<sub>0</sub> and H<sub>a</sub> from the business question.</span></li>
+          <li><span>Choose α (we use .05).</span></li>
+          <li><span>Compute the test statistic from the sample.</span></li>
+          <li><span>Find the p-value.</span></li>
+          <li><span>Decide, then say what it means for the business.</span></li>
+        </ol>
+        <p class="callout">What changes today is only step 3: <b>how we measure the spread</b>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="stop" id="mean">
+    <div class="stop-head"><div class="stop-num">STOP 2 · 9.4 · POPULATION MEAN, σ UNKNOWN · TWO-TAILED</div><h2>Is the average charge different from $12,000?</h2>
+      <p class="muted">Workbook sheet: <b>9.4 Charges (50)</b>.</p></div>
+    <div class="two">
+      <div class="card">
+        <div class="label">Hypotheses</div>
+        <p class="hyp">H<sub>0</sub>: μ = 12,000<br>H<sub>a</sub>: μ ≠ 12,000</p>
+        <p class="note">Two-tailed: Bridger needs to know if the assumption is off in <i>either</i> direction. Too high or too low, the prices are wrong.</p>
+        <div class="label">The 50 customers</div>
+        <div class="kv">
+          <div><span>n</span><b>50</b></div>
+          <div><span>Sample mean <span class="xb">x</span></span><b>$11,935.39</b></div>
+          <div><span>Median</span><b>$7,733.60</b></div>
+          <div><span>Sample std. deviation s</span><b>$11,707.09</b></div>
+        </div>
+        <p class="callout">The mean is far above the median: a few very expensive customers pull it up. Charges are <b>right-skewed</b>. With n = 50, the Central Limit Theorem still lets us use t, but keep this in mind.</p>
+      </div>
+      <div class="card">
+        <div class="label">No σ: use s, and use t</div>
+        <p>Nobody knows the standard deviation of <i>all</i> customers' charges, so we estimate it with the sample's s. That extra uncertainty is why we use the <b>t distribution with n − 1 = 49 degrees of freedom</b> instead of z.</p>
+        <div class="predict">
+          <div class="label">Predict first</div>
+          <p>The sample mean is only $65 below $12,000. Will we reject H<sub>0</sub>?</p>
+          <div class="btnrow" data-predict="mean"><button type="button" class="btn">Reject H<sub>0</sub></button><button type="button" class="btn">Do not reject H<sub>0</sub></button></div>
+        </div>
+        <button type="button" class="btn primary" data-show="mean-res">Show the test</button>
+        <div data-reveal id="mean-res" hidden>
+          <div class="wrapx">
+            <table class="rules">
+              <thead><tr><th>Step</th><th>Excel</th><th>Result</th></tr></thead>
+              <tbody>
+                <tr><td>Standard error s/√n</td><td class="mono">=D11/SQRT(D8)</td><td class="num">1,655.63</td></tr>
+                <tr><td>t = (<span class="xb">x</span> − μ<sub>0</sub>) / SE</td><td class="mono">=(D9-D12)/D16</td><td class="num">−0.039</td></tr>
+                <tr><td>p-value, two tail</td><td class="mono">=2*MIN(T.DIST(t,49,TRUE), 1-T.DIST(t,49,TRUE))</td><td class="num">0.969</td></tr>
+                <tr><td>Critical values ±t<sub>.025</sub></td><td class="mono">=T.INV(1-0.05/2,49)</td><td class="num">±2.010</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="verdict keep">p = 0.969 &gt; .05 · Do not reject H<sub>0</sub></p>
+          <p class="ans"><b>For the pricing team:</b> this sample gives no evidence that the average cost differs from $12,000.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="stop" id="prop">
+    <div class="stop-head"><div class="stop-num">STOP 3 · 9.5 · POPULATION PROPORTION · UPPER TAIL</div><h2>Do more than 15% of customers smoke?</h2>
+      <p class="muted">Workbook sheet: <b>9.5 Smokers (50)</b>. Same 50 customers.</p></div>
+    <div class="two">
+      <div class="card">
+        <div class="label">Hypotheses</div>
+        <p class="hyp">H<sub>0</sub>: p ≤ .15<br>H<sub>a</sub>: p &gt; .15</p>
+        <p class="note">Upper tail: the worry is <i>more</i> smokers than the surcharge was priced for.</p>
+        <div class="label">The data is yes / no, so we count</div>
+        <div class="kv">
+          <div><span>n</span><b>50</b></div>
+          <div><span>Smokers <span class="mono">=COUNTIF(A2:A51,"yes")</span></span><b>7</b></div>
+          <div><span>Sample proportion <span class="pb">p</span> = 7 / 50</span><b>0.14</b></div>
+        </div>
+        <div class="label">Can we use the normal curve?</div>
+        <p>Need n·p<sub>0</sub> ≥ 5 and n(1 − p<sub>0</sub>) ≥ 5: 50 × .15 = <b>7.5</b> and 50 × .85 = <b>42.5</b>. Both pass.</p>
+      </div>
+      <div class="card">
+        <div class="label">Why this one is z, not t</div>
+        <p>H<sub>0</sub> hands us the spread. If p really is .15, the standard error is exactly</p>
+        <p class="hyp">σ<sub><span class="pb">p</span></sub> = √( p<sub>0</sub>(1 − p<sub>0</sub>) / n ) = √(.15 × .85 / 50) = 0.0505</p>
+        <p>Nothing is estimated, so there is no extra uncertainty: <b>z</b>. Note it uses <b>p<sub>0</sub>, not <span class="pb">p</span></b>.</p>
+        <div class="predict">
+          <div class="label">Predict first</div>
+          <p><span class="pb">p</span> = 0.14 is <i>below</i> .15, in a test about <i>more than</i> .15. Will the p-value be small or large?</p>
+          <div class="btnrow" data-predict="prop"><button type="button" class="btn">Small (below .05)</button><button type="button" class="btn">Large (above .5)</button></div>
+        </div>
+        <button type="button" class="btn primary" data-show="prop-res">Show the test</button>
+        <div data-reveal id="prop-res" hidden>
+          <div class="wrapx">
+            <table class="rules">
+              <thead><tr><th>Step</th><th>Excel</th><th>Result</th></tr></thead>
+              <tbody>
+                <tr><td>z = (<span class="pb">p</span> − p<sub>0</sub>) / σ<sub><span class="pb">p</span></sub></td><td class="mono">=(D10-D11)/D16</td><td class="num">−0.198</td></tr>
+                <tr><td>p-value, upper tail</td><td class="mono">=1-NORM.S.DIST(z,TRUE)</td><td class="num">0.578</td></tr>
+                <tr><td>Critical value z<sub>.05</sub></td><td class="mono">=NORM.S.INV(1-0.05)</td><td class="num">1.645</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="verdict keep">p = 0.578 &gt; .05 · Do not reject H<sub>0</sub></p>
+          <p class="ans">When <span class="pb">p</span> lands on the <i>wrong side</i> of p<sub>0</sub> for an upper-tail test, z is negative and the p-value is above .5. The sample points the other way, so it cannot be evidence for H<sub>a</sub>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="stop" id="all">
+    <div class="stop-head"><div class="stop-num">STOP 4 · 9.6 · THE SAME TESTS ON ALL 1,338 CUSTOMERS</div><h2>The analyst gets the full file. Do the answers change?</h2>
+      <p class="muted">Workbook sheets: <b>9.6 Charges (all)</b> and <b>9.6 Smokers (all)</b>. Same formulas, longer range.</p></div>
+    <div class="card">
+      <div class="predict">
+        <div class="label">Predict first, with your neighbor</div>
+        <p>Both tests said “do not reject” with 50 customers. With 1,338 customers, what happens?</p>
+        <div class="btnrow" data-predict="all"><button type="button" class="btn">Nothing changes</button><button type="button" class="btn">One flips</button><button type="button" class="btn">Both flip</button></div>
+      </div>
+      <button type="button" class="btn primary" data-show="all-res">Show the comparison</button>
+      <div data-reveal id="all-res" hidden>
+        <div class="wrapx">
+          <table class="rules">
+            <thead><tr><th>Test</th><th></th><th>50 customers</th><th>All 1,338</th></tr></thead>
+            <tbody>
+              <tr><td rowspan="5"><b>9.4</b> Average charges<br><span class="note">H<sub>a</sub>: μ ≠ 12,000</span></td><td><span class="xb">x</span></td><td class="num">$11,935</td><td class="num">$13,270</td></tr>
+              <tr><td>Standard error</td><td class="num">1,655.63</td><td class="num">331.07</td></tr>
+              <tr><td>t</td><td class="num">−0.04</td><td class="num">3.84</td></tr>
+              <tr><td>p-value</td><td class="num">0.969</td><td class="num">0.0001</td></tr>
+              <tr><td>Decision</td><td>Do not reject</td><td class="flip">Reject H<sub>0</sub></td></tr>
+              <tr><td rowspan="5"><b>9.5</b> Share who smoke<br><span class="note">H<sub>a</sub>: p &gt; .15</span></td><td><span class="pb">p</span></td><td class="num">0.140</td><td class="num">0.205</td></tr>
+              <tr><td>Standard error</td><td class="num">0.0505</td><td class="num">0.0098</td></tr>
+              <tr><td>z</td><td class="num">−0.20</td><td class="num">5.61</td></tr>
+              <tr><td>p-value</td><td class="num">0.578</td><td class="num">0.00000001</td></tr>
+              <tr><td>Decision</td><td>Do not reject</td><td class="flip">Reject H<sub>0</sub></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="ans"><b>Both flip.</b> With all 1,338 customers, the average cost is about $13,270, not $12,000, and about 20.5% smoke, not 15%. Both assumptions were wrong. The sample of 50 just could not see it.</p>
+        <p class="warn"><b>“Do not reject” never meant “the assumption is right.”</b> It meant the 50-customer sample could not tell. Missing a real difference like this is a <b>Type II error</b> (9.2). This sample also happened to include only 7 smokers, fewer than typical: that is ordinary sampling luck.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="stop" id="why">
+    <div class="stop-head"><div class="stop-num">STOP 5 · 9.6 · WHY IT FLIPPED</div><h2>Bigger n, smaller standard error, smaller p-value</h2>
+      <p class="muted">Keep the gap and the spread fixed. Change only n, and watch the p-value.</p></div>
+    <div class="sim">
+      <div class="card">
+        <div class="label">Gap between <span class="xb">x</span> and $12,000</div>
+        <div class="btnrow" id="gaps">
+          <button type="button" class="btn" data-gap="1270" aria-pressed="true">$1,270 (ours)</button>
+          <button type="button" class="btn" data-gap="500" aria-pressed="false">$500</button>
+          <button type="button" class="btn" data-gap="100" aria-pressed="false">$100</button>
+        </div>
+        <div class="label">Sample size n</div>
+        <div class="row"><input type="range" id="nSlider" min="0" max="1000" value="0" aria-label="Sample size"><span class="val" id="nVal">50</span></div>
+        <p class="note">s is held at $12,110, the spread of all 1,338 customers. Slider runs from 50 to 100,000. p-values use the normal curve, which matches t closely at these sample sizes.</p>
+      </div>
+      <div class="card">
+        <div class="tiles">
+          <div class="tile"><span class="cap">Standard error s/√n</span><span class="num" id="seVal">–</span></div>
+          <div class="tile"><span class="cap">t</span><span class="num" id="tVal">–</span></div>
+          <div class="tile"><span class="cap">p-value (two tail)</span><span class="num" id="pVal">–</span></div>
+        </div>
+        <div class="bar-wrap">
+          <span class="label">p-value on a 0 to 1 scale · red line = α = .05</span>
+          <div class="bar-track"><div class="bar-fill" id="pBar"></div><div class="bar-alpha" style="left:5%"></div></div>
+        </div>
+        <p class="ans" id="simSay"></p>
+        <p class="callout">The gap never changes. Only the standard error shrinks, as s/√n. Any gap, however tiny, becomes “significant” once n is large enough. That is the textbook's warning in 9.6, and its Table 9.5 shows the same thing for 84.5 vs 84 seconds.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="stop" id="matter">
+    <div class="stop-head"><div class="stop-num">STOP 6 · 9.6 · STATISTICAL VS. PRACTICAL SIGNIFICANCE</div><h2>Significant is not the same as important</h2>
+      <p class="muted">Workbook sheet: <b>9.6 Compare</b>. A p-value says whether a difference is real. Only the business can say whether it matters.</p></div>
+    <div class="two">
+      <div class="card">
+        <div class="label">Case 1 · Charges: significant, and it matters</div>
+        <div class="kv">
+          <div><span>Gap per customer</span><b>$1,270</b></div>
+          <div><span>× 1,338 customers</span><b>≈ $1.7 million</b></div>
+        </div>
+        <p>Bridger is under-pricing by about $1.7 million a year on these customers. That is worth acting on.</p>
+      </div>
+      <div class="card">
+        <div class="label">Case 2 · BMI: significant, but does it matter?</div>
+        <div class="kv">
+          <div><span>Average BMI, all 1,338</span><b>30.66</b></div>
+          <div><span>Cutoff being tested</span><b>30</b></div>
+          <div><span>p-value (upper tail)</span><b>0.00004</b></div>
+        </div>
+        <p><b>Discuss:</b> the difference is almost certainly real. Is 0.66 BMI points big enough to change any pricing decision?</p>
+      </div>
+    </div>
+    <p class="callout"><b>Rule for your project:</b> before you run a test, decide <b>how big a difference would change the decision</b>. Then report both: is it significant, and is it big enough?</p>
+  </section>
+
+  <!-- 7 -->
+  <section class="stop" id="wrap">
+    <div class="stop-head"><div class="stop-num">STOP 7 · SUMMARY &amp; YOUR PROJECT</div><h2>Three one-sample tests on one page</h2></div>
+    <div class="wrapx">
+      <table class="rules">
+        <thead><tr><th></th><th>9.3 Mean, <span class="nc">σ</span> known</th><th>9.4 Mean, <span class="nc">σ</span> unknown</th><th>9.5 Proportion</th></tr></thead>
+        <tbody>
+          <tr><td>Data</td><td>numbers</td><td>numbers</td><td>yes / no</td></tr>
+          <tr><td>Spread</td><td>σ from past data</td><td>s from the sample</td><td>√(p<sub>0</sub>(1 − p<sub>0</sub>)/n) from H<sub>0</sub></td></tr>
+          <tr><td>Statistic</td><td>z = (<span class="xb">x</span> − μ<sub>0</sub>)/(σ/√n)</td><td>t = (<span class="xb">x</span> − μ<sub>0</sub>)/(s/√n), df = n − 1</td><td>z = (<span class="pb">p</span> − p<sub>0</sub>)/σ<sub><span class="pb">p</span></sub></td></tr>
+          <tr><td>Excel p-value (upper)</td><td class="mono">1-NORM.S.DIST(z,TRUE)</td><td class="mono">1-T.DIST(t,df,TRUE)</td><td class="mono">1-NORM.S.DIST(z,TRUE)</td></tr>
+          <tr><td>Check first</td><td>n ≥ 30 or normal data</td><td>n ≥ 30 or roughly normal data</td><td>n·p<sub>0</sub> ≥ 5 and n(1 − p<sub>0</sub>) ≥ 5</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="two">
+      <div class="card">
+        <div class="label">9.6 in two sentences</div>
+        <p>Big samples find small differences: with thousands of rows, almost every test rejects. So a large-sample result needs a second question: <b>is the difference big enough to matter?</b></p>
+      </div>
+      <div class="card">
+        <div class="label">With your group, 5 minutes</div>
+        <p>Your dataset has 10,000 to 119,000 rows. Pick one numeric or yes/no variable and write:</p>
+        <ol class="fivestep">
+          <li><span>H<sub>0</sub> and H<sub>a</sub>, with a target your business relies on.</span></li>
+          <li><span>Mean (t, 9.4) or proportion (z, 9.5)?</span></li>
+          <li><span>The smallest difference that would change your business decision.</span></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+document.querySelectorAll("[data-predict]").forEach(group => {
+  group.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    group.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+  }));
+});
+document.querySelectorAll("[data-show]").forEach(b => b.addEventListener("click", () => {
+  const el = document.getElementById(b.dataset.show);
+  el.hidden = !el.hidden;
+  b.textContent = el.hidden ? b.textContent.replace("Hide", "Show") : b.textContent.replace("Show", "Hide");
+}));
+
+// Standard normal upper tail, Abramowitz–Stegun 7.1.26 via erfc
+function erfc(x) {
+  const z = Math.abs(x), t = 1 / (1 + 0.5 * z);
+  const r = t * Math.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (0.37409196 + t * (0.09678418 +
+    t * (-0.18628806 + t * (0.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277)))))))));
+  return x >= 0 ? r : 2 - r;
+}
+const S = 12110, slider = document.getElementById("nSlider");
+let gap = 1270;
+const nFromSlider = v => Math.round(50 * Math.pow(100000 / 50, v / 1000));
+function update() {
+  const n = nFromSlider(+slider.value), se = S / Math.sqrt(n), t = gap / se, p = erfc(t / Math.SQRT2);
+  document.getElementById("nVal").textContent = n.toLocaleString();
+  document.getElementById("seVal").textContent = "$" + se.toLocaleString(undefined, { maximumFractionDigits: se < 10 ? 2 : 0 });
+  document.getElementById("tVal").textContent = t.toFixed(2);
+  document.getElementById("pVal").textContent = p < 0.0001 ? "< 0.0001" : p.toFixed(4);
+  document.getElementById("pBar").style.width = Math.max(p * 100, 0.4) + "%";
+  document.getElementById("simSay").textContent = p <= 0.05
+    ? `With n = ${n.toLocaleString()}, a $${gap.toLocaleString()} gap is statistically significant (p ≤ .05): reject H₀.`
+    : `With n = ${n.toLocaleString()}, a $${gap.toLocaleString()} gap is not significant (p > .05): the sample can't tell it apart from $12,000.`;
+}
+document.querySelectorAll("#gaps button").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll("#gaps button").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+  gap = +b.dataset.gap; update();
+}));
+slider.addEventListener("input", update);
+update();
+</script>
+</body>
+</html>
