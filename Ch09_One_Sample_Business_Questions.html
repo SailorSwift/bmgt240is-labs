@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>One-Sample Business Questions</title>
+<style>
+/* Layout: a projected lesson in six numbered stops, matching the Ch 9 labs.
+   Brand: MSU navy #162860 + gold #F3B324, Aptos. */
+:root {
+  --navy: #162860;
+  --navy-deep: #0f1c48;
+  --gold: #F3B324;
+  --bg: #f3f5fa;
+  --panel: #ffffff;
+  --ink: #111a30;
+  --muted: #4a5570;
+  --line: #d5dae7;
+  --hit: #162860;
+  --hit-soft: rgba(22,40,96,.13);
+  --miss: #c8432f;
+  --miss-soft: rgba(200,67,47,.14);
+  --chip: #e7ebf4;
+  --focus: #F3B324;
+  --on-accent: #ffffff;
+  --display: Aptos, "Aptos Display", "Segoe UI", Arial, Helvetica, sans-serif;
+  --body: Aptos, "Segoe UI", Arial, Helvetica, sans-serif;
+  --mono: Consolas, "Courier New", monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b1433; --panel: #14214d; --ink: #eef1f8; --muted: #a9b3cc; --line: #2a3a6e;
+    --hit: #F3B324; --hit-soft: rgba(243,179,36,.18); --miss: #f07a63; --miss-soft: rgba(240,122,99,.16);
+    --chip: #1c2b5c; --focus: #FADA92; --on-accent: #162860;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b1433; --panel: #14214d; --ink: #eef1f8; --muted: #a9b3cc; --line: #2a3a6e;
+  --hit: #F3B324; --hit-soft: rgba(243,179,36,.18); --miss: #f07a63; --miss-soft: rgba(240,122,99,.16);
+  --chip: #1c2b5c; --focus: #FADA92; --on-accent: #162860;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 56px;
+}
+.wrap { max-width: 1280px; margin: 0 auto; display: grid; gap: 28px; }
+header.brand {
+  margin-top: 20px; border-radius: 12px; padding: 26px clamp(18px, 3vw, 36px) 24px;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-deep) 100%); color: #ffffff;
+  display: grid; gap: 8px; border: 1px solid var(--line);
+}
+header.brand .bar { width: 52px; height: 4px; border-radius: 2px; background: var(--gold); }
+header.brand .course { font-size: 14px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); }
+header.brand h1 { color: #ffffff; }
+header.brand .meta { font-size: 14px; color: #b9c3dc; }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(30px, 4.2vw, 44px); line-height: 1.1; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--display); font-size: clamp(22px, 2.6vw, 28px); line-height: 1.2; margin: 0; text-wrap: balance; }
+h3 { font-family: var(--display); font-size: 18px; margin: 0; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+
+nav.stops {
+  position: sticky; top: 0; z-index: 5; background: var(--bg);
+  display: flex; gap: 6px; overflow-x: auto; padding-block: 10px; border-bottom: 1px solid var(--line);
+}
+nav.stops a {
+  flex: 0 0 auto; text-decoration: none; color: var(--ink); background: var(--chip); border: 1px solid var(--line);
+  border-radius: 999px; padding: 5px 12px; font-size: 14px; font-weight: 500; white-space: nowrap;
+}
+nav.stops a span { font-family: var(--mono); color: var(--hit); margin-right: 6px; }
+nav.stops a:hover { border-color: var(--hit); }
+
+section.stop { display: grid; gap: 14px; scroll-margin-top: 64px; }
+.stop-head { display: grid; gap: 4px; }
+.stop-num { font: 700 13px var(--body); color: var(--hit); letter-spacing: .14em; display: flex; align-items: center; gap: 10px; }
+.stop-num::before { content: ""; width: 28px; height: 3px; border-radius: 2px; background: var(--gold); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; min-width: 0; align-content: start; }
+.two { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 860px) { .two { grid-template-columns: 1fr; } }
+.three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 860px) { .three { grid-template-columns: 1fr; } }
+.four { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 1000px) { .four { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .four { grid-template-columns: 1fr; } }
+
+.big-claim { font-size: clamp(19px, 2.2vw, 23px); line-height: 1.4; max-width: 62ch; }
+.big-claim em { font-style: normal; background: var(--hit-soft); padding: 0 4px; border-radius: 4px; }
+.label { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.note { font-size: 14px; color: var(--muted); }
+.callout { border-left: 4px solid var(--hit); padding: 4px 0 4px 12px; }
+.ans { background: var(--hit-soft); border-radius: 8px; padding: 10px 12px; }
+.n-badge { font: 700 15px var(--mono); color: var(--on-accent); background: var(--hit); border-radius: 999px; width: 30px; height: 30px; display: grid; place-items: center; }
+.src-name { font: 700 19px var(--display); }
+.src-ex { font-size: 15px; background: var(--chip); border-radius: 6px; padding: 8px 10px; }
+
+.sentence { font-size: clamp(20px, 2.6vw, 27px); line-height: 1.6; }
+.sentence .blank { display: inline-block; min-width: 7ch; border-bottom: 3px solid var(--gold); margin: 0 4px; }
+.sentence .fill { background: var(--hit-soft); border-radius: 4px; padding: 0 5px; font-weight: 600; }
+
+.contrast { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 560px) { .contrast { grid-template-columns: 1fr; } }
+.contrast > div { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 6px; }
+.contrast > div.good { border-color: var(--hit); background: var(--hit-soft); }
+.contrast > div.bad { border-color: var(--miss); background: var(--miss-soft); }
+.contrast .k { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; font-weight: 700; color: var(--muted); }
+
+.btn {
+  font: 600 15px var(--body); color: var(--ink); background: var(--chip); border: 1px solid var(--line);
+  border-radius: 7px; padding: 8px 12px; cursor: pointer;
+}
+.btn[aria-pressed="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+button:focus-visible, a:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+button:hover { filter: brightness(1.06); }
+.btnrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+.steps-list { display: grid; gap: 10px; }
+.qstep { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 8px; background: var(--panel); }
+.qstep .q { font-weight: 600; }
+.qstep .n { font: 600 12px var(--mono); color: var(--hit); letter-spacing: .06em; }
+.feedback { border-radius: 8px; padding: 10px 12px; }
+.feedback.good { background: var(--hit-soft); }
+.feedback.bad { background: var(--miss-soft); }
+
+.wrapx { overflow-x: auto; }
+table.rules { border-collapse: collapse; width: 100%; min-width: 980px; }
+table.rules td.cols { width: 22%; }
+table.rules td.cols .colname { font-weight: 700; color: var(--hit); }
+table.rules td.cols .how { font-size: 14px; color: var(--muted); }
+table.rules td.cols .how code { font-size: 13.5px; }
+table.rules th, table.rules td { border: 1px solid var(--line); padding: 9px 11px; text-align: left; font-size: 15.5px; vertical-align: top; }
+table.rules th { background: var(--chip); font-size: 13px; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+table.rules td.biz { font-weight: 600; width: 13%; }
+table.rules td.src { width: 18%; }
+table.rules td.dec { width: 20%; }
+.tag { display: inline-block; font: 700 12px var(--body); letter-spacing: .05em; text-transform: uppercase; border-radius: 4px; padding: 1px 7px; background: var(--chip); color: var(--hit); margin-bottom: 3px; }
+.reveal { font: 600 14px var(--body); color: var(--hit); background: transparent; border: 1px dashed var(--hit); border-radius: 6px; padding: 5px 10px; cursor: pointer; }
+.dec-text[hidden] { display: none; }
+
+.checks { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.checks li { display: grid; grid-template-columns: 30px 1fr; gap: 10px; align-items: start; }
+.checks li::before { content: "✓"; font-weight: 700; color: var(--on-accent); background: var(--hit); border-radius: 6px; width: 24px; height: 24px; display: grid; place-items: center; font-size: 14px; }
+table.tails { border-collapse: collapse; width: 100%; }
+table.tails th, table.tails td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; font-size: 15.5px; }
+table.tails th { background: var(--chip); font-size: 13px; color: var(--muted); }
+code { font: 15px var(--mono); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="brand">
+    <div class="bar"></div>
+    <div class="course">BMGT 240IS · Business Analytics</div>
+    <h1>Why Ask a One-Sample Question?</h1>
+    <div class="meta">Ch 9 · One-sample tests (9.3–9.6) · Final Project · Fall 2026 · Montana State University</div>
+  </header>
+
+  <nav class="stops" aria-label="Lesson stops">
+    <a href="#rule"><span>1</span>The rule</a>
+    <a href="#sources"><span>2</span>Where targets come from</a>
+    <a href="#bridger"><span>3</span>Bridger example</a>
+    <a href="#check"><span>4</span>Real or not?</a>
+    <a href="#examples"><span>5</span>Businesses like yours</a>
+    <a href="#turn"><span>6</span>Your turn</a>
+  </nav>
+
+  <!-- 1 -->
+  <section class="stop" id="rule">
+    <div class="stop-head"><div class="stop-num">STOP 1 · THE RULE</div><h2>A one-sample test needs three things</h2></div>
+    <p class="big-claim">Every test in Chapter 9 compares <em>one group</em> to <em>one fixed number</em>. That test is only worth running when your business actually <em>relies on</em> that number.</p>
+    <div class="three">
+      <div class="card"><div class="n-badge">1</div><h3>A number your business relies on</h3><p class="muted">A price, a cost, a rate, a promise. Not a number picked because it is round.</p></div>
+      <div class="card"><div class="n-badge">2</div><h3>A reason it relies on it</h3><p class="muted">A budget was built on it, an ad promises it, a policy kicks in at it, or a goal is set at it.</p></div>
+      <div class="card"><div class="n-badge">3</div><h3>A decision that changes with the answer</h3><p class="muted">If the test comes out one way you do one thing; the other way, something else.</p></div>
+    </div>
+    <p class="callout"><b>If you cannot name the decision, you do not have a business question yet. You have a calculation.</b></p>
+  </section>
+
+  <!-- 2 -->
+  <section class="stop" id="sources">
+    <div class="stop-head"><div class="stop-num">STOP 2 · WHERE THE TARGET NUMBER COMES FROM</div><h2>Real targets come from four places</h2>
+      <p class="muted">The number after μ<sub>0</sub> or p<sub>0</sub> in your hypotheses has to come from somewhere in the business. These are the four places it usually comes from.</p></div>
+    <div class="four">
+      <div class="card"><span class="label">Source 1</span><div class="src-name">A claim or promise</div><p>Something the business says out loud: an ad, a guarantee, a contract.</p><p class="src-ex">“Our cars cost under $3,500 a year to fuel.”</p></div>
+      <div class="card"><span class="label">Source 2</span><div class="src-name">A planning assumption</div><p>A number a budget, price, or schedule was built on.</p><p class="src-ex">“We priced plans assuming $12,000 per customer.”</p></div>
+      <div class="card"><span class="label">Source 3</span><div class="src-name">A policy trigger</div><p>A level that sets off an action when it is crossed.</p><p class="src-ex">“If cancellations go above 30%, we require deposits.”</p></div>
+      <div class="card"><span class="label">Source 4</span><div class="src-name">A goal</div><p>A target the business is trying to reach.</p><p class="src-ex">“Our profit margin target is 10%.”</p></div>
+    </div>
+    <p class="callout">If your target does not come from one of these, the test answers a question nobody asked.</p>
+  </section>
+
+  <!-- 3 -->
+  <section class="stop" id="bridger">
+    <div class="stop-head"><div class="stop-num">STOP 3 · WORKED EXAMPLE · OUR CLASS PROJECT</div><h2>Bridger Health Insurance: two numbers our prices were built on</h2>
+      <p class="muted">From our class proposal: this year's prices assume the average customer costs $12,000 a year and 15% of customers smoke.</p></div>
+    <div class="two">
+      <div class="card">
+        <div class="label">The mean · 9.4 (t test)</div>
+        <p class="sentence">Our business relies on <span class="fill">an average cost of $12,000</span> because <span class="fill">every plan was priced on it</span>; if the test shows <span class="fill">the true average is higher</span>, we will <span class="fill">raise next year's premiums</span>.</p>
+        <p class="note">Source 2: a planning assumption. Variable: <code>charges</code>.</p>
+      </div>
+      <div class="card">
+        <div class="label">The proportion · 9.5 (z test)</div>
+        <p class="sentence">Our business relies on <span class="fill">15% of customers smoking</span> because <span class="fill">the smoker surcharge was set for that mix</span>; if the test shows <span class="fill">more than 15% smoke</span>, we will <span class="fill">raise the surcharge</span>.</p>
+        <p class="note">Source 2: a planning assumption. Variable: <code>smoker</code> (yes / no).</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="label">Same dataset, two versions of the question</div>
+      <div class="contrast">
+        <div class="bad"><span class="k">Just a calculation</span><p>“Is the average BMI different from 28?”</p><p class="note">Why 28? Nothing in the business depends on it, and no decision changes with the answer.</p></div>
+        <div class="good"><span class="k">A business question</span><p>“Is the average charge different from the $12,000 our prices were built on?”</p><p class="note">The number has a source, and the answer decides whether we reprice.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="stop" id="check">
+    <div class="stop-head"><div class="stop-num">STOP 4 · QUICK CHECK</div><h2>Real business question, or just a calculation?</h2>
+      <p class="muted">Decide for each one before clicking. Then say which source the target comes from.</p></div>
+    <div class="steps-list" id="quiz"></div>
+  </section>
+
+  <!-- 5 -->
+  <section class="stop" id="examples">
+    <div class="stop-head"><div class="stop-num">STOP 5 · BUSINESSES LIKE YOURS</div><h2>One-sample questions from this semester's businesses</h2>
+      <p class="muted">Each question names its target and where it comes from. <b>Before revealing the decision, say out loud what you think the business would do.</b></p></div>
+    <div class="btnrow"><button type="button" class="btn" id="revealAll" aria-pressed="false">Reveal all decisions</button></div>
+    <div class="wrapx">
+      <table class="rules" id="exTable">
+        <thead><tr><th>Business</th><th>One-sample question</th><th>Columns to use</th><th>Where the target comes from</th><th>The decision it drives</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="note">These are examples, not assigned questions. Your group should write its own, with a target your business would actually use.</p>
+  </section>
+
+  <!-- 6 -->
+  <section class="stop" id="turn">
+    <div class="stop-head"><div class="stop-num">STOP 6 · YOUR TURN · WITH YOUR GROUP</div><h2>Write one one-sample question for your project</h2></div>
+    <div class="card">
+      <div class="label">Fill in the sentence</div>
+      <p class="sentence">Our business relies on <span class="blank">&nbsp;</span> because <span class="blank">&nbsp;</span>; if the test shows <span class="blank">&nbsp;</span>, we will <span class="blank">&nbsp;</span>.</p>
+    </div>
+    <div class="two">
+      <div class="card">
+        <div class="label">Before you call it done</div>
+        <ul class="checks">
+          <li><span>The target number comes from one of the <b>four sources</b>, and you can say which.</span></li>
+          <li><span>You named the <b>variable</b> in your dataset, and whether it is a mean (9.4) or a yes/no share (9.5).</span></li>
+          <li><span>You decided <b>how big a difference would matter</b> to the business. With thousands of rows, almost any difference is “significant” (9.6).</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="label">Which tail? Listen to the decision</div>
+        <table class="tails">
+          <thead><tr><th>The decision depends on…</th><th>H<sub>a</sub></th><th>Tail</th></tr></thead>
+          <tbody>
+            <tr><td>“more than,” “above,” “exceeds”</td><td>μ &gt; μ<sub>0</sub></td><td>Upper</td></tr>
+            <tr><td>“less than,” “under,” “fewer than”</td><td>μ &lt; μ<sub>0</sub></td><td>Lower</td></tr>
+            <tr><td>“is it still,” “different from,” “off from”</td><td>μ ≠ μ<sub>0</sub></td><td>Two-tailed</td></tr>
+          </tbody>
+        </table>
+        <p class="note">Same rules for a proportion, with p and p<sub>0</sub>.</p>
+      </div>
+    </div>
+    <p class="ans"><b>This feeds your report.</b> Section 6 needs hypotheses and a business decision for each test, and Section 8's recommendations must point back to that evidence. A question built around a decision is already halfway to both.</p>
+  </section>
+</div>
+
+<script>
+const QUIZ = [
+  { q: "“Is the average Nashville Airbnb price different from $347?”",
+    real: false, why: "Where does $347 come from? No claim, plan, policy, or goal depends on it, and no decision changes with the answer." },
+  { q: "“Our deposit policy starts if more than 30% of bookings cancel. Is our cancellation rate above 30%?”",
+    real: true, why: "Source 3, a policy trigger. The answer decides whether deposits are required." },
+  { q: "“What is the average profit per order line?”",
+    real: false, why: "There is no target to test against. This is a descriptive statistic or a confidence interval, not a one-sample test." },
+  { q: "“We advertise that our used cars cost under $3,500 a year to fuel. Is that true?”",
+    real: true, why: "Source 1, a claim. The answer decides whether the ad can run." }
+];
+const quiz = document.getElementById("quiz");
+QUIZ.forEach((item, i) => {
+  const box = document.createElement("div");
+  box.className = "qstep";
+  box.innerHTML = `<div class="n">QUESTION ${i + 1}</div><div class="q">${item.q}</div>
+    <div class="btnrow"><button type="button" class="btn" data-a="real">Real business question</button><button type="button" class="btn" data-a="calc">Just a calculation</button></div>
+    <div class="feedback" hidden></div>`;
+  const fb = box.querySelector(".feedback");
+  box.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    box.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+    const right = (b.dataset.a === "real") === item.real;
+    fb.hidden = false;
+    fb.className = "feedback " + (right ? "good" : "bad");
+    fb.textContent = (right ? "Yes. " : "Not quite. ") + item.why;
+  }));
+  quiz.appendChild(box);
+});
+
+// cols: [test, the column tested, how to narrow or build it]
+const EX = [
+  ["Used-car dealership", "Do our typical used cars (model years 2015–2020) average under $3,500 a year in fuel?",
+    ["9.4 · mean", "fuelCost08", "Keep rows where <code>year</code> is 2015–2020."],
+    "Claim", "A line the dealership wants to put in its ads", "Run the ad, or don't. A false claim is a legal and reputation risk."],
+  ["New and used dealership", "Do 2026 gas models average more than 22 MPG combined?",
+    ["9.4 · mean", "comb08", "Keep rows where <code>year</code> = 2026 and <code>atvType</code> is blank (gas only)."],
+    "Goal", "The efficiency level commuter customers ask for", "Market new gas cars as “efficient,” or steer those buyers toward hybrids."],
+  ["Dealership (city vs. highway)", "For 2026 gas models, is highway MPG more than 6 MPG above city on average?",
+    ["9.4 · mean", "highway08 − city08", "Build a new column of the difference. Keep <code>year</code> = 2026, <code>atvType</code> blank."],
+    "Planning assumption", "The rule of thumb salespeople tell buyers", "Keep using “expect about 6 more on the highway,” or change what staff say."],
+  ["Star Retail", "Is the profit margin on Same Day orders above 10%?",
+    ["9.4 · mean", "Profit ÷ Sales", "Build a margin column. Keep rows where <code>Ship Mode</code> = Same Day."],
+    "Goal", "The company's margin target", "Keep offering Same Day shipping, or reprice or drop it."],
+  ["Airbnb property managers", "Do 2-bedroom listings average more than $250 a night?",
+    ["9.4 · mean", "price", "Keep rows where <code>bedrooms</code> = 2. Price is text with “$”: convert it to a number first."],
+    "Planning assumption", "The nightly rate the budget for a new 2-bedroom unit is built on", "Buy or list another 2-bedroom property, or don't."],
+  ["Nashville property management", "Are listings open 250 nights a year on average?",
+    ["9.4 · mean", "availability_365", "Nights the listing is open, not nights booked."],
+    "Planning assumption", "The figure management fees and staffing are based on", "How many cleaners and staff to schedule, and whether the fee model holds."],
+  ["Nashville rental company", "Do listings average at least a 4.8 rating?",
+    ["9.4 · mean", "review_scores_rating", "Skip listings with no rating."],
+    "Goal", "The rating guests tend to treat as the minimum acceptable", "Whether to invest in guest experience: cleaning, amenities."],
+  ["Bobcat Retail", "Are more than 15% of order lines losing money?",
+    ["9.5 · proportion", "Unprofitable", "Yes / No column (Yes when <code>Profit</code> &lt; 0), already in the Orders sheet."],
+    "Policy trigger", "Above this level, the discount policy gets reviewed", "Whether to cap discounts."],
+  ["American Waterfowl Outfitters", "Do clients book more than 90 days ahead on average?",
+    ["9.4 · mean", "lead_time", "Days between booking and arrival."],
+    "Policy trigger", "The cutoff the deposit and refund rules would use", "When to require deposits, and how far ahead to schedule guides and lodging."],
+  ["American Waterfowl Outfitters", "Is our cancellation rate above 30%?",
+    ["9.5 · proportion", "is_canceled", "1 = canceled, 0 = not. The share is the count of 1s ÷ n."],
+    "Policy trigger", "The level at which empty, unpaid spots become a serious cost", "Require deposits, or overbook."],
+  ["Gallatin Lodging Group", "Does the resort average more than $100 a night?",
+    ["9.4 · mean", "adr", "Average daily rate. Keep rows where <code>hotel</code> = Resort Hotel."],
+    "Goal", "The nightly rate the resort needs to cover its higher costs", "Raise resort prices, cut costs, or change marketing."],
+  ["Gallatin Lodging Group", "Do fewer than 10% of bookings include children?",
+    ["9.5 · proportion", "children + babies", "Build a Yes / No column: Yes when <code>children</code> + <code>babies</code> &gt; 0."],
+    "Policy trigger", "Below this level, family amenities may not pay for themselves", "Keep, cut, or expand kids' programs and family rooms."]
+];
+const tbody = document.querySelector("#exTable tbody");
+EX.forEach(([biz, q, [test, col, how], tag, src, dec]) => {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<td class="biz">${biz}</td><td>${q}</td>
+    <td class="cols"><span class="tag">${test}</span><br><code class="colname">${col}</code><br><span class="how">${how}</span></td>
+    <td class="src"><span class="tag">${tag}</span><br>${src}</td>
+    <td class="dec"><button type="button" class="reveal">Reveal decision</button><span class="dec-text" hidden>${dec}</span></td>`;
+  const btn = tr.querySelector(".reveal"), txt = tr.querySelector(".dec-text");
+  btn.addEventListener("click", () => { btn.hidden = true; txt.hidden = false; });
+  tbody.appendChild(tr);
+});
+const all = document.getElementById("revealAll");
+all.addEventListener("click", () => {
+  const show = all.getAttribute("aria-pressed") !== "true";
+  all.setAttribute("aria-pressed", show ? "true" : "false");
+  all.textContent = show ? "Hide all decisions" : "Reveal all decisions";
+  tbody.querySelectorAll("tr").forEach(tr => {
+    tr.querySelector(".reveal").hidden = show;
+    tr.querySelector(".dec-text").hidden = !show;
+  });
+});
+</script>
+</body>
+</html>
