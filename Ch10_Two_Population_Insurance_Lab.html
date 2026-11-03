@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Two-Population Insurance Lab</title>
+<style>
+/* Layout: a projected lesson in seven numbered stops, matching the Ch 9 labs.
+   Brand: MSU navy #162860 + gold #F3B324, Aptos. */
+:root {
+  --navy: #162860; --navy-deep: #0f1c48; --gold: #F3B324;
+  --bg: #f3f5fa; --panel: #ffffff; --ink: #111a30; --muted: #4a5570; --line: #d5dae7;
+  --hit: #162860; --hit-soft: rgba(22,40,96,.13); --miss: #c8432f; --miss-soft: rgba(200,67,47,.14);
+  --chip: #e7ebf4; --focus: #F3B324; --on-accent: #ffffff;
+  --display: Aptos, "Aptos Display", "Segoe UI", Arial, Helvetica, sans-serif;
+  --body: Aptos, "Segoe UI", Arial, Helvetica, sans-serif;
+  --mono: Consolas, "Courier New", monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b1433; --panel: #14214d; --ink: #eef1f8; --muted: #a9b3cc; --line: #2a3a6e;
+    --hit: #F3B324; --hit-soft: rgba(243,179,36,.18); --miss: #f07a63; --miss-soft: rgba(240,122,99,.16);
+    --chip: #1c2b5c; --focus: #FADA92; --on-accent: #162860; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b1433; --panel: #14214d; --ink: #eef1f8; --muted: #a9b3cc; --line: #2a3a6e;
+  --hit: #F3B324; --hit-soft: rgba(243,179,36,.18); --miss: #f07a63; --miss-soft: rgba(240,122,99,.16);
+  --chip: #1c2b5c; --focus: #FADA92; --on-accent: #162860; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 56px;
+}
+.wrap { max-width: 1280px; margin: 0 auto; display: grid; gap: 28px; }
+header.brand {
+  margin-top: 20px; border-radius: 12px; padding: 26px clamp(18px, 3vw, 36px) 24px;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-deep) 100%); color: #ffffff;
+  display: grid; gap: 8px; border: 1px solid var(--line);
+}
+header.brand .bar { width: 52px; height: 4px; border-radius: 2px; background: var(--gold); }
+header.brand .course { font-size: 14px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); }
+header.brand h1 { color: #ffffff; }
+header.brand .meta { font-size: 14px; color: #b9c3dc; }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(30px, 4.2vw, 44px); line-height: 1.1; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--display); font-size: clamp(22px, 2.6vw, 28px); line-height: 1.2; margin: 0; text-wrap: balance; }
+h3 { font-family: var(--display); font-size: 18px; margin: 0; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.mono, b.m { font-family: var(--mono); font-weight: 500; font-variant-numeric: tabular-nums; }
+.xb { display: inline-block; position: relative; font-weight: 700; font-style: italic; line-height: 1; padding: 0 .06em; }
+.xb::before { content: ""; position: absolute; left: .1em; right: .02em; top: .1em; height: .1em; min-height: 2px; border-radius: 1px; background: currentColor; }
+.nc { text-transform: none; }
+.pb { text-decoration: overline; font-style: italic; font-weight: 700; }
+
+nav.stops { position: sticky; top: 0; z-index: 5; background: var(--bg); display: flex; gap: 6px; overflow-x: auto; padding-block: 10px; border-bottom: 1px solid var(--line); }
+nav.stops a { flex: 0 0 auto; text-decoration: none; color: var(--ink); background: var(--chip); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; font-size: 14px; font-weight: 500; white-space: nowrap; }
+nav.stops a span { font-family: var(--mono); color: var(--hit); margin-right: 6px; }
+nav.stops a:hover { border-color: var(--hit); }
+
+section.stop { display: grid; gap: 14px; scroll-margin-top: 64px; }
+.stop-head { display: grid; gap: 4px; }
+.stop-num { font: 700 13px var(--body); color: var(--hit); letter-spacing: .14em; display: flex; align-items: center; gap: 10px; }
+.stop-num::before { content: ""; width: 28px; height: 3px; border-radius: 2px; background: var(--gold); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; min-width: 0; align-content: start; }
+.two { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 860px) { .two { grid-template-columns: 1fr; } }
+.big-claim { font-size: clamp(19px, 2.2vw, 22px); line-height: 1.4; max-width: 64ch; }
+.big-claim em { font-style: normal; background: var(--hit-soft); padding: 0 4px; border-radius: 4px; }
+.label { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.note { font-size: 14px; color: var(--muted); }
+.callout { border-left: 4px solid var(--hit); padding: 4px 0 4px 12px; }
+.ans { background: var(--hit-soft); border-radius: 8px; padding: 10px 12px; }
+.warn { background: var(--miss-soft); border-radius: 8px; padding: 10px 12px; }
+.hyp { font: 600 19px var(--mono); line-height: 1.6; }
+
+.kv { display: grid; gap: 6px; font-variant-numeric: tabular-nums; }
+.kv div { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; border-bottom: 1px dashed var(--line); padding-bottom: 4px; }
+.kv div:last-child { border-bottom: 0; }
+.kv span:first-child { color: var(--muted); }
+.kv b { font: 500 17px var(--mono); }
+
+.fivestep { display: grid; gap: 8px; counter-reset: st; margin: 0; padding: 0; list-style: none; }
+.fivestep li { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: baseline; }
+.fivestep li::before { counter-increment: st; content: counter(st); font: 700 15px var(--mono); color: var(--on-accent); background: var(--hit); border-radius: 999px; width: 28px; height: 28px; display: grid; place-items: center; }
+
+.btn { font: 600 15px var(--body); color: var(--ink); background: var(--chip); border: 1px solid var(--line); border-radius: 7px; padding: 8px 12px; cursor: pointer; }
+.btn[aria-pressed="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+.btn.primary { background: var(--hit); color: var(--on-accent); border-color: var(--hit); }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+button:hover { filter: brightness(1.06); }
+.btnrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.predict { display: grid; gap: 8px; }
+.feedback { border-radius: 8px; padding: 10px 12px; background: var(--chip); }
+
+.wrapx { overflow-x: auto; }
+table.rules { border-collapse: collapse; width: 100%; min-width: 560px; }
+table.rules th, table.rules td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; font-size: 15.5px; vertical-align: top; }
+table.rules th { background: var(--chip); font-size: 13px; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+table.rules td.mono { font-family: var(--mono); font-size: 14.5px; }
+table.rules td.num { font-family: var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+table.rules td.flip { background: var(--hit-soft); font-weight: 700; }
+.verdict { font: 700 18px var(--display); border-radius: 8px; padding: 8px 12px; text-align: center; }
+.verdict.rej { background: var(--miss-soft); color: var(--miss); }
+.verdict.keep { background: var(--hit-soft); color: var(--hit); }
+[data-reveal][hidden] { display: none !important; }
+
+.sim { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 900px) { .sim { grid-template-columns: 1fr; } }
+.row { display: flex; align-items: center; gap: 10px; }
+input[type="range"] { flex: 1; accent-color: var(--hit); }
+.val { font: 600 20px var(--mono); min-width: 80px; text-align: right; font-variant-numeric: tabular-nums; }
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 560px) { .tiles { grid-template-columns: 1fr; } }
+.tile { background: var(--chip); border-radius: 8px; padding: 8px 12px; display: grid; }
+.tile .num { font: 600 26px var(--display); font-variant-numeric: tabular-nums; line-height: 1.15; }
+.tile .cap { font-size: 13px; color: var(--muted); }
+.bar-wrap { display: grid; gap: 4px; }
+.bar-track { height: 16px; border-radius: 8px; background: var(--chip); position: relative; overflow: hidden; }
+.bar-fill { position: absolute; inset: 0 auto 0 0; background: var(--hit); border-radius: 8px; transition: width .15s; }
+.bar-alpha { position: absolute; top: -3px; bottom: -3px; width: 3px; background: var(--miss); }
+
+.time { display: inline-block; font: 600 13px var(--mono); color: var(--on-accent); background: var(--hit); border-radius: 999px; padding: 2px 10px; margin-left: 8px; vertical-align: middle; }
+.quiz { display: grid; gap: 8px; }
+.quiz .q { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; border-bottom: 1px dashed var(--line); padding-bottom: 8px; }
+.quiz .why { font-size: 15px; }
+.right { color: var(--hit); font-weight: 700; } .wrong { color: var(--miss); font-weight: 700; }
+table.rules td.d { font-family: var(--mono); text-align: right; }
+.fivestep .mono, .note .mono { overflow-wrap: anywhere; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="brand">
+    <div class="bar"></div>
+    <div class="course">BMGT 240IS · Business Analytics</div>
+    <h1>Two-Population Insurance Lab</h1>
+    <div class="meta">Ch 10.1–10.4 · Comparing two groups · works through Assignment 8 · 75 minutes · Fall 2026 · Montana State University</div>
+  </header>
+
+  <nav class="stops" aria-label="Lesson stops">
+    <a href="#start"><span>1</span>One group → two</a>
+    <a href="#z"><span>2</span>10.1 σ known</a>
+    <a href="#smoke"><span>3</span>10.2 surcharge</a>
+    <a href="#region"><span>4</span>10.2 .05 vs .01</a>
+    <a href="#pair"><span>5</span>10.3 matched</a>
+    <a href="#prop"><span>6</span>10.4 proportions</a>
+    <a href="#wrap"><span>7</span>Which test? &amp; Thursday</a>
+  </nav>
+
+  <section class="stop" id="start">
+    <div class="stop-head"><div class="stop-num">STOP 1 · FROM ONE SAMPLE TO TWO <span class="time">5 min</span></div><h2>Last week: is the average $12,000? This week: are two groups different?</h2>
+      <p class="muted">Open <b>Assignment8_Chapter10.xlsx</b>. The 1,338 customers are on the <b>insurance</b> sheet. Each stop below is one sheet.</p></div>
+    <div class="two">
+      <div class="card">
+        <p class="big-claim">Chapter 9 compared <em>one group</em> to a target. Chapter 10 compares <em>two groups</em> to each other.</p>
+        <p>Same five steps, same p-value rule. What changes is the thing we test: a <b>difference</b>, μ<sub>1</sub> − μ<sub>2</sub> or p<sub>1</sub> − p<sub>2</sub>, and H<sub>0</sub> almost always says that difference is 0.</p>
+      </div>
+      <div class="card">
+        <div class="label">The four tests in Chapter 10</div>
+        <div class="wrapx"><table class="rules"><tr><th>Section</th><th>Compares</th><th>Uses</th></tr>
+          <tr><td>10.1</td><td>Two means, σ known</td><td>z</td></tr>
+          <tr><td>10.2</td><td>Two means, σ unknown</td><td>t, with s<sub>1</sub> and s<sub>2</sub></td></tr>
+          <tr><td>10.3</td><td>The same elements measured twice</td><td>t on the differences d</td></tr>
+          <tr><td>10.4</td><td>Two proportions</td><td>z, with a pooled p̄</td></tr></table></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stop" id="z">
+    <div class="stop-head"><div class="stop-num">STOP 2 · 10.1 · TWO MEANS, σ KNOWN <span class="time">12 min</span></div><h2>Do Northeast and Southwest customers cost the same?</h2>
+      <p class="muted">Workbook sheet: <b>Q1</b>. Audit samples of 50 per region are in columns E and F.</p></div>
+    <div class="two">
+      <div class="card">
+        <p class="hyp">H<sub>0</sub>: μ<sub>NE</sub> − μ<sub>SW</sub> = 0<br>H<sub>a</sub>: μ<sub>NE</sub> − μ<sub>SW</sub> ≠ 0</p>
+        <p>Bridger knows σ for each region from all its records, so we use <b>z</b>:</p>
+        <p class="hyp">SE = √(σ<sub>1</sub>²/n<sub>1</sub> + σ<sub>2</sub>²/n<sub>2</sub>)</p>
+        <div class="kv">
+          <div><span>x̄ NE − x̄ SW</span><b>$13,202.67 − $11,906.07 = $1,296.60</b></div>
+          <div><span>SE</span><b>$2,277.98</b></div>
+          <div><span>z · p-value</span><b>0.569 · 0.569</b></div>
+        </div>
+        <p class="verdict keep">Do not reject H<sub>0</sub></p>
+        <p class="note">Excel: <span class="mono">=SQRT(B5^2/B7+B6^2/B8)</span>, then <span class="mono">=2*(1-NORM.S.DIST(ABS(z),TRUE))</span>.</p>
+      </div>
+      <div class="card">
+        <div class="predict"><div class="label">The twist</div>
+          <p>Bridger’s full records show the Northeast really does average <b>$1,059 more</b>. So H<sub>0</sub> is false, and we did not reject it. Which error is that?</p>
+          <div class="btnrow" data-predict="err"><button type="button" class="btn">Type I</button><button type="button" class="btn">Type II</button></div>
+          <button type="button" class="btn primary" data-show="errAns">Show</button></div>
+        <div id="errAns" data-reveal hidden class="ans"><b>Type II.</b> The difference is real, but $1,059 is small next to σ ≈ $11,000. Slide n to see how big an audit would need to be.</div>
+        <div class="label">Thought experiment: policies sampled per region</div>
+        <div class="row"><input type="range" id="nS" min="50" max="1200" step="10" value="50" aria-label="Sample size per region"><span class="val" id="nV">50</span></div>
+        <div class="tiles"><div class="tile"><span class="num" id="seV">–</span><span class="cap">standard error</span></div><div class="tile"><span class="num" id="zV">–</span><span class="cap">z for a $1,059 gap</span></div><div class="tile"><span class="num" id="pV">–</span><span class="cap">p-value</span></div></div>
+        <p class="feedback" id="simSay"></p>
+        <p class="note">It takes about <b>890 per region</b> to detect this gap at α = .05, and Bridger has only about 325 customers in each region. Some real differences are too small for the data you have.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="stop" id="smoke">
+    <div class="stop-head"><div class="stop-num">STOP 3 · 10.2 · TWO MEANS, σ UNKNOWN <span class="time">15 min</span></div><h2>How big should the smoker surcharge be?</h2>
+      <p class="muted">Workbook sheet: <b>Q2</b>. Everyone builds this one with me, row by row.</p></div>
+    <div class="two">
+      <div class="card">
+        <p class="hyp">H<sub>0</sub>: μ<sub>S</sub> − μ<sub>N</sub> ≤ 0<br>H<sub>a</sub>: μ<sub>S</sub> − μ<sub>N</sub> &gt; 0</p>
+        <div class="wrapx"><table class="rules"><tr><th></th><th>Smokers</th><th>Non-smokers</th></tr>
+          <tr><td>n</td><td class="num">274</td><td class="num">1,064</td></tr>
+          <tr><td>x̄</td><td class="num">$32,050.23</td><td class="num">$8,434.27</td></tr>
+          <tr><td>s</td><td class="num">$11,541.55</td><td class="num">$5,993.78</td></tr></table></div>
+        <div class="kv">
+          <div><span>SE = √(s<sub>1</sub>²/n<sub>1</sub> + s<sub>2</sub>²/n<sub>2</sub>)</span><b>$721.06</b></div>
+          <div><span>Welch df</span><b>311.85</b></div>
+          <div><span>t · p (upper tail)</span><b>32.75 · &lt; 0.0001</b></div>
+          <div><span>95% CI for μ<sub>S</sub> − μ<sub>N</sub></span><b>$22,197 to $25,035</b></div>
+        </div>
+        <p class="verdict rej">Reject H<sub>0</sub></p>
+      </div>
+      <div class="card">
+        <div class="label">The Excel you need</div>
+        <ol class="fivestep">
+          <li><span><span class="mono">=COUNTIF(insurance!E:E,"yes")</span> and <span class="mono">=AVERAGEIF(insurance!E:E,"yes",insurance!G:G)</span></span></li>
+          <li><span><span class="mono">=STDEV.S(FILTER(insurance!G2:G1339,insurance!E2:E1339="yes"))</span>: FILTER pulls one group’s values</span></li>
+          <li><span>SE, then the Welch df formula on the sheet (or read df from the ToolPak)</span></li>
+          <li><span><span class="mono">=T.DIST.RT(t,df)</span> for the upper tail</span></li>
+          <li><span>CI: difference ± <span class="mono">T.INV.2T(0.05,df)</span> × SE</span></li>
+        </ol>
+        <p class="callout">The test says smokers cost more. The <b>interval says how much</b>: $22,200 to $25,000 a year. That is the number the surcharge is built on.</p>
+        <p class="note">Check: <i>Data › Data Analysis › t-Test: Two-Sample Assuming Unequal Variances</i>. It rounds df to 312.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="stop" id="region">
+    <div class="stop-head"><div class="stop-num">STOP 4 · 10.2 · SIGNIFICANT AT .05, NOT AT .01 <span class="time">10 min</span></div><h2>Should Southeast customers pay more?</h2>
+      <p class="muted">Workbook sheet: <b>Q3</b>. Your turn: same formulas as Q2, with region instead of smoker, and a two-tailed p-value.</p></div>
+    <div class="two">
+      <div class="card">
+        <div class="predict"><div class="label">Predict first</div>
+          <p>Southeast averages $14,735, Northwest $12,418. Significant at α = .05?</p>
+          <div class="btnrow" data-predict="reg"><button type="button" class="btn">Yes</button><button type="button" class="btn">No</button></div>
+          <button type="button" class="btn primary" data-show="regAns">Show</button></div>
+        <div id="regAns" data-reveal hidden class="kv">
+          <div><span>t · df</span><b>2.425 · 677.64</b></div>
+          <div><span>p (two-tailed)</span><b>0.0156</b></div>
+          <div><span>95% CI</span><b>$441 to $4,194</b></div>
+        </div>
+      </div>
+      <div class="card">
+        <p class="big-claim">p = 0.016 rejects at α = .05 but <em>not</em> at α = .01.</p>
+        <p>That is moderate evidence, not strong. The interval runs from $441 to $4,194, which is a wide range for a pricing decision. Before charging a region more, ask <i>why</i> it costs more: does the Southeast have more smokers?</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="stop" id="pair">
+    <div class="stop-head"><div class="stop-num">STOP 5 · 10.3 · MATCHED SAMPLES <span class="time">15 min</span></div><h2>Does the wellness program lower charges?</h2>
+      <p class="muted">Workbook sheet: <b>Q4</b>. <b>Hypothetical data</b>, made up for teaching: the insurance file has no before-and-after pairs.</p></div>
+    <div class="two">
+      <div class="card">
+        <div class="wrapx"><table class="rules"><tr><th>Customer</th><th>Before</th><th>After</th><th>d = After − Before</th></tr><tr><td>1</td><td class='d'>9,800</td><td class='d'>9,100</td><td class='d'>-700</td></tr><tr><td>2</td><td class='d'>14,200</td><td class='d'>13,100</td><td class='d'>-1,100</td></tr><tr><td>3</td><td class='d'>7,600</td><td class='d'>7,900</td><td class='d'>+300</td></tr><tr><td>4</td><td class='d'>22,500</td><td class='d'>20,800</td><td class='d'>-1,700</td></tr><tr><td>5</td><td class='d'>11,300</td><td class='d'>10,600</td><td class='d'>-700</td></tr><tr><td>6</td><td class='d'>6,400</td><td class='d'>6,500</td><td class='d'>+100</td></tr><tr><td>7</td><td class='d'>18,900</td><td class='d'>17,600</td><td class='d'>-1,300</td></tr><tr><td>8</td><td class='d'>12,700</td><td class='d'>12,100</td><td class='d'>-600</td></tr><tr><td>9</td><td class='d'>8,800</td><td class='d'>8,300</td><td class='d'>-500</td></tr><tr><td>10</td><td class='d'>15,600</td><td class='d'>14,200</td><td class='d'>-1,400</td></tr><tr><td>11</td><td class='d'>10,200</td><td class='d'>10,400</td><td class='d'>+200</td></tr><tr><td>12</td><td class='d'>13,400</td><td class='d'>12,500</td><td class='d'>-900</td></tr></table></div>
+        <p class="note">Column G: one formula, <span class="mono">=F5-E5</span>, copied down.</p>
+      </div>
+      <div class="card">
+        <p class="hyp">H<sub>0</sub>: μ<sub>d</sub> ≥ 0 &nbsp; H<sub>a</sub>: μ<sub>d</sub> &lt; 0</p>
+        <div class="label">Same 12 customers, two ways to analyze them</div>
+        <div class="btnrow" id="how"><button type="button" class="btn" aria-pressed="true" data-k="paired">Paired (10.3)</button><button type="button" class="btn" aria-pressed="false" data-k="indep">As if independent (10.2)</button></div>
+        <div class="tiles"><div class="tile"><span class="num" id="hSE">$185.64</span><span class="cap">standard error</span></div><div class="tile"><span class="num" id="hT">−3.73</span><span class="cap">t</span></div><div class="tile"><span class="num" id="hP">0.0017</span><span class="cap">p-value (lower tail)</span></div></div>
+        <p class="feedback" id="hSay">Paired: each customer is compared with themselves. Charges fell by $691.67 on average. Reject H<sub>0</sub>.</p>
+        <p class="callout">Same mean drop, $691.67. The difference is the <b>standard error</b>. Customers range from $6,400 to $22,500, and the independent test counts all that spread as noise. Pairing removes it.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="stop" id="prop">
+    <div class="stop-head"><div class="stop-num">STOP 6 · 10.4 · TWO PROPORTIONS <span class="time">12 min</span></div><h2>Do men smoke more than women?</h2>
+      <p class="muted">Workbook sheet: <b>Q5</b>.</p></div>
+    <div class="two">
+      <div class="card">
+        <p class="hyp">H<sub>0</sub>: p<sub>M</sub> − p<sub>F</sub> = 0 &nbsp; H<sub>a</sub>: p<sub>M</sub> − p<sub>F</sub> ≠ 0</p>
+        <div class="kv">
+          <div><span>Men</span><b>159 / 676 = 0.2352</b></div>
+          <div><span>Women</span><b>115 / 662 = 0.1737</b></div>
+          <div><span>Pooled p̄ = (159 + 115)/(676 + 662)</span><b>0.2048</b></div>
+          <div><span>SE (pooled) · z</span><b>0.02207 · 2.787</b></div>
+          <div><span>p (two-tailed)</span><b>0.0053</b></div>
+          <div><span>95% CI (unpooled SE)</span><b>0.018 to 0.105</b></div>
+        </div>
+        <p class="verdict rej">Reject H<sub>0</sub></p>
+        <p class="note">Excel: <span class="mono">=COUNTIFS(insurance!B:B,"male",insurance!E:E,"yes")</span></p>
+      </div>
+      <div class="card">
+        <div class="label">Why pool for the test, but not for the interval?</div>
+        <p>The test <b>assumes H<sub>0</sub> is true</b>: one smoking rate for everyone. Our best estimate of that single rate combines both samples: the pooled p̄.</p>
+        <p>The interval <b>doesn’t assume</b> the rates are equal. It estimates how far apart they are, so each group keeps its own p̄.</p>
+        <p class="callout">Men are 2 to 10 percentage points more likely to smoke. Connect it back to Stop 4: is that part of why some regions cost more?</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="stop" id="wrap">
+    <div class="stop-head"><div class="stop-num">STOP 7 · WHICH TEST? AND THURSDAY <span class="time">6 min</span></div><h2>Pick the test, then bring it to your project</h2>
+      <p class="muted">Workbook sheet: <b>Q6</b>. Click an answer.</p></div>
+    <div class="two">
+      <div class="card"><div class="quiz"><div class="q" data-ans="10.3"><b>The same 40 customers’ BMI, before and after a nutrition program.</b><div class="btnrow"><button type="button" class="btn">10.1</button><button type="button" class="btn">10.2</button><button type="button" class="btn">10.3</button><button type="button" class="btn">10.4</button></div><p class="why" hidden></p><template>The same customers measured twice: matched.</template></div><div class="q" data-ans="10.4"><b>Renewal rate: customers who got a discount offer vs those who did not.</b><div class="btnrow"><button type="button" class="btn">10.1</button><button type="button" class="btn">10.2</button><button type="button" class="btn">10.3</button><button type="button" class="btn">10.4</button></div><p class="why" hidden></p><template>Renew or not is yes/no, in two groups: two proportions.</template></div><div class="q" data-ans="10.2"><b>Mean charges, customers with children vs without.</b><div class="btnrow"><button type="button" class="btn">10.1</button><button type="button" class="btn">10.2</button><button type="button" class="btn">10.3</button><button type="button" class="btn">10.4</button></div><p class="why" hidden></p><template>Two separate groups of customers, σ unknown.</template></div><div class="q" data-ans="10.1"><b>Mean claim time at two offices, when years of records give each office’s σ.</b><div class="btnrow"><button type="button" class="btn">10.1</button><button type="button" class="btn">10.2</button><button type="button" class="btn">10.3</button><button type="button" class="btn">10.4</button></div><p class="why" hidden></p><template>Two means with σ known: z.</template></div></div></div>
+      <div class="card">
+        <p class="big-claim">Thursday is a <em>lab day</em>. You run these tests on <em>your own</em> project data.</p>
+        <p>Quiz 8 gives each group its own workbook, built on the two-group question from your topic proposal. The steps are the ones from today: check the data, H<sub>0</sub> and H<sub>a</sub>, n, x̄, s, SE, df, t, p, CI, and what it means for the business.</p>
+        <p class="note">Finish any Assignment 8 sheets we didn’t complete in class and upload the workbook as LastName_Assignment8.xlsx.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+document.querySelectorAll("[data-predict]").forEach(g => g.querySelectorAll("button").forEach(b => b.addEventListener("click", () =>
+  g.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false")))));
+document.querySelectorAll("[data-show]").forEach(b => b.addEventListener("click", () => {
+  const el = document.getElementById(b.dataset.show); el.hidden = !el.hidden;
+  b.textContent = el.hidden ? b.textContent.replace("Hide", "Show") : b.textContent.replace("Show", "Hide");
+}));
+document.querySelectorAll(".quiz .q").forEach(q => {
+  const why = q.querySelector(".why"), text = q.querySelector("template").innerHTML;
+  q.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    q.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+    const ok = b.textContent === q.dataset.ans;
+    why.innerHTML = `<span class="${ok ? "right" : "wrong"}">${ok ? "✓ Right." : "Not quite: " + q.dataset.ans + "."}</span> ${text}`; why.hidden = false;
+  }));
+});
+// Stop 2: z for the true $1,059.44 gap, σ = 11,238.42 and 11,539.39, n per region
+function erfc(x) {
+  const z = Math.abs(x), t = 1 / (1 + 0.5 * z);
+  const r = t * Math.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (0.37409196 + t * (0.09678418 +
+    t * (-0.18628806 + t * (0.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277)))))))));
+  return x >= 0 ? r : 2 - r;
+}
+const S1 = 11238.42, S2 = 11539.39, GAP = 1059.44, nS = document.getElementById("nS");
+function upd() {
+  const n = +nS.value, se = Math.sqrt(S1 * S1 / n + S2 * S2 / n), z = GAP / se, p = erfc(z / Math.SQRT2);
+  document.getElementById("nV").textContent = n; document.getElementById("seV").textContent = "$" + Math.round(se).toLocaleString();
+  document.getElementById("zV").textContent = z.toFixed(2); document.getElementById("pV").textContent = p.toFixed(4);
+  document.getElementById("simSay").textContent = p <= 0.05 ? `With ${n} per region, a $1,059 gap is detected (p ≤ .05).` : `With ${n} per region, a $1,059 gap is still not detected (p > .05).`;
+}
+nS.addEventListener("input", upd); upd();
+// Stop 5: paired vs independent, values from Excel
+const H = { paired: ["$185.64", "−3.73", "0.0017", "Paired: each customer is compared with themselves. Charges fell by $691.67 on average. Reject H₀."],
+            indep: ["$1,808.65", "−0.38", "0.353", "As if independent: the same $691.67 drop is buried in customer-to-customer spread. Do not reject H₀. Wrong test for this design."] };
+document.querySelectorAll("#how button").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll("#how button").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+  const v = H[b.dataset.k]; ["hSE", "hT", "hP"].forEach((id, i) => document.getElementById(id).textContent = v[i]); document.getElementById("hSay").textContent = v[3];
+}));
+</script>
+</body>
+</html>
