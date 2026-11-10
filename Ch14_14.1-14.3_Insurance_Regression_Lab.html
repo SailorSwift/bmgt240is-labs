@@ -328,6 +328,40 @@ svg.plot .tt { fill: var(--ink); font: 600 13px var(--body); }
         </div>
       </div>
     </div>
+
+    <div class="card">
+      <div class="label">Why least squares? Why not some other rule?</div>
+      <p>Every line misses some customers. To pick the “best” line we need <b>one number that scores how badly a line misses</b>, then choose the line with the best score. There are three obvious candidates. Here they are for the same 5 customers, on six lines that all pass through the point of means (40, $6,902.60):</p>
+      <div class="wrapx">
+        <table class="rules">
+          <thead><tr><th>Slope of the line</th><th>① Sum of misses<br>Σ(y − <span class="yh">y</span>)</th><th>② Sum of absolute misses<br>Σ|y − <span class="yh">y</span>|</th><th>③ Sum of squared misses<br>SSE = Σ(y − <span class="yh">y</span>)²</th><th>Largest single miss</th></tr></thead>
+          <tbody>
+            <tr><td>$0 (flat: just predict the mean)</td><td class="num">0</td><td class="num">17,513.6</td><td class="num">74,669,475</td><td class="num">$6,109</td></tr>
+            <tr><td>$100 per year</td><td class="num">0</td><td class="num">11,513.6</td><td class="num">31,269,475</td><td class="num">$4,109</td></tr>
+            <tr><td>$200 per year</td><td class="num">0</td><td class="num">5,513.6</td><td class="num">7,869,475</td><td class="num">$2,109</td></tr>
+            <tr><td><b>$267 per year (least squares)</b></td><td class="num">0</td><td class="num">3,137.6</td><td class="num flip">3,380,475</td><td class="num">$1,464</td></tr>
+            <tr><td>$350 per year</td><td class="num">0</td><td class="num">6,413.6</td><td class="num">10,269,475</td><td class="num">$2,459</td></tr>
+            <tr><td>$450 per year</td><td class="num">0</td><td class="num">12,413.6</td><td class="num">36,869,475</td><td class="num">$4,459</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="two">
+        <div style="display:grid;gap:8px">
+          <p class="warn"><b>① The plain sum fails.</b> Misses above the line (+) and below it (−) cancel out. For <i>every</i> line through the point of means the sum is exactly 0, the terrible flat line included. It can't tell a good line from a bad one.</p>
+          <p class="warn"><b>② Absolute values don't pick one line.</b> Nothing cancels now, but every slope from <b>$264.80 to $275.20</b> ties at 3,137.6. The rule can't say which line is best, and there is no simple formula: you have to search by trial and error.</p>
+          <p class="ans"><b>③ Squares give exactly one best line</b>, $267, with an exact formula you can do by hand (14.6, 14.7) or with <span class="mono">=SLOPE</span>. Move the slider above: the SSE climbs on both sides of 267.</p>
+        </div>
+        <div style="display:grid;gap:8px">
+          <div class="label">Three more reasons it's the standard</div>
+          <ul style="margin:0;padding-left:20px;display:grid;gap:6px">
+            <li><b>Big misses count extra.</b> Squaring makes a $2,000 miss count 4 times as much as a $1,000 miss, not 2. For an insurer, one badly mispriced customer hurts more than several small misses, so this is a sensible priority. The flip side: a few very large charges (Bridger's smokers) pull the line toward them. Residual analysis (14.8) checks for that.</li>
+            <li><b>It's the same idea as the mean.</b> Of all single numbers, <span class="xb">y</span> is the one that makes Σ(y − c)² smallest. Least squares extends that to a line, which is why the line always passes through (<span class="xb">x</span>, <span class="xb">y</span>). The flat “just predict the mean” line in the table has SSE = 74,669,475 = SST.</li>
+            <li><b>Everything else in Chapter 14 is built on it.</b> SST = SSR + SSE and r² (14.3), and the t test and intervals (14.5–14.6), only work this neatly for the least squares line.</li>
+          </ul>
+          <p class="callout"><b>For Bridger, in one sentence:</b> least squares picks the age-based pricing line whose squared pricing errors, added up over all customers, are as small as possible.</p>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- 3 -->
