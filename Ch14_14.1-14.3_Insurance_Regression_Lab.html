@@ -110,6 +110,8 @@ svg.plot .tt { fill: var(--ink); font: 600 13px var(--body); }
 .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 14px; color: var(--muted); }
 .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
 [data-reveal] .label { margin-top: 10px; }
+.defbox { border: 2px solid var(--hit); border-radius: 10px; padding: 12px 14px; display: grid; gap: 8px; background: var(--hit-soft); }
+ul.tight { margin: 0; padding-left: 20px; display: grid; gap: 4px; font-size: 15.5px; }
 ol.steps { margin: 0; padding-left: 22px; display: grid; gap: 10px; }
 .hyp.sm { display: block; font-size: 16px; margin-top: 4px; }
 .split { display: flex; height: 30px; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); }
@@ -591,6 +593,17 @@ ol.steps { margin: 0; padding-left: 22px; display: grid; gap: 10px; }
       <p class="muted">Workbook sheets: <b>14.3 By Hand (5)</b>, <b>14.3 Project 1 Contrast</b>, <b>14.3 Compare</b>.</p></div>
     <div class="two">
       <div class="card">
+        <div class="defbox">
+          <div class="label">Definition</div>
+          <p>The <b>coefficient of determination</b>, <b>r²</b>, is the <b>proportion of the variation in the dependent variable y that is explained by the estimated regression equation</b>. It measures how well the line fits the data.</p>
+          <p class="hyp sm">r² = SSR / SST = explained variation / total variation</p>
+          <ul class="tight">
+            <li><b>Range:</b> 0 to 1. Often reported as a percent: r² = 0.089 means 8.9%.</li>
+            <li><b>r² = 1:</b> every point lies on the line. <b>r² = 0:</b> the line explains nothing; it predicts the average for everyone.</li>
+            <li><b>No units.</b> It is a share, so it reads the same whether y is dollars, nights or MPG.</li>
+            <li><b>It is not</b> the slope, not the probability the line is right, and not a significance test.</li>
+          </ul>
+        </div>
         <div class="label">r² in three steps</div>
         <ol class="steps">
           <li><b>Total variation.</b> How far charges spread around their average, before using age at all:
