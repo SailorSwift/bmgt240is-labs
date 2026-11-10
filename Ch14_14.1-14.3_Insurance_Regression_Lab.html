@@ -385,7 +385,89 @@ svg.plot .tt { fill: var(--ink); font: 600 13px var(--body); }
         <div class="label">Rule for your project</div>
         <p class="callout">Interpret b<sub>0</sub> only if <b>x = 0 is a real, observed value</b> (0 children, 0 nights, $0 discount). Otherwise, say “the intercept has no practical meaning here; it just positions the line.”</p>
         <p class="note">The same warning applies to predictions: a line fit to ages 18 to 64 should not price an 80-year-old.</p>
+        <p><b>What b<sub>0</sub> is:</b> the value of ŷ when x = 0. It is a <i>prediction</i>, like any other point on the line. A prediction is only trustworthy where the line has data to learn from. So the real question is always: <b>is x = 0 inside my data?</b></p>
       </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Two questions before you write a word about b<sub>0</sub></div>
+      <div class="two">
+        <div>
+          <ol style="margin:0;padding-left:22px;display:grid;gap:10px">
+            <li><b>Can x really be 0?</b> Is there such a thing as a customer, listing or order with x = 0? A studio has 0 bedrooms; a full-price order has a 0% discount. No one is 0 years old in an adult insurance pool; no car has a 0-liter engine.</li>
+            <li><b>Is x = 0 actually in your data, with real rows at or near it?</b> One or two odd rows don't count, especially if they look like data errors. Check with <span class="mono">=COUNTIF(x_range,0)</span> and <span class="mono">=MIN(x_range)</span>.</li>
+          </ol>
+        </div>
+        <div>
+          <p class="ans"><b>Both yes:</b> interpret it, in y's units. “b<sub>0</sub> = $___ is the predicted nightly price of a studio (0 bedrooms).”</p>
+          <p class="warn" style="margin-top:8px"><b>Either no:</b> don't interpret it. Write: “The intercept has no practical meaning here, because no customer is 0 years old (our data cover ages 18 to 64); it only positions the line.”</p>
+          <p class="note" style="margin-top:8px">Either way, <b>keep b<sub>0</sub> in your equation</b>. Every prediction ŷ = b<sub>0</sub> + b<sub>1</sub>x needs it, even when it means nothing on its own.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Apply it to the course datasets</div>
+      <div class="wrapx">
+        <table class="rules">
+          <thead><tr><th>Dataset</th><th>x</th><th>Is x = 0 real and in the data?</th><th>Interpret b<sub>0</sub>?</th><th>What b<sub>0</sub> means, or what to say instead</th></tr></thead>
+          <tbody>
+            <tr><td>Insurance</td><td>age</td><td>No: ages run 18 to 64</td><td class="flip">No</td><td>“No practical meaning: no customer is 0 years old.” (Bridger's −$2,091 above.)</td></tr>
+            <tr><td>Insurance</td><td>children</td><td>Yes: 574 customers have 0 children</td><td>Yes</td><td>Predicted charges for a customer with no children</td></tr>
+            <tr><td>Nashville Airbnb</td><td>bedrooms</td><td>Yes: 320 listings are studios (0 bedrooms)</td><td>Yes</td><td>Predicted nightly price of a studio</td></tr>
+            <tr><td>Nashville Airbnb</td><td>number of reviews</td><td>Yes: 1,010 listings have 0 reviews</td><td>Yes</td><td>Predicted value for a brand-new listing with no reviews yet</td></tr>
+            <tr><td>Superstore</td><td>discount</td><td>Yes: 4,798 of 9,994 lines (48%) have 0% discount</td><td>Yes</td><td>Predicted profit (or margin) on a full-price line</td></tr>
+            <tr><td>EPA Fuel Economy</td><td>engine displacement</td><td>No: 0.9 to 8.4 liters</td><td class="flip">No</td><td>“No practical meaning: no car has a 0-liter engine.”</td></tr>
+            <tr><td>Hotel Bookings</td><td>number of guests</td><td>Only 31 of 73,419 completed bookings show 0 guests, almost certainly recording errors</td><td class="flip">No</td><td>“No practical meaning: a booking with no guests isn't a real booking.” (Consider removing those 31 rows when you clean.)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Counts are from the course's clean copies of the datasets; your cleaned file may differ slightly.</p>
+    </div>
+
+    <div class="two">
+      <div class="card">
+        <div class="label">Where the line has data</div>
+        <svg class="plot" viewBox="0 0 560 150" role="img" aria-label="Age axis from 0 to 90 with ages 18 to 64 shaded as the range of the data; the intercept at 0 and an 80-year-old are outside it">
+          <rect x="128" y="40" width="322" height="46" rx="6" style="fill:var(--hit-soft)"/>
+          <text x="289" y="68" text-anchor="middle" style="fill:var(--hit);font:700 14px var(--body)">ages 18–64: the line is fit here</text>
+          <line x1="20" y1="100" x2="540" y2="100" class="ax"/>
+          <g style="font:12px var(--body)">
+            <text x="20" y="120" text-anchor="middle">0</text><text x="128" y="120" text-anchor="middle">18</text><text x="450" y="120" text-anchor="middle">64</text><text x="520" y="120" text-anchor="middle">80</text><text x="540" y="140" text-anchor="end" class="tt">age</text>
+          </g>
+          <line x1="128" y1="34" x2="128" y2="100" style="stroke:var(--hit);stroke-width:2"/><line x1="450" y1="34" x2="450" y2="100" style="stroke:var(--hit);stroke-width:2"/>
+          <circle cx="20" cy="100" r="7" style="fill:var(--miss)"/><text x="30" y="28" style="fill:var(--miss);font:700 13px var(--body)">b₀ lives here</text>
+          <line x1="22" y1="93" x2="40" y2="34" style="stroke:var(--miss);stroke-width:1.5"/>
+          <circle cx="520" cy="100" r="7" style="fill:var(--miss)"/><text x="540" y="28" text-anchor="end" style="fill:var(--miss);font:700 13px var(--body)">an 80-year-old</text>
+          <line x1="520" y1="93" x2="515" y2="34" style="stroke:var(--miss);stroke-width:1.5"/>
+        </svg>
+        <p class="note">Predicting inside the shaded range is <b>interpolation</b>: the line has customers on both sides. Predicting outside it is <b>extrapolation</b>: the line is guessing. The intercept is just the most extreme case of extrapolation when 0 is far from the data.</p>
+      </div>
+      <div class="card">
+        <div class="label">The same warning for predictions: an 80-year-old</div>
+        <div class="kv">
+          <div><span>All-customer line at age 80: 3,165.89 + 257.72 × 80</span><b>$23,784</b></div>
+          <div><span>Customers in the data older than 64</span><b>0</b></div>
+        </div>
+        <p>Excel will happily print $23,784. Nothing in the data says whether charges keep climbing $258 a year after 64, speed up, or level off. The line was never shown an 80-year-old.</p>
+        <p class="warn">The line is already shaky at the edge. The 22 customers aged exactly 64 averaged <b>$23,276</b>, but the line predicts <b>$19,660</b> at 64, about $3,600 low. A straight line drawn through the middle of the data is least reliable at its ends, and beyond them it has no support at all.</p>
+        <p class="note">Rule: predict only for x between the smallest and largest x in your data. If the business needs a number outside that range, say plainly that it is an extrapolation and should not be relied on.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Sentences for your final report (§6)</div>
+      <div class="wrapx">
+        <table class="rules">
+          <thead><tr><th>Situation</th><th>Model sentence (fill in your variables)</th></tr></thead>
+          <tbody>
+            <tr><td>x = 0 is real and observed</td><td>“The intercept, b<sub>0</sub> = $___, is the predicted nightly price of a listing with 0 bedrooms (a studio). Our data include ___ studios, so x = 0 is real.”</td></tr>
+            <tr><td>x = 0 is not in the data</td><td>“The intercept has no practical meaning, because no customer is 0 years old (our data cover ages 18 to 64). It only sets the height of the line.”</td></tr>
+            <tr><td>Making a prediction</td><td>“We use the line only for ages 18 to 64, the range of our data. For a 45-year-old, ŷ = 3,165.89 + 257.72 × 45 = $14,763.”</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Excel checks: <span class="mono">=MIN(x_range)</span> and <span class="mono">=MAX(x_range)</span> give your range; <span class="mono">=COUNTIF(x_range,0)</span> tells you how many rows have x = 0.</p>
     </div>
   </section>
 
