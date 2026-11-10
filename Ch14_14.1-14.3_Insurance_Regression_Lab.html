@@ -109,6 +109,8 @@ svg.plot text { fill: var(--muted); font: 12px var(--body); }
 svg.plot .tt { fill: var(--ink); font: 600 13px var(--body); }
 .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 14px; color: var(--muted); }
 .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+[data-reveal] .label { margin-top: 10px; }
+[data-reveal] { display: grid; gap: 8px; }
 .three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 @media (max-width: 860px) { .three { grid-template-columns: 1fr; } }
 .eqcard { background: var(--chip); border-radius: 8px; padding: 12px 14px; display: grid; gap: 8px; align-content: start; font-size: 15.5px; }
@@ -291,9 +293,38 @@ svg.plot .tt { fill: var(--ink); font: 600 13px var(--body); }
               <tbody id="handRows"></tbody>
             </table>
           </div>
-          <p class="hyp">b<sub>1</sub> = 267,000 / 1,000 = <b>267.00</b><br>b<sub>0</sub> = 6,902.6 − 267(40) = <b>−3,777.40</b></p>
-          <p class="ans"><span class="yh">y</span> = −3,777.40 + 267.00x. <b>For these 5 customers, each additional year of age adds about $267 to annual charges.</b> Excel's <span class="mono">=SLOPE(C10:C14,B10:B14)</span> returns the same 267.</p>
-          <p class="note">Why are the first two column sums 0? Deviations from a mean always cancel. That is why we multiply them before adding.</p>
+          <div class="label">Step by step</div>
+          <ol style="margin:0;padding-left:22px;display:grid;gap:6px">
+            <li><b>Means.</b> <span class="xb">x</span> = 200 / 5 = <b>40</b> years; <span class="xb">y</span> = 34,513 / 5 = <b>$6,902.60</b>.</li>
+            <li><b>Deviations.</b> Subtract the means from each customer (columns 4 and 5). A 20-year-old is 20 years below average and $4,540.60 below average in charges.</li>
+            <li><b>Multiply and add.</b> Σ(x − <span class="xb">x</span>)(y − <span class="xb">y</span>) = <b>267,000</b>. Every product is positive or zero (the 40-year-old is exactly average in age): customers below average in age are also below average in charges, and vice versa. That is what a positive slope looks like in numbers.</li>
+            <li><b>Square and add.</b> Σ(x − <span class="xb">x</span>)² = <b>1,000</b>: how spread out the ages are.</li>
+            <li><b>Slope.</b> b<sub>1</sub> = 267,000 / 1,000 = <b>267.00</b>.</li>
+            <li><b>Intercept.</b> b<sub>0</sub> = 6,902.6 − 267 × 40 = 6,902.6 − 10,680 = <b>−3,777.40</b>.</li>
+          </ol>
+          <p class="hyp"><span class="yh">y</span> = −3,777.40 + 267.00x</p>
+          <div class="label">Check the line against the 5 customers</div>
+          <div class="wrapx">
+            <table class="rules">
+              <thead><tr><th>Age x</th><th>Actual y</th><th>Predicted <span class="yh">y</span></th><th>Residual y − <span class="yh">y</span></th></tr></thead>
+              <tbody>
+                <tr><td class="num">20</td><td class="num">$2,362</td><td class="num">$1,562.6</td><td class="num">+799.4</td></tr>
+                <tr><td class="num">30</td><td class="num">$4,150</td><td class="num">$4,232.6</td><td class="num">−82.6</td></tr>
+                <tr><td class="num">40</td><td class="num">$5,439</td><td class="num">$6,902.6</td><td class="num">−1,463.6</td></tr>
+                <tr><td class="num">50</td><td class="num">$9,550</td><td class="num">$9,572.6</td><td class="num">−22.6</td></tr>
+                <tr><td class="num">60</td><td class="num">$13,012</td><td class="num">$12,242.6</td><td class="num">+769.4</td></tr>
+                <tr class="sum"><td colspan="3">Sum of residuals</td><td class="num">0.0</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="ans"><b>For these 5 customers, each additional year of age adds about $267 to annual charges</b>, so ten years adds about $2,670. Excel's <span class="mono">=SLOPE(C10:C14,B10:B14)</span> returns the same 267.</p>
+          <ul style="margin:0;padding-left:20px;display:grid;gap:4px" class="note">
+            <li>The line passes through the point of means: −3,777.4 + 267 × 40 = 6,902.6 = <span class="xb">y</span>. The least squares line always does.</li>
+            <li>The residuals add to 0: the line runs through the middle of the points, some above, some below.</li>
+            <li>Squared and added, the residuals give SSE = <b>3,380,475</b>, the smallest value the slider can reach. No other line does better.</li>
+            <li>The first two column sums are 0 because deviations from a mean always cancel. That's why we multiply them before adding.</li>
+            <li>The intercept, −$3,777, is negative. Hold that thought until Stop 5.</li>
+          </ul>
         </div>
       </div>
     </div>
@@ -324,8 +355,26 @@ svg.plot .tt { fill: var(--ink); font: 600 13px var(--body); }
         <button type="button" class="btn primary" data-show="all-res">Answer the Stop 1 question</button>
         <div data-reveal id="all-res" hidden>
           <p class="hyp">18,629 − 10,898 = <b>$7,732</b> = 30 × 257.72</p>
-          <p class="ans"><b>For the pricing team:</b> each additional year of age is associated with about <b>$258 more</b> in annual charges, so a 60-year-old costs about $7,700 a year more than a 30-year-old.</p>
-          <p class="note">The difference is always 30 × b<sub>1</sub>: the intercept cancels. That is why the slope, not the intercept, is the number a business uses.</p>
+          <p class="ans"><b>For the pricing team:</b> each additional year of age is associated with about <b>$258 more</b> in annual charges, so a 60-year-old costs about $7,700 a year more than a 30-year-old. Of the Stop 1 guesses, “about $8,000” was closest.</p>
+          <div class="label">The line, one decade at a time</div>
+          <div class="wrapx">
+            <table class="rules">
+              <thead><tr><th>Age</th><th>Predicted charges <span class="yh">y</span></th><th>Change from previous decade</th></tr></thead>
+              <tbody>
+                <tr><td class="num">20</td><td class="num">$8,320</td><td></td></tr>
+                <tr><td class="num">30</td><td class="num">$10,898</td><td class="num">+$2,577</td></tr>
+                <tr><td class="num">40</td><td class="num">$13,475</td><td class="num">+$2,577</td></tr>
+                <tr><td class="num">50</td><td class="num">$16,052</td><td class="num">+$2,577</td></tr>
+                <tr><td class="num">60</td><td class="num">$18,629</td><td class="num">+$2,577</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <ul style="margin:0;padding-left:20px;display:grid;gap:4px" class="note">
+            <li><b>Same step every decade:</b> 10 × $257.72 = $2,577. A straight line rises by the same amount for every extra year, at 25 or at 55. Whether real charges do is a question for residual analysis (14.8).</li>
+            <li><b>The intercept cancels in any difference.</b> 60 vs. 30 is always 30 × b<sub>1</sub>. That's why the slope, not the intercept, is the number a business uses.</li>
+            <li><b>ŷ is an average, not a promise.</b> The line says a typical 30-year-old costs $10,898. Customer #22 is 30 and cost $4,150. Individual customers scatter far from the line, as the chart shows. Stop 6 measures how far.</li>
+            <li><b>Your 5-customer slope ($267) was close to this one ($258).</b> That's partly by design: the 5 are non-smokers, and Stop 4 shows the non-smoker slope is $267.</li>
+          </ul>
         </div>
       </div>
     </div>
@@ -349,17 +398,37 @@ svg.plot .tt { fill: var(--ink); font: 600 13px var(--body); }
         </div>
         <button type="button" class="btn primary" id="colorBtn">Color by smoker</button>
         <div data-reveal id="stripe-res" hidden>
-          <p class="ans"><b>Smokers.</b> Almost every customer above about $30,000 smokes. The middle stripe mixes smokers and non-smokers; the bottom stripe is all non-smokers.</p>
+          <p class="ans"><b>Smokers.</b> Almost every customer above about $30,000 smokes. The bottom stripe is the non-smokers. And the middle stripe has a second answer hiding in it.</p>
+          <div class="label">Who is in each stripe</div>
           <div class="wrapx">
             <table class="rules">
-              <thead><tr><th>Line</th><th>n</th><th>b<sub>1</sub> (per year)</th><th>b<sub>0</sub></th></tr></thead>
+              <thead><tr><th>Stripe (annual charges)</th><th>Customers</th><th>Who they are</th></tr></thead>
               <tbody>
-                <tr><td>All customers</td><td class="num">1,338</td><td class="num">$257.72</td><td class="num">$3,165.89</td></tr>
-                <tr><td>Non-smokers only</td><td class="num">1,064</td><td class="num">$267.25</td><td class="num flip">−$2,091.42</td></tr>
+                <tr><td>Bottom: up to $15,000</td><td class="num">980</td><td>Non-smokers: only 7 of the 980 smoke</td></tr>
+                <tr><td>Middle: $15,000–$30,000</td><td class="num">196</td><td>115 smokers, all but 1 with BMI <b>under 30</b>, plus 81 non-smokers</td></tr>
+                <tr><td>Top: over $30,000</td><td class="num">162</td><td>152 smokers, 144 of them with BMI <b>30 or more</b></td></tr>
               </tbody>
             </table>
           </div>
-          <p class="note">The age effect barely moves: about $260 a year either way. Smoking shifts the whole line up; it doesn't change how fast charges rise with age much. Look at the non-smoker intercept: it's negative.</p>
+          <p class="note">So the stripes are smoking, and among smokers, BMI. Age moves every stripe up at about the same rate.</p>
+          <div class="label">Three lines</div>
+          <div class="wrapx">
+            <table class="rules">
+              <thead><tr><th>Line</th><th>n</th><th>Average charges</th><th>b<sub>1</sub> (per year)</th><th>b<sub>0</sub></th></tr></thead>
+              <tbody>
+                <tr><td>All customers</td><td class="num">1,338</td><td class="num">$13,270</td><td class="num">$257.72</td><td class="num">$3,165.89</td></tr>
+                <tr><td>Non-smokers</td><td class="num">1,064</td><td class="num">$8,434</td><td class="num">$267.25</td><td class="num flip">−$2,091.42</td></tr>
+                <tr><td>Smokers</td><td class="num">274</td><td class="num">$32,050</td><td class="num">$305.24</td><td class="num">$20,294.13</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <ul style="margin:0;padding-left:20px;display:grid;gap:4px" class="note">
+            <li><b>The age effect barely moves:</b> about $260–$305 a year in every group. Getting a year older costs about the same whether you smoke or not.</li>
+            <li><b>Smoking moves the whole line up.</b> Smokers average $32,050, non-smokers $8,434: a gap of about <b>$23,600 a year</b>, far bigger than 30 years of aging ($7,700).</li>
+            <li><b>Why the all-customer line fits so poorly:</b> it runs between two very different groups, so it is too high for most non-smokers and far too low for smokers.</li>
+            <li><b>For pricing:</b> an age-only price misses the biggest driver of cost. Using age <i>and</i> smoking together is multiple regression (Ch 15).</li>
+            <li>Look at the non-smoker intercept: it's negative. Stop 5 explains it.</li>
+          </ul>
         </div>
       </div>
     </div>
@@ -379,6 +448,12 @@ svg.plot .tt { fill: var(--ink); font: 600 13px var(--body); }
         <button type="button" class="btn primary" data-show="b0-res">Show the answer</button>
         <div data-reveal id="b0-res" hidden>
           <p class="ans">The youngest customer is <b>18</b> and the oldest is <b>64</b>. The line describes customers aged 18 to 64. At x = 0 it is <b>extrapolating</b>: predicting far outside the data, where nothing says the straight line still holds.</p>
+          <ul style="margin:0;padding-left:20px;display:grid;gap:4px" class="note">
+            <li><b>Excel made no error.</b> Least squares only tries to fit the customers it has, aged 18 to 64. It never had to make sense at age 0.</li>
+            <li><b>Inside the data, the line is fine.</b> At 18 it predicts −2,091.42 + 267.25 × 18 = <b>$2,719</b>, a sensible positive number. The line only drops below $0 before age <b>7.8</b>, where there are no customers.</li>
+            <li><b>The sign isn't the test.</b> The all-customer intercept, $3,166, is positive, and it is just as meaningless: no customer is 0 years old. A positive b<sub>0</sub> can be nonsense too. The test is whether x = 0 is in your data.</li>
+            <li><b>“Babies really are cheaper”</b> may even be true, but this data can't tell you. There are no babies in it.</li>
+          </ul>
         </div>
       </div>
       <div class="card">
@@ -508,7 +583,28 @@ svg.plot .tt { fill: var(--ink); font: 600 13px var(--body); }
         <div data-reveal id="r2-res" hidden>
           <div id="r2bars" style="display:grid;gap:10px"></div>
           <p class="ans">Same slope for all customers and non-smokers, very different r². <b>b<sub>1</sub> answers “how much does y change per x?”; r² answers “how much of y's variation does x explain?”</b> Age explains 9% of all charges, 39% once smokers are set aside. Income explains none of investments: that line is flat, and it predicts about the average for everyone.</p>
+          <div class="label">The sums of squares behind each r²</div>
+          <div class="wrapx">
+            <table class="rules">
+              <thead><tr><th>Line</th><th>SST</th><th>SSR</th><th>SSE</th><th>r² = SSR/SST</th><th>r</th></tr></thead>
+              <tbody>
+                <tr><td>5 customers</td><td class="num">74.7 million</td><td class="num">71.3 million</td><td class="num">3.4 million</td><td class="num">0.955</td><td class="num">+0.977</td></tr>
+                <tr><td>All 1,338</td><td class="num">196.1 billion</td><td class="num">17.5 billion</td><td class="num">178.5 billion</td><td class="num">0.089</td><td class="num">+0.299</td></tr>
+                <tr><td>Non-smokers</td><td class="num">38.2 billion</td><td class="num">15.1 billion</td><td class="num">23.1 billion</td><td class="num">0.394</td><td class="num">+0.628</td></tr>
+                <tr><td>Project 1</td><td class="num">102.2 billion</td><td class="num">0.0009 billion</td><td class="num">102.2 billion</td><td class="num">0.000</td><td class="num">+0.003</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note">SST is the same no matter which x you use: it's the total variation in y. The line only decides how SST splits into SSR (explained) and SSE (missed). For all customers, SSE is still 91% of SST.</p>
+          <div class="label">What r² means in dollars: the typical miss</div>
+          <div class="kv">
+            <div><span>All customers: typical miss <i>without</i> age (SD of charges)</span><b>$12,110</b></div>
+            <div><span>All customers: typical miss <i>with</i> the age line (s)</span><b>$11,560</b></div>
+            <div><span>Non-smokers: without age → with age</span><b>$5,994 → $4,667</b></div>
+          </div>
+          <p class="note">Knowing a customer's age shrinks Bridger's typical pricing error by only about 5% overall, but by about 22% for non-smokers. That is what r² = 0.089 versus 0.394 feels like in money. (s, the standard error of the estimate, is formally introduced in 14.5.)</p>
           <p class="warn">The 5 hand-picked customers give 0.955: a tiny sample can make a line look far better than it is. And a high r² is still not a significance test. That's Thursday (14.5).</p>
+          <p class="note"><b>Check:</b> r² is r squared. 0.299² = 0.089 and 0.628² = 0.394. r carries the sign of the slope, so all four r's here are positive.</p>
         </div>
       </div>
     </div>
