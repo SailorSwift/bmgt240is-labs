@@ -110,6 +110,11 @@ svg.plot .tt { fill: var(--ink); font: 600 13px var(--body); }
 .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 14px; color: var(--muted); }
 .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
 [data-reveal] .label { margin-top: 10px; }
+ol.steps { margin: 0; padding-left: 22px; display: grid; gap: 10px; }
+.hyp.sm { display: block; font-size: 16px; margin-top: 4px; }
+.split { display: flex; height: 30px; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); }
+.split-r { background: var(--hit); color: var(--on-accent); font: 600 13px var(--body); display: flex; align-items: center; padding-left: 10px; white-space: nowrap; }
+.split-e { background: var(--miss-soft); }
 [data-reveal] { display: grid; gap: 8px; }
 .three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 @media (max-width: 860px) { .three { grid-template-columns: 1fr; } }
@@ -586,26 +591,24 @@ svg.plot .tt { fill: var(--ink); font: 600 13px var(--body); }
       <p class="muted">Workbook sheets: <b>14.3 By Hand (5)</b>, <b>14.3 Project 1 Contrast</b>, <b>14.3 Compare</b>.</p></div>
     <div class="two">
       <div class="card">
-        <div class="label">Split the variation in charges into two parts</div>
-        <div class="wrapx">
-          <table class="rules">
-            <thead><tr><th>Sum of squares</th><th>Formula</th><th>Measures</th></tr></thead>
-            <tbody>
-              <tr><td>SST, total</td><td class="mono">Σ(y − <span class="xb">y</span>)²</td><td>How much charges vary at all</td></tr>
-              <tr><td>SSR, regression</td><td class="mono">Σ(<span class="yh">y</span> − <span class="xb">y</span>)²</td><td>The part the line explains</td></tr>
-              <tr><td>SSE, error</td><td class="mono">Σ(y − <span class="yh">y</span>)²</td><td>The part it misses</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p class="hyp">SST = SSR + SSE   r² = SSR / SST</p>
-        <p class="note">r² runs from 0 (the line explains nothing) to 1 (every point on the line). The correlation is r = (sign of b<sub>1</sub>)√r².</p>
+        <div class="label">r² in three steps</div>
+        <ol class="steps">
+          <li><b>Total variation.</b> How far charges spread around their average, before using age at all:
+            <span class="hyp sm">SST = Σ(y − <span class="xb">y</span>)²</span></li>
+          <li><b>Split it in two.</b> The line explains part of that spread and misses the rest:
+            <span class="hyp sm">SSR = Σ(<span class="yh">y</span> − <span class="xb">y</span>)² explained &nbsp; SSE = Σ(y − <span class="yh">y</span>)² missed</span>
+            <span class="hyp sm">SST = SSR + SSE</span></li>
+          <li><b>Take the share explained.</b> From 0 (explains nothing) to 1 (every point on the line):
+            <span class="hyp sm">r² = SSR / SST</span></li>
+        </ol>
         <div class="label">The 5 customers</div>
-        <div class="kv">
-          <div><span>SST</span><b>74,669,475</b></div>
-          <div><span>SSR</span><b>71,289,000</b></div>
-          <div><span>SSE</span><b>3,380,475</b></div>
-          <div><span>r² = 71,289,000 / 74,669,475</span><b>0.955</b></div>
+        <div class="split" aria-label="SST split: 95.5% explained, 4.5% missed">
+          <div class="split-r" style="width:95.47%">SSR 71,289,000 · explained</div>
+          <div class="split-e" style="width:4.53%"></div>
         </div>
+        <p class="note">SST = 74,669,475 = 71,289,000 (SSR) + 3,380,475 (SSE). &nbsp; r² = 71,289,000 / 74,669,475 = <b>0.955</b>.</p>
+        <p class="callout"><b>Say it like this:</b> “For these 5 customers, age explains 95.5% of the variation in annual charges.”</p>
+        <p class="note">r is the square root of r², with the slope's sign: √0.955 = <b>+0.977</b>.</p>
       </div>
       <div class="card">
         <div class="predict">
@@ -615,30 +618,13 @@ svg.plot .tt { fill: var(--ink); font: 600 13px var(--body); }
         </div>
         <button type="button" class="btn primary" data-show="r2-res">Show all four lines</button>
         <div data-reveal id="r2-res" hidden>
-          <div id="r2bars" style="display:grid;gap:10px"></div>
-          <p class="ans">Same slope for all customers and non-smokers, very different r². <b>b<sub>1</sub> answers “how much does y change per x?”; r² answers “how much of y's variation does x explain?”</b> Age explains 9% of all charges, 39% once smokers are set aside. Income explains none of investments: that line is flat, and it predicts about the average for everyone.</p>
-          <div class="label">The sums of squares behind each r²</div>
-          <div class="wrapx">
-            <table class="rules">
-              <thead><tr><th>Line</th><th>SST</th><th>SSR</th><th>SSE</th><th>r² = SSR/SST</th><th>r</th></tr></thead>
-              <tbody>
-                <tr><td>5 customers</td><td class="num">74.7 million</td><td class="num">71.3 million</td><td class="num">3.4 million</td><td class="num">0.955</td><td class="num">+0.977</td></tr>
-                <tr><td>All 1,338</td><td class="num">196.1 billion</td><td class="num">17.5 billion</td><td class="num">178.5 billion</td><td class="num">0.089</td><td class="num">+0.299</td></tr>
-                <tr><td>Non-smokers</td><td class="num">38.2 billion</td><td class="num">15.1 billion</td><td class="num">23.1 billion</td><td class="num">0.394</td><td class="num">+0.628</td></tr>
-                <tr><td>Project 1</td><td class="num">102.2 billion</td><td class="num">0.0009 billion</td><td class="num">102.2 billion</td><td class="num">0.000</td><td class="num">+0.003</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <p class="note">SST is the same no matter which x you use: it's the total variation in y. The line only decides how SST splits into SSR (explained) and SSE (missed). For all customers, SSE is still 91% of SST.</p>
-          <div class="label">What r² means in dollars: the typical miss</div>
-          <div class="kv">
-            <div><span>All customers: typical miss <i>without</i> age (SD of charges)</span><b>$12,110</b></div>
-            <div><span>All customers: typical miss <i>with</i> the age line (s)</span><b>$11,560</b></div>
-            <div><span>Non-smokers: without age → with age</span><b>$5,994 → $4,667</b></div>
-          </div>
-          <p class="note">Knowing a customer's age shrinks Bridger's typical pricing error by only about 5% overall, but by about 22% for non-smokers. That is what r² = 0.089 versus 0.394 feels like in money. (s, the standard error of the estimate, is formally introduced in 14.5.)</p>
-          <p class="warn">The 5 hand-picked customers give 0.955: a tiny sample can make a line look far better than it is. And a high r² is still not a significance test. That's Thursday (14.5).</p>
-          <p class="note"><b>Check:</b> r² is r squared. 0.299² = 0.089 and 0.628² = 0.394. r carries the sign of the slope, so all four r's here are positive.</p>
+          <div id="r2bars" style="display:grid;gap:12px"></div>
+          <div class="label">Three takeaways</div>
+          <ol class="steps">
+            <li><b>Slope and r² answer different questions.</b> All customers and non-smokers have nearly the same slope (about $260 a year) but very different r². b<sub>1</sub> says <i>how much</i> charges change per year; r² says <i>how much of the variation</i> age explains.</li>
+            <li><b>In dollars:</b> knowing age shrinks Bridger's typical pricing miss from $12,110 to $11,560 for all customers (about 5%), but from $5,994 to $4,667 for non-smokers (about 22%).</li>
+            <li><b>Don't be fooled by a high r².</b> Five hand-picked customers gave 0.955. Small samples can look far better than the truth, and r² is not a significance test (that's 14.5).</li>
+          </ol>
         </div>
       </div>
     </div>
@@ -757,11 +743,16 @@ document.getElementById("colorBtn").addEventListener("click", () => {
 });
 
 // ---- Stop 6: r² bars
-const R2 = [["Charges on age · 5 hand-picked customers", 0.9547], ["Charges on age · all 1,338 customers", 0.0894], ["Charges on age · 1,064 non-smokers", 0.3943], ["Investments on income · Project 1 (410)", 0.0000]];
-document.getElementById("r2bars").innerHTML = R2.map(([lab, v]) =>
-  `<div style="display:grid;gap:4px"><div style="display:flex;justify-content:space-between;gap:8px"><span>${lab}</span><b class="mono">r² = ${v.toFixed(3)}</b></div>
-   <div class="bar-track" aria-hidden="true"><div class="bar-fill" style="width:${Math.max(v * 100, .6)}%"></div></div></div>`).join("") +
-  `<p class="note">Blue = SSR, the share the line explains. Red = SSE, the share it misses.</p>`;
+const R2 = [
+  ["Charges on age · 5 hand-picked customers", 0.9547, "Almost every point on the line, but only 5 points."],
+  ["Charges on age · all 1,338 customers", 0.0894, "Age explains 9%; smoking and other factors explain the rest."],
+  ["Charges on age · 1,064 non-smokers", 0.3943, "Take smokers out and age explains 39%."],
+  ["Investments on income · Project 1 (410)", 0.0000, "Income explains nothing: a flat line that predicts the average for everyone."]];
+document.getElementById("r2bars").innerHTML = R2.map(([lab, v, say]) =>
+  `<div style="display:grid;gap:3px"><div style="display:flex;justify-content:space-between;gap:8px"><span>${lab}</span><b class="mono">r² = ${v.toFixed(3)}</b></div>
+   <div class="bar-track" aria-hidden="true"><div class="bar-fill" style="width:${Math.max(v * 100, .6)}%"></div></div>
+   <span class="note">${say}</span></div>`).join("") +
+  `<p class="note">Filled = SSR, the share the line explains. Unfilled = SSE, the share it misses.</p>`;
 
 function drawAll() { drawHand(); scatter("allPlot", false, [[B0A, B1A, css("--hit")]]); drawStripes(); }
 drawAll();
