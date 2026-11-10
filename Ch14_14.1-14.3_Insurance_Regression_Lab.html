@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Insurance Regression Lab</title>
+<style>
+/* Layout: a projected lesson in seven numbered stops, matching the Ch 9 labs.
+   Brand: MSU navy #162860 + gold #F3B324, Aptos. */
+:root {
+  --navy: #162860; --navy-deep: #0f1c48; --gold: #F3B324;
+  --bg: #f3f5fa; --panel: #ffffff; --ink: #111a30; --muted: #4a5570; --line: #d5dae7;
+  --hit: #162860; --hit-soft: rgba(22,40,96,.13); --miss: #c8432f; --miss-soft: rgba(200,67,47,.14);
+  --chip: #e7ebf4; --focus: #F3B324; --on-accent: #ffffff; --dot: rgba(74,85,112,.45); --grid: #e3e7f0;
+  --display: Aptos, "Aptos Display", "Segoe UI", Arial, Helvetica, sans-serif;
+  --body: Aptos, "Segoe UI", Arial, Helvetica, sans-serif;
+  --mono: Consolas, "Courier New", monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b1433; --panel: #14214d; --ink: #eef1f8; --muted: #a9b3cc; --line: #2a3a6e;
+    --hit: #F3B324; --hit-soft: rgba(243,179,36,.18); --miss: #f07a63; --miss-soft: rgba(240,122,99,.16);
+    --chip: #1c2b5c; --focus: #FADA92; --on-accent: #162860; --dot: rgba(169,179,204,.45); --grid: #22336a; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b1433; --panel: #14214d; --ink: #eef1f8; --muted: #a9b3cc; --line: #2a3a6e;
+  --hit: #F3B324; --hit-soft: rgba(243,179,36,.18); --miss: #f07a63; --miss-soft: rgba(240,122,99,.16);
+  --chip: #1c2b5c; --focus: #FADA92; --on-accent: #162860; --dot: rgba(169,179,204,.45); --grid: #22336a; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 56px;
+}
+.wrap { max-width: 1280px; margin: 0 auto; display: grid; gap: 28px; }
+header.brand {
+  margin-top: 20px; border-radius: 12px; padding: 26px clamp(18px, 3vw, 36px) 24px;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-deep) 100%); color: #ffffff;
+  display: grid; gap: 8px; border: 1px solid var(--line);
+}
+header.brand .bar { width: 52px; height: 4px; border-radius: 2px; background: var(--gold); }
+header.brand .course { font-size: 14px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); }
+header.brand h1 { color: #ffffff; }
+header.brand .meta { font-size: 14px; color: #b9c3dc; }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(30px, 4.2vw, 44px); line-height: 1.1; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--display); font-size: clamp(22px, 2.6vw, 28px); line-height: 1.2; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.mono { font-family: var(--mono); font-weight: 500; font-variant-numeric: tabular-nums; }
+.xb { display: inline-block; position: relative; font-weight: 700; font-style: italic; line-height: 1; padding: 0 .06em; }
+.xb::before { content: ""; position: absolute; left: .1em; right: .02em; top: .1em; height: .1em; min-height: 2px; border-radius: 1px; background: currentColor; }
+.yh { display: inline-block; position: relative; font-weight: 700; font-style: italic; }
+.yh::before { content: "^"; position: absolute; left: .05em; top: -.62em; font-size: .9em; font-style: normal; }
+nav.stops { position: sticky; top: 0; z-index: 5; background: var(--bg); display: flex; gap: 6px; overflow-x: auto; padding-block: 10px; border-bottom: 1px solid var(--line); }
+nav.stops a { flex: 0 0 auto; text-decoration: none; color: var(--ink); background: var(--chip); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; font-size: 14px; font-weight: 500; white-space: nowrap; }
+nav.stops a span { font-family: var(--mono); color: var(--hit); margin-right: 6px; }
+nav.stops a:hover { border-color: var(--hit); }
+section.stop { display: grid; gap: 14px; scroll-margin-top: 64px; }
+.stop-head { display: grid; gap: 4px; }
+.stop-num { font: 700 13px var(--body); color: var(--hit); letter-spacing: .14em; display: flex; align-items: center; gap: 10px; }
+.stop-num::before { content: ""; width: 28px; height: 3px; border-radius: 2px; background: var(--gold); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; min-width: 0; align-content: start; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 860px) { .two { grid-template-columns: 1fr; } }
+.label { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.note { font-size: 14px; color: var(--muted); }
+.callout { border-left: 4px solid var(--hit); padding: 4px 0 4px 12px; }
+.ans { background: var(--hit-soft); border-radius: 8px; padding: 10px 12px; }
+.warn { background: var(--miss-soft); border-radius: 8px; padding: 10px 12px; }
+.hyp { font: 600 19px var(--mono); line-height: 1.6; }
+.kv { display: grid; gap: 6px; font-variant-numeric: tabular-nums; }
+.kv div { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; border-bottom: 1px dashed var(--line); padding-bottom: 4px; }
+.kv div:last-child { border-bottom: 0; }
+.kv span:first-child { color: var(--muted); }
+.kv b { font: 500 17px var(--mono); }
+.btn { font: 600 15px var(--body); color: var(--ink); background: var(--chip); border: 1px solid var(--line); border-radius: 7px; padding: 8px 12px; cursor: pointer; }
+.btn[aria-pressed="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+.btn.primary { background: var(--hit); color: var(--on-accent); border-color: var(--hit); }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+button:hover { filter: brightness(1.06); }
+.btnrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.predict { display: grid; gap: 8px; }
+.wrapx { overflow-x: auto; }
+table.rules { border-collapse: collapse; width: 100%; min-width: 520px; }
+table.rules th, table.rules td { border: 1px solid var(--line); padding: 7px 10px; text-align: left; font-size: 15.5px; vertical-align: top; }
+table.rules th { background: var(--chip); font-size: 13px; color: var(--muted); letter-spacing: .04em; }
+table.rules td.mono { font-family: var(--mono); font-size: 14.5px; }
+table.rules td.num { font-family: var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+table.rules tr.sum td { font-weight: 700; border-top: 2px solid var(--ink); }
+table.rules td.flip { background: var(--hit-soft); font-weight: 700; }
+[data-reveal][hidden] { display: none !important; }
+.row { display: flex; align-items: center; gap: 10px; }
+input[type="range"] { flex: 1; accent-color: var(--hit); }
+.val { font: 600 20px var(--mono); min-width: 90px; text-align: right; font-variant-numeric: tabular-nums; }
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 560px) { .tiles { grid-template-columns: 1fr; } }
+.tile { background: var(--chip); border-radius: 8px; padding: 8px 12px; display: grid; }
+.tile .num { font: 600 24px var(--display); font-variant-numeric: tabular-nums; line-height: 1.15; }
+.tile .cap { font-size: 13px; color: var(--muted); }
+svg.plot { width: 100%; height: auto; display: block; }
+svg.plot .ax { stroke: var(--muted); stroke-width: 1; }
+svg.plot .gr { stroke: var(--grid); stroke-width: 1; }
+svg.plot text { fill: var(--muted); font: 12px var(--body); }
+svg.plot .tt { fill: var(--ink); font: 600 13px var(--body); }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 14px; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+.bar-track { height: 18px; border-radius: 9px; background: var(--miss-soft); position: relative; overflow: hidden; }
+.bar-fill { position: absolute; inset: 0 auto 0 0; background: var(--hit); border-radius: 9px; transition: width .2s; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="brand">
+    <div class="bar"></div>
+    <div class="course">BMGT 240IS · Business Analytics</div>
+    <h1>Insurance Regression Lab</h1>
+    <div class="meta">Ch 14.1 · The regression model · Ch 14.2 · Least squares · Ch 14.3 · Coefficient of determination · Fall 2026 · Montana State University</div>
+  </header>
+
+  <nav class="stops" aria-label="Lesson stops">
+    <a href="#question"><span>1</span>Bridger's question</a>
+    <a href="#hand"><span>2</span>14.2: least squares by hand</a>
+    <a href="#all"><span>3</span>14.2: all 1,338</a>
+    <a href="#stripes"><span>4</span>Three stripes</a>
+    <a href="#intercept"><span>5</span>The intercept trap</a>
+    <a href="#r2"><span>6</span>14.3: how good is the line?</a>
+    <a href="#wrap"><span>7</span>Summary &amp; your project</a>
+  </nav>
+
+  <!-- 1 -->
+  <section class="stop" id="question">
+    <div class="stop-head"><div class="stop-num">STOP 1 · 14.1 · THE BUSINESS QUESTION</div><h2>Should Bridger charge older customers more, and how much?</h2></div>
+    <div class="two">
+      <div class="card">
+        <p>Bridger Health Insurance wants age-based prices. That is question Q3 in our class-example proposal: <b>does a customer's age predict their annual medical charges?</b></p>
+        <p>In Ch 9 and 10 we tested <i>one number</i> (a mean, a proportion, a difference). Regression asks a different question: <b>how does y change when x changes?</b></p>
+        <div class="kv">
+          <div><span>Independent variable x</span><b>age (years)</b></div>
+          <div><span>Dependent variable y</span><b>charges ($ per year)</b></div>
+        </div>
+        <div class="predict">
+          <div class="label">Predict first</div>
+          <p>A 60-year-old customer versus a 30-year-old. How much more does the 60-year-old cost Bridger per year, on average?</p>
+          <div class="btnrow" data-predict="q1"><button type="button" class="btn">About $0</button><button type="button" class="btn">About $2,000</button><button type="button" class="btn">About $8,000</button><button type="button" class="btn">About $20,000</button></div>
+          <p class="note">Write your guess down. We answer it in Stop 3.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">14.1 · Three equations, one idea</div>
+        <div class="wrapx">
+          <table class="rules">
+            <thead><tr><th>Name</th><th>Equation</th><th>What it describes</th></tr></thead>
+            <tbody>
+              <tr><td>Regression model</td><td class="mono">y = β<sub>0</sub> + β<sub>1</sub>x + ε</td><td>Every customer: the line plus their own error ε</td></tr>
+              <tr><td>Regression equation</td><td class="mono">E(y) = β<sub>0</sub> + β<sub>1</sub>x</td><td>The <i>average</i> charges at each age, for the whole population</td></tr>
+              <tr><td>Estimated regression equation</td><td class="mono"><span class="yh">y</span> = b<sub>0</sub> + b<sub>1</sub>x</td><td>Our estimate of that line, from sample data</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="callout">Same pattern as Ch 8: β<sub>0</sub> and β<sub>1</sub> are <b>parameters</b> we never see (like μ). b<sub>0</sub> and b<sub>1</sub> are <b>statistics</b> we compute (like <span class="xb">x</span>).</p>
+        <p class="note">b<sub>1</sub> is the slope: the change in <span class="yh">y</span> for a one-unit increase in x. b<sub>0</sub> is the intercept: <span class="yh">y</span> when x = 0.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="stop" id="hand">
+    <div class="stop-head"><div class="stop-num">STOP 2 · 14.2 · THE LEAST SQUARES METHOD · 5 CUSTOMERS</div><h2>Which line is the “best” line?</h2>
+      <p class="muted">Workbook sheet: <b>14.2 By Hand (5)</b>. Five non-smoking customers, charges rounded to the dollar.</p></div>
+    <div class="two">
+      <div class="card">
+        <div class="label">Try it: you pick the slope</div>
+        <svg class="plot" id="handPlot" viewBox="0 0 560 330" role="img" aria-label="Five customers and a line whose slope you control"></svg>
+        <div class="row"><span class="label" style="min-width:70px">Slope</span><input type="range" id="bSlider" min="0" max="500" value="100" aria-label="Slope of your line"><span class="val" id="bVal">$100</span></div>
+        <div class="tiles">
+          <div class="tile"><span class="cap">Your line</span><span class="num mono" id="lineEq" style="font-size:16px">–</span></div>
+          <div class="tile"><span class="cap">SSE = Σ(y − <span class="yh">y</span>)²</span><span class="num" id="sseVal">–</span></div>
+          <div class="tile"><span class="cap">Compared with the best</span><span class="num" id="sseCmp">–</span></div>
+        </div>
+        <p class="note">Your line always passes through (<span class="xb">x</span>, <span class="xb">y</span>) = (40, $6,902.60), like the least squares line. The red segments are the errors y − <span class="yh">y</span>. Make their squared total as small as you can.</p>
+      </div>
+      <div class="card">
+        <div class="label">The least squares criterion</div>
+        <p class="hyp">min Σ(y<sub>i</sub> − <span class="yh">y</span><sub>i</sub>)²</p>
+        <p>Choose b<sub>0</sub> and b<sub>1</sub> to make the <b>sum of squared errors</b> as small as possible. Calculus gives the answer in closed form:</p>
+        <p class="hyp">b<sub>1</sub> = Σ(x − <span class="xb">x</span>)(y − <span class="xb">y</span>) / Σ(x − <span class="xb">x</span>)²  <span class="note">(14.6)</span><br>b<sub>0</sub> = <span class="xb">y</span> − b<sub>1</sub><span class="xb">x</span>  <span class="note">(14.7)</span></p>
+        <button type="button" class="btn primary" data-show="hand-res">Show the calculation</button>
+        <div data-reveal id="hand-res" hidden>
+          <div class="wrapx">
+            <table class="rules">
+              <thead><tr><th>Customer #</th><th>x</th><th>y</th><th>x − <span class="xb">x</span></th><th>y − <span class="xb">y</span></th><th>(x − <span class="xb">x</span>)(y − <span class="xb">y</span>)</th><th>(x − <span class="xb">x</span>)²</th></tr></thead>
+              <tbody id="handRows"></tbody>
+            </table>
+          </div>
+          <p class="hyp">b<sub>1</sub> = 267,000 / 1,000 = <b>267.00</b><br>b<sub>0</sub> = 6,902.6 − 267(40) = <b>−3,777.40</b></p>
+          <p class="ans"><span class="yh">y</span> = −3,777.40 + 267.00x. <b>For these 5 customers, each additional year of age adds about $267 to annual charges.</b> Excel's <span class="mono">=SLOPE(C10:C14,B10:B14)</span> returns the same 267.</p>
+          <p class="note">Why are the first two column sums 0? Deviations from a mean always cancel. That is why we multiply them before adding.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="stop" id="all">
+    <div class="stop-head"><div class="stop-num">STOP 3 · 14.2 · LET EXCEL DO IT · ALL 1,338 CUSTOMERS</div><h2>Five customers was arithmetic. 1,338 is a job for SLOPE and INTERCEPT.</h2>
+      <p class="muted">Workbook sheet: <b>14.2 All Customers</b>. Then build the scatter chart yourself (Insert › Scatter, add a trendline with its equation).</p></div>
+    <div class="two">
+      <div class="card">
+        <svg class="plot" id="allPlot" viewBox="0 0 560 360" role="img" aria-label="Scatter of annual charges against age for 1,338 customers with the least squares line"></svg>
+        <div class="legend" id="allLegend"><span><i style="background:var(--dot)"></i>customer</span><span><i style="background:var(--hit);border-radius:0;height:3px"></i>least squares line</span></div>
+      </div>
+      <div class="card">
+        <div class="wrapx">
+          <table class="rules">
+            <thead><tr><th>Item</th><th>Excel</th><th>Result</th></tr></thead>
+            <tbody>
+              <tr><td>Slope b<sub>1</sub></td><td class="mono">=SLOPE(B2:B1339,A2:A1339)</td><td class="num">257.72</td></tr>
+              <tr><td>Intercept b<sub>0</sub></td><td class="mono">=INTERCEPT(B2:B1339,A2:A1339)</td><td class="num">3,165.89</td></tr>
+              <tr><td><span class="yh">y</span> at age 30</td><td class="mono">=E8+E7*30</td><td class="num">$10,897.56</td></tr>
+              <tr><td><span class="yh">y</span> at age 60</td><td class="mono">=E8+E7*60</td><td class="num">$18,629.24</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="warn"><b>Trap:</b> SLOPE and INTERCEPT take <b>y first</b>, then x. Swap them and you get a different line (age predicted from charges).</p>
+        <button type="button" class="btn primary" data-show="all-res">Answer the Stop 1 question</button>
+        <div data-reveal id="all-res" hidden>
+          <p class="hyp">18,629 − 10,898 = <b>$7,732</b> = 30 × 257.72</p>
+          <p class="ans"><b>For the pricing team:</b> each additional year of age is associated with about <b>$258 more</b> in annual charges, so a 60-year-old costs about $7,700 a year more than a 30-year-old.</p>
+          <p class="note">The difference is always 30 × b<sub>1</sub>: the intercept cancels. That is why the slope, not the intercept, is the number a business uses.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="stop" id="stripes">
+    <div class="stop-head"><div class="stop-num">STOP 4 · 14.2 · LOOK AT THE PICTURE</div><h2>Why are there three stripes?</h2>
+      <p class="muted">Workbook sheet: <b>14.2 Non-smokers</b>.</p></div>
+    <div class="two">
+      <div class="card">
+        <svg class="plot" id="stripePlot" viewBox="0 0 560 360" role="img" aria-label="Scatter of charges against age, optionally colored by smoker status"></svg>
+        <div class="legend" id="stripeLegend"></div>
+      </div>
+      <div class="card">
+        <p>The scatter is not one cloud. It is three bands that all rise with age. Something besides age splits the customers.</p>
+        <div class="predict">
+          <div class="label">Predict first, with your neighbor</div>
+          <p>Which variable puts a customer in the top stripe?</p>
+          <div class="btnrow" data-predict="stripe"><button type="button" class="btn">sex</button><button type="button" class="btn">region</button><button type="button" class="btn">children</button><button type="button" class="btn">smoker</button></div>
+        </div>
+        <button type="button" class="btn primary" id="colorBtn">Color by smoker</button>
+        <div data-reveal id="stripe-res" hidden>
+          <p class="ans"><b>Smokers.</b> Almost every customer above about $30,000 smokes. The middle stripe mixes smokers and non-smokers; the bottom stripe is all non-smokers.</p>
+          <div class="wrapx">
+            <table class="rules">
+              <thead><tr><th>Line</th><th>n</th><th>b<sub>1</sub> (per year)</th><th>b<sub>0</sub></th></tr></thead>
+              <tbody>
+                <tr><td>All customers</td><td class="num">1,338</td><td class="num">$257.72</td><td class="num">$3,165.89</td></tr>
+                <tr><td>Non-smokers only</td><td class="num">1,064</td><td class="num">$267.25</td><td class="num flip">−$2,091.42</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note">The age effect barely moves: about $260 a year either way. Smoking shifts the whole line up; it doesn't change how fast charges rise with age much. Look at the non-smoker intercept: it's negative.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="stop" id="intercept">
+    <div class="stop-head"><div class="stop-num">STOP 5 · 14.2 · READING THE INTERCEPT</div><h2>Does a newborn cost Bridger −$2,091?</h2></div>
+    <div class="two">
+      <div class="card">
+        <p>Non-smoker line: <span class="yh">y</span> = −2,091.42 + 267.25x. Plug in x = 0 and you get <b>−$2,091</b>, a customer who pays Bridger to be insured.</p>
+        <div class="predict">
+          <div class="label">Predict first</div>
+          <p>What's wrong?</p>
+          <div class="btnrow" data-predict="b0"><button type="button" class="btn">Excel made an error</button><button type="button" class="btn">Age 0 is outside the data</button><button type="button" class="btn">Babies really are cheaper</button></div>
+        </div>
+        <button type="button" class="btn primary" data-show="b0-res">Show the answer</button>
+        <div data-reveal id="b0-res" hidden>
+          <p class="ans">The youngest customer is <b>18</b> and the oldest is <b>64</b>. The line describes customers aged 18 to 64. At x = 0 it is <b>extrapolating</b>: predicting far outside the data, where nothing says the straight line still holds.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">Rule for your project</div>
+        <p class="callout">Interpret b<sub>0</sub> only if <b>x = 0 is a real, observed value</b> (0 children, 0 nights, $0 discount). Otherwise, say “the intercept has no practical meaning here; it just positions the line.”</p>
+        <p class="note">The same warning applies to predictions: a line fit to ages 18 to 64 should not price an 80-year-old.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="stop" id="r2">
+    <div class="stop-head"><div class="stop-num">STOP 6 · 14.3 · COEFFICIENT OF DETERMINATION</div><h2>The slope says how much. r² says how well.</h2>
+      <p class="muted">Workbook sheets: <b>14.3 By Hand (5)</b>, <b>14.3 Project 1 Contrast</b>, <b>14.3 Compare</b>.</p></div>
+    <div class="two">
+      <div class="card">
+        <div class="label">Split the variation in charges into two parts</div>
+        <div class="wrapx">
+          <table class="rules">
+            <thead><tr><th>Sum of squares</th><th>Formula</th><th>Measures</th></tr></thead>
+            <tbody>
+              <tr><td>SST, total</td><td class="mono">Σ(y − <span class="xb">y</span>)²</td><td>How much charges vary at all</td></tr>
+              <tr><td>SSR, regression</td><td class="mono">Σ(<span class="yh">y</span> − <span class="xb">y</span>)²</td><td>The part the line explains</td></tr>
+              <tr><td>SSE, error</td><td class="mono">Σ(y − <span class="yh">y</span>)²</td><td>The part it misses</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="hyp">SST = SSR + SSE   r² = SSR / SST</p>
+        <p class="note">r² runs from 0 (the line explains nothing) to 1 (every point on the line). The correlation is r = (sign of b<sub>1</sub>)√r².</p>
+        <div class="label">The 5 customers</div>
+        <div class="kv">
+          <div><span>SST</span><b>74,669,475</b></div>
+          <div><span>SSR</span><b>71,289,000</b></div>
+          <div><span>SSE</span><b>3,380,475</b></div>
+          <div><span>r² = 71,289,000 / 74,669,475</span><b>0.955</b></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="predict">
+          <div class="label">Predict first</div>
+          <p>In Project 1 you found r = 0.003 between household income and investments. Regress investments on income: what will r² be?</p>
+          <div class="btnrow" data-predict="r2"><button type="button" class="btn">About 0</button><button type="button" class="btn">About 0.3</button><button type="button" class="btn">About 0.9</button></div>
+        </div>
+        <button type="button" class="btn primary" data-show="r2-res">Show all four lines</button>
+        <div data-reveal id="r2-res" hidden>
+          <div id="r2bars" style="display:grid;gap:10px"></div>
+          <p class="ans">Same slope for all customers and non-smokers, very different r². <b>b<sub>1</sub> answers “how much does y change per x?”; r² answers “how much of y's variation does x explain?”</b> Age explains 9% of all charges, 39% once smokers are set aside. Income explains none of investments: that line is flat, and it predicts about the average for everyone.</p>
+          <p class="warn">The 5 hand-picked customers give 0.955: a tiny sample can make a line look far better than it is. And a high r² is still not a significance test. That's Thursday (14.5).</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="stop" id="wrap">
+    <div class="stop-head"><div class="stop-num">STOP 7 · SUMMARY &amp; YOUR PROJECT</div><h2>Simple linear regression on one page</h2></div>
+    <div class="wrapx">
+      <table class="rules">
+        <thead><tr><th>Quantity</th><th>Formula</th><th>Excel</th><th>Say it like this</th></tr></thead>
+        <tbody>
+          <tr><td>Slope b<sub>1</sub></td><td class="mono">Σ(x − <span class="xb">x</span>)(y − <span class="xb">y</span>) / Σ(x − <span class="xb">x</span>)²</td><td class="mono">=SLOPE(y, x)</td><td>“Each additional year of age adds about $258 to annual charges.”</td></tr>
+          <tr><td>Intercept b<sub>0</sub></td><td class="mono"><span class="xb">y</span> − b<sub>1</sub><span class="xb">x</span></td><td class="mono">=INTERCEPT(y, x)</td><td>Only if x = 0 is in the data. Otherwise: “no practical meaning.”</td></tr>
+          <tr><td>Prediction <span class="yh">y</span></td><td class="mono">b<sub>0</sub> + b<sub>1</sub>x</td><td class="mono">=b0_cell + b1_cell*x</td><td>“A 45-year-old non-smoker is expected to cost about $9,900.”</td></tr>
+          <tr><td>r²</td><td class="mono">SSR / SST</td><td class="mono">=RSQ(y, x)</td><td>“Age explains about 9% of the variation in charges.”</td></tr>
+          <tr><td>r</td><td class="mono">(sign of b<sub>1</sub>)√r²</td><td class="mono">=CORREL(x, y)</td><td>“A weak positive linear relationship.”</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="two">
+      <div class="card">
+        <div class="label">14.1 to 14.3 in two sentences</div>
+        <p>Least squares picks the one line that makes the squared errors smallest; its slope is the business number. r² tells you how much of the story that line tells, and it can be low even when the slope matters.</p>
+      </div>
+      <div class="card">
+        <div class="label">With your group, 5 minutes</div>
+        <p>Simple regression is required in your final report (§6). For your dataset, write:</p>
+        <ol style="margin:0;padding-left:20px;display:grid;gap:4px">
+          <li>y: the number your business most wants to predict, with units.</li>
+          <li>x: the one variable you expect drives it, with units.</li>
+          <li>The sentence you hope to write: “each additional ___ adds about $___ to ___.”</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const PTS = [[19,16885,1],[18,1726,0],[28,4449,0],[33,21984,0],[32,3867,0],[31,3757,0],[46,8241,0],[37,7282,0],[37,6406,0],[60,28923,0],[25,2721,0],[62,27809,1],[23,1827,0],[56,11091,0],[27,39612,1],[19,1837,0],[52,10797,0],[23,2395,0],[56,10602,0],[30,36837,1],[60,13229,0],[30,4150,0],[18,1137,0],[34,37702,1],[37,6204,0],[59,14001,0],[63,14452,0],[55,12269,0],[23,2775,0],[31,38711,1],[22,35586,1],[18,2198,0],[19,4688,0],[63,13770,0],[28,51195,1],[19,1625,0],[62,15612,0],[26,2302,0],[35,39774,1],[60,48173,1],[24,3046,0],[31,4950,0],[41,6272,0],[37,6314,0],[38,6080,0],[55,20630,0],[18,3393,0],[28,3557,0],[60,12630,0],[36,38709,1],[18,2211,0],[21,3580,0],[48,23568,1],[36,37743,1],[40,8060,0],[58,47496,1],[58,13607,0],[18,34303,1],[53,23245,1],[34,5990,0],[43,8606,0],[25,4505,0],[64,30167,0],[28,4134,0],[20,14712,1],[19,1743,0],[61,14235,0],[40,6389,0],[40,5920,0],[28,17663,1],[27,16578,1],[31,6799,0],[53,11742,0],[58,11947,0],[44,7727,0],[57,11357,0],[29,3947,0],[21,1532,0],[22,2755,0],[41,6571,0],[31,4441,0],[45,7935,0],[22,37165,1],[48,11034,0],[37,39837,1],[45,21099,1],[57,43579,1],[56,11073,0],[46,8027,0],[55,11083,0],[21,2027,0],[53,10942,0],[59,30185,1],[35,5729,0],[64,47291,1],[28,3767,0],[54,12105,0],[55,10226,0],[56,22413,1],[38,15821,1],[41,6186,0],[30,3645,0],[18,21345,0],[61,30942,1],[34,5004,0],[20,17560,1],[19,2332,0],[26,3877,0],[29,2867,0],[63,47056,1],[54,10825,0],[55,11881,0],[37,4647,0],[21,2405,0],[52,11488,0],[60,30260,0],[58,11381,0],[29,19108,1],[49,8601,0],[37,6686,0],[44,7740,0],[18,1706,0],[20,2257,0],[44,39556,1],[47,10115,0],[26,3385,0],[19,17081,1],[52,9635,0],[32,32734,1],[38,6082,0],[59,12815,0],[61,13616,0],[53,11164,0],[19,1633,0],[20,2457,0],[22,2156,0],[19,1261,0],[22,2046,0],[54,27323,0],[22,2167,0],[34,27376,0],[26,3491,0],[34,18972,1],[29,18158,0],[30,20746,1],[29,5138,0],[46,40721,1],[51,9878,0],[53,10960,0],[19,1843,0],[35,5125,0],[48,7790,0],[32,6334,0],[42,19965,1],[40,7077,0],[44,6949,0],[48,21224,1],[18,15518,1],[30,36950,1],[50,19749,0],[42,21349,1],[18,36149,1],[54,10451,0],[32,5152,0],[37,5028,0],[47,10407,0],[20,4831,0],[32,6129,0],[19,2719,0],[27,4828,0],[63,13405,0],[49,8117,0],[18,1695,0],[35,5246,0],[24,2855,0],[63,48824,1],[38,6456,0],[54,10436,0],[46,8823,0],[41,8538,0],[58,11736,0],[18,1632,0],[22,4005,0],[44,7419,0],[44,7731,0],[36,43753,1],[26,3982,0],[30,5326,0],[41,6776,0],[29,4923,0],[61,12558,0],[36,4884,0],[25,2138,0],[56,12044,0],[18,1137,0],[19,1640,0],[39,5650,0],[45,8517,0],[51,9644,0],[64,14902,0],[19,2131,0],[48,8871,0],[60,13012,0],[27,37134,1],[46,7147,0],[28,4338,0],[59,11743,0],[35,20984,1],[63,13881,0],[40,6610,0],[20,1980,0],[40,8163,0],[24,3538,0],[34,5003,0],[45,8520,0],[41,7372,0],[53,10356,0],[27,2484,0],[26,3393,0],[24,25082,0],[34,5012,0],[53,10565,0],[32,5254,0],[19,34780,1],[42,19516,1],[55,11987,0],[28,2689,0],[58,24227,0],[41,7358,0],[47,9225,0],[42,7444,0],[59,14001,0],[19,1728,0],[59,12334,0],[39,6710,0],[40,19444,1],[18,1616,0],[31,4463,0],[19,17353,1],[44,7153,0],[23,38512,1],[33,5354,0],[55,35160,0],[40,7197,0],[63,29523,1],[54,24476,0],[60,12649,0],[24,1987,0],[19,1832,0],[29,4041,0],[18,12829,1],[63,47305,1],[54,44261,1],[27,4261,0],[50,41097,1],[55,13047,0],[56,43921,1],[38,5401,0],[51,11520,0],[19,33750,1],[58,11837,0],[20,17085,1],[52,24870,1],[19,36219,1],[53,20463,0],[46,46151,1],[40,17180,1],[59,14591,0],[45,7441,0],[49,9282,0],[18,1719,0],[50,42857,1],[41,7266,0],[50,9618,0],[25,2523,0],[47,9716,0],[19,2804,0],[22,2150,0],[59,12929,0],[51,9855,0],[40,22332,1],[54,48549,1],[30,4237,0],[55,11879,0],[52,9626,0],[46,7742,0],[46,9433,0],[63,14256,0],[59,47897,1],[52,25993,0],[28,3172,0],[29,20278,0],[25,42112,1],[22,2157,0],[25,3906,0],[18,1705,0],[19,16298,1],[47,21979,1],[31,38746,1],[48,9249,0],[36,6747,0],[53,24873,1],[56,12266,0],[28,4349,0],[57,12646,0],[29,19442,0],[28,20178,0],[30,4151,0],[58,11945,0],[41,7749,0],[50,8444,0],[19,1737,0],[43,42125,1],[49,8124,0],[27,34839,1],[52,9723,0],[50,8835,0],[54,10435,0],[44,7421,0],[32,4668,0],[34,4895,0],[26,24672,0],[34,35492,1],[57,11566,0],[29,2866,0],[40,6600,0],[27,3562,0],[45,42761,1],[64,47928,1],[52,9145,0],[61,48518,1],[52,24394,1],[61,13429,0],[56,11658,0],[43,19145,0],[64,13823,0],[60,12143,0],[62,13938,0],[50,41919,1],[46,8233,0],[24,18955,0],[62,13352,0],[60,13217,0],[63,13982,0],[49,10977,0],[34,6184,0],[33,4890,0],[46,8334,0],[36,5478,0],[19,1636,0],[57,11831,0],[50,8932,0],[30,3554,0],[33,12405,0],[18,14133,0],[46,24603,0],[46,8944,0],[47,9620,0],[23,1837,0],[18,1608,0],[48,10043,0],[35,4751,0],[19,13845,1],[21,2598,0],[21,3181,0],[49,9778,0],[56,13430,0],[42,8017,0],[44,8116,0],[18,3482,0],[61,13415,0],[57,12029,0],[42,7639,0],[26,36085,1],[20,1392,0],[23,18034,1],[39,21660,1],[24,38126,1],[64,16456,0],[62,27001,0],[27,15007,1],[55,42304,1],[55,20781,0],[35,5847,0],[44,8303,0],[19,1262,0],[58,11856,0],[50,30285,0],[26,3177,0],[24,4618,0],[48,10737,0],[19,2138,0],[48,8964,0],[49,9290,0],[46,9411,0],[46,7527,0],[43,8522,0],[21,16586,0],[64,14988,0],[18,1632,0],[51,9265,0],[47,8084,0],[64,14693,0],[49,10269,0],[31,3260,0],[52,11397,0],[33,4185,0],[47,8540,0],[38,6653,0],[32,4074,0],[19,1621,0],[44,19595,1],[26,14456,1],[25,5080,0],[19,2135,0],[43,7346,0],[52,9141,0],[36,18608,1],[64,14418,0],[63,28950,1],[64,46889,1],[61,46599,1],[40,39125,1],[25,2727,0],[48,8968,0],[45,9789,0],[38,6555,0],[18,7324,0],[21,3167,0],[27,18805,0],[19,23083,0],[29,4906,0],[42,5970,0],[60,12638,0],[31,4244,0],[60,13920,0],[22,2255,0],[35,5927,0],[52,12593,0],[26,2897,0],[31,4738,0],[33,37079,1],[18,1149,0],[59,28288,0],[56,26109,1],[45,7345,0],[60,12731,0],[56,11454,0],[40,5911,0],[35,4762,0],[39,7512,0],[30,4032,0],[24,1970,0],[20,1770,0],[32,4686,0],[59,21797,0],[55,11882,0],[57,11841,0],[56,10601,0],[40,7683,0],[49,10381,0],[42,22144,1],[62,15230,0],[56,11165,0],[19,1632,0],[30,19522,1],[60,13225,0],[56,12643,0],[28,23289,0],[18,2201,0],[27,2497,0],[18,2203,0],[19,1744,0],[47,20879,0],[54,25382,1],[61,28869,1],[24,35148,1],[25,2534,0],[21,1534,0],[23,1824,0],[63,15555,0],[49,9305,0],[18,1622,0],[51,9880,0],[48,9563,0],[31,4347,0],[54,12475,0],[19,1254,0],[44,48885,1],[53,10462,0],[19,1749,0],[61,24513,0],[18,2196,0],[61,12574,0],[21,17942,1],[20,1967,0],[31,4932,0],[45,8028,0],[44,8211,0],[62,13471,0],[29,36198,1],[43,6837,0],[51,22218,1],[19,32548,1],[38,5974,0],[37,6797,0],[22,2643,0],[21,3077,0],[24,3044,0],[57,11455,0],[56,11763,0],[27,2498,0],[51,9361,0],[19,1256,0],[39,21082,1],[58,11363,0],[20,27724,0],[45,8413,0],[35,5241,0],[31,3858,0],[50,25657,0],[32,3994,0],[51,9866,0],[38,5398,0],[42,38246,1],[18,11483,0],[19,24060,0],[51,9861,0],[46,8343,0],[18,1708,0],[57,48676,1],[62,14043,0],[59,12926,0],[37,19215,0],[64,13831,0],[38,6067,0],[33,5972,0],[46,8825,0],[46,8233,0],[53,27346,0],[34,6196,0],[20,3056,0],[63,13887,0],[54,63770,1],[54,10231,0],[49,23807,1],[28,3269,0],[54,11538,0],[25,3214,0],[43,45863,1],[63,13391,0],[32,3973,0],[62,12957,0],[52,11188,0],[25,17879,0],[28,3848,0],[46,8335,0],[34,3935,0],[35,39983,1],[19,1646,0],[46,9194,0],[54,10924,0],[27,2494,0],[50,9059,0],[18,2801,0],[19,2128,0],[38,6374,0],[41,7257,0],[49,11553,0],[48,45702,1],[31,3761,0],[18,2219,0],[30,4754,0],[62,31620,0],[57,13224,0],[58,12223,0],[22,1665,0],[31,58571,1],[52,9725,0],[25,3206,0],[59,12914,0],[19,1640,0],[39,6356,0],[32,17626,0],[19,1243,0],[33,4780,0],[21,3861,0],[34,43944,1],[61,13636,0],[38,5977,0],[58,11842,0],[47,8428,0],[20,2566,0],[21,15359,1],[41,5709,0],[46,8824,0],[42,7640,0],[34,5595,0],[43,7442,0],[52,33472,0],[18,1633,0],[51,9174,0],[56,11071,0],[64,16085,0],[19,17469,1],[51,9284,0],[27,3559,0],[59,25679,1],[28,4435,0],[30,39241,1],[47,8548,0],[38,6572,0],[18,2208,0],[34,6753,0],[20,1880,0],[47,42970,1],[56,11658,0],[49,23307,1],[19,34440,1],[55,10714,0],[30,3659,0],[37,40182,1],[49,9182,0],[18,34618,1],[59,12130,0],[29,3736,0],[36,6749,0],[33,11327,0],[58,11366,0],[44,42983,1],[53,10086,0],[24,1978,0],[29,3367,0],[40,7173,0],[51,9391,0],[64,14411,0],[19,2709,0],[35,24915,0],[39,20149,1],[56,12949,0],[33,6666,0],[42,32787,1],[61,13144,0],[23,4467,0],[43,18806,0],[48,10141,0],[39,6124,0],[40,8252,0],[18,1712,0],[58,12431,0],[49,9801,0],[53,10580,0],[48,8281,0],[45,8528,0],[59,12245,0],[52,24667,1],[26,3410,0],[27,4059,0],[48,26392,0],[57,14394,0],[37,6436,0],[57,22192,0],[32,5149,0],[18,1136,0],[64,27038,1],[43,42560,1],[49,8703,0],[40,40003,1],[62,45710,1],[40,6500,0],[30,4838,0],[29,3944,0],[36,4400,0],[41,6185,0],[44,46201,1],[45,7223,0],[55,12486,0],[60,46131,1],[56,12364,0],[49,10157,0],[21,2585,0],[19,1242,0],[39,40104,1],[53,9863,0],[33,4766,0],[53,11244,0],[42,7730,0],[40,5439,0],[47,26237,0],[27,34806,1],[21,2104,0],[47,8068,0],[20,2362,0],[24,2353,0],[27,3578,0],[26,3201,0],[53,29186,0],[41,40274,1],[56,10976,0],[23,3501,0],[21,2021,0],[50,9542,0],[53,9504,0],[34,5385,0],[47,8931,0],[33,5375,0],[51,44400,1],[49,10264,0],[31,6113,0],[36,5469,0],[18,1728,0],[50,10107,0],[43,8311,0],[20,1984,0],[24,2458,0],[60,12147,0],[49,9567,0],[60,13113,0],[51,10848,0],[58,12232,0],[51,9876,0],[53,11265,0],[62,12979,0],[19,1263,0],[50,10106,0],[30,40932,1],[41,6665,0],[29,16658,1],[18,2218,0],[41,6781,0],[35,19362,1],[53,10065,0],[24,4235,0],[48,9447,0],[59,14007,0],[49,9584,0],[37,40419,1],[26,3484,0],[23,36189,1],[29,44585,1],[45,8604,0],[27,18246,1],[53,43254,1],[31,3758,0],[50,8827,0],[50,9910,0],[34,11738,0],[19,1627,0],[47,8557,0],[28,3063,0],[37,19539,1],[21,1906,0],[64,14211,0],[58,11834,0],[24,17128,0],[31,5031,0],[39,7986,0],[47,23065,1],[30,5429,0],[18,36308,1],[22,3926,0],[23,2417,0],[33,19041,1],[27,3071,0],[45,9095,0],[57,11843,0],[47,8063,0],[42,7051,0],[64,14319,0],[38,6933,0],[61,27941,0],[53,11151,0],[44,12797,0],[19,17749,1],[41,7262,0],[51,10560,0],[40,6987,0],[45,7448,0],[35,5934,0],[53,9870,0],[30,18259,1],[18,1147,0],[51,9386,0],[50,24520,1],[31,4351,0],[35,6414,0],[60,12741,0],[21,1917,0],[29,5210,0],[62,13458,0],[39,5662,0],[19,1252,0],[22,2732,0],[53,21196,1],[39,7209,0],[27,18311,1],[30,4266,0],[30,4720,0],[58,11848,0],[33,17905,1],[42,7047,0],[64,14314,0],[21,2103,0],[18,38793,1],[23,1816,0],[45,7732,0],[40,28477,0],[19,2137,0],[18,1132,0],[25,3310,0],[46,9415,0],[33,6361,0],[54,11014,0],[28,4429,0],[36,5584,0],[20,1878,0],[24,2843,0],[23,3598,0],[47,23401,1],[33,55135,1],[45,7446,0],[26,2681,0],[18,1622,0],[44,8219,0],[60,12524,0],[64,16069,0],[56,43814,1],[36,20774,1],[41,39597,1],[39,6117,0],[63,13394,0],[36,5266,0],[28,4720,0],[58,11744,0],[36,5377,0],[42,7160,0],[36,4402,0],[56,11658,0],[35,6402,0],[59,12622,0],[21,1526,0],[59,12324,0],[23,36021,1],[57,27534,1],[53,10072,0],[60,45009,1],[51,9873,0],[23,2438,0],[27,2974,0],[55,10602,0],[37,37270,1],[61,14120,0],[46,42112,1],[53,11730,0],[49,24107,1],[20,1875,0],[48,40974,1],[25,15818,1],[25,18218,0],[57,10965,0],[37,46114,1],[38,7151,0],[55,12270,0],[36,5458,0],[51,8782,0],[40,6600,0],[18,1141,0],[57,11576,0],[61,13130,0],[25,4392,0],[50,8458,0],[26,3392,0],[42,5967,0],[43,6849,0],[44,8891,0],[23,2690,0],[49,26140,0],[33,6654,0],[41,6282,0],[37,6312,0],[22,3443,0],[23,2789,0],[21,2586,0],[51,46255,1],[25,4878,0],[32,19720,1],[57,27218,1],[36,5272,0],[22,1683,0],[57,11945,0],[64,29331,1],[36,7244,0],[54,10423,0],[47,44203,1],[62,13555,0],[61,13064,0],[43,19798,1],[19,2222,0],[18,1635,0],[19,2117,0],[49,8689,0],[60,48674,1],[26,4661,0],[49,8126,0],[60,12645,0],[26,4564,0],[27,4847,0],[44,7634,0],[63,15170,0],[32,17496,1],[22,2639,0],[18,33733,1],[59,14383,0],[44,7627,0],[33,5258,0],[24,2473,0],[43,21774,1],[45,35069,1],[61,13042,0],[35,5245,0],[62,13451,0],[62,13463,0],[38,5488,0],[34,4320,0],[43,6250,0],[50,25333,0],[19,2914,0],[57,12032,0],[62,13471,0],[41,6290,0],[26,2927,0],[39,6238,0],[46,10097,0],[45,7348,0],[32,4673,0],[59,12234,0],[44,32109,0],[39,8966,0],[18,2304,0],[53,9488,0],[18,1122,0],[50,9550,0],[18,2217,0],[19,1628,0],[62,12983,0],[56,11674,0],[42,7160,0],[37,39047,1],[42,6359,0],[25,19933,1],[57,11535,0],[51,47463,1],[30,4527,0],[44,38999,1],[34,20010,1],[31,3876,0],[54,42000,1],[24,12610,0],[43,41034,1],[48,28469,0],[19,2730,0],[29,3353,0],[63,14475,0],[46,9501,0],[52,26467,0],[35,4746,0],[51,23967,1],[44,7518,0],[21,3280,0],[39,8597,0],[50,10703,0],[34,4992,0],[22,2528,0],[19,1759,0],[26,2323,0],[29,16139,1],[48,7804,0],[26,2903,0],[45,9705,0],[36,4889,0],[54,25517,0],[34,4500,0],[31,19200,1],[27,16796,0],[20,4915,0],[44,7625,0],[43,8410,0],[45,28340,0],[34,4519,0],[24,14572,1],[26,3379,0],[38,7145,0],[50,10118,0],[38,5484,0],[27,16420,1],[39,7986,0],[39,7419,0],[63,13888,0],[33,6552,0],[36,5268,0],[30,17362,1],[24,34473,1],[24,1973,0],[48,21232,0],[47,8628,0],[29,4433,0],[28,4438,0],[47,24915,1],[25,23241,0],[51,9958,0],[48,8269,0],[43,18768,1],[61,36580,0],[48,8765,0],[38,5384,0],[59,12125,0],[19,2709,0],[26,3988,0],[54,12495,0],[21,26019,0],[51,8799,0],[22,35596,1],[47,42211,1],[18,1711,0],[47,8570,0],[21,2020,0],[19,16451,1],[23,21595,0],[54,9850,0],[37,6878,0],[46,21677,1],[55,44424,1],[30,4138,0],[18,13748,1],[61,12950,0],[54,12094,0],[22,37484,1],[45,39726,1],[22,2251,0],[19,22494,0],[35,20235,1],[18,1705,0],[20,33476,1],[28,3161,0],[55,11394,0],[43,21881,1],[43,7325,0],[22,44501,1],[25,3594,0],[49,39728,1],[44,8023,0],[64,14395,0],[49,9288,0],[47,25309,1],[27,3353,0],[55,10595,0],[48,8278,0],[45,17929,0],[24,2481,0],[32,4463,0],[24,1982,0],[57,11554,0],[59,48970,1],[36,6548,0],[29,5709,0],[42,7045,0],[48,8978,0],[39,5757,0],[63,14350,0],[54,10929,0],[37,39872,1],[63,13974,0],[21,1910,0],[54,12097,0],[60,13204,0],[32,4563,0],[47,8551,0],[21,2102,0],[28,34672,1],[63,15162,0],[18,11884,0],[32,4454,0],[38,5856,0],[32,4076,0],[62,15020,0],[39,19023,1],[55,10796,0],[57,11353,0],[52,9749,0],[56,10577,0],[47,41676,1],[55,11287,0],[23,3591,0],[22,33908,1],[50,11299,0],[18,4561,0],[51,44641,1],[22,1675,0],[52,23046,0],[25,3227,0],[33,16776,1],[53,11253,0],[29,3471,0],[58,11363,0],[37,20421,0],[54,10339,0],[49,8988,0],[50,10494,0],[26,2904,0],[45,8605,0],[54,11512,0],[38,41949,1],[48,24181,1],[28,5312,0],[23,2396,0],[55,10807,0],[41,9222,0],[25,36125,1],[33,38283,1],[30,5693,0],[23,34166,1],[46,8347,0],[53,46661,1],[27,18903,0],[23,40904,1],[63,14255,0],[55,10215,0],[35,5837,0],[34,14358,0],[19,1729,0],[39,8582,0],[27,3693,0],[57,20709,0],[52,9991,0],[28,19673,0],[50,11086,0],[44,7624,0],[26,3176,0],[33,3704,0],[19,36899,1],[50,9048,0],[41,7955,0],[52,27118,0],[39,6338,0],[50,9630,0],[52,11289,0],[60,52591,1],[20,2262,0],[55,10792,0],[42,5980,0],[18,2204,0],[58,12236,0],[43,40941,1],[35,5630,0],[48,11015,0],[36,7228,0],[19,39723,1],[23,14426,0],[20,2460,0],[32,3990,0],[43,7727,0],[34,5124,0],[30,18963,0],[18,2201,0],[41,7154,0],[35,5228,0],[57,10983,0],[29,4529,0],[32,4671,0],[37,6112,0],[18,17179,1],[43,22479,1],[56,11094,0],[38,6458,0],[29,4434,0],[22,2154,0],[52,23888,1],[40,6497,0],[23,2899,0],[31,19350,1],[42,7651,0],[24,2851,0],[25,2633,0],[48,9447,0],[23,18328,1],[45,8604,0],[20,37465,1],[62,13845,0],[43,21771,1],[23,13127,0],[31,5327,0],[41,13725,0],[58,13019,0],[48,8671,0],[31,4134,0],[19,18839,0],[19,33308,1],[41,5700,0],[40,6394,0],[31,4935,0],[37,6199,0],[46,8733,0],[22,2055,0],[51,9964,0],[18,18223,1],[35,5117,0],[59,36911,0],[36,38415,1],[37,20297,1],[59,12347,0],[36,5373,0],[39,23563,0],[18,1702,0],[52,10807,0],[27,3956,0],[18,12890,0],[40,5416,0],[29,4058,0],[46,41662,1],[38,7537,0],[30,4718,0],[40,6594,0],[50,8443,0],[20,26126,1],[41,6858,0],[33,4796,0],[38,6641,0],[42,7162,0],[56,10594,0],[58,11938,0],[52,60021,1],[20,20167,1],[54,12480,0],[58,11346,0],[45,8516,0],[26,2700,0],[63,14450,0],[58,12224,0],[37,6986,0],[25,3238,0],[52,47270,1],[64,49578,1],[22,4296,0],[28,3172,0],[18,1136,0],[28,5615,0],[45,9102,0],[33,6059,0],[18,1634,0],[32,37608,1],[24,18648,1],[19,1242,0],[20,16233,1],[40,15829,0],[34,4415,0],[42,6474,0],[51,11437,0],[54,11306,0],[55,30064,0],[52,10198,0],[32,4544,0],[28,3277,0],[41,6770,0],[43,7338,0],[49,10371,0],[64,26927,1],[55,10704,0],[24,34254,1],[20,1880,0],[45,8615,0],[26,3293,0],[25,3022,0],[43,14478,0],[35,4747,0],[26,17043,1],[57,10959,0],[22,2742,0],[32,4357,0],[39,22462,1],[25,4189,0],[48,8284,0],[47,24536,1],[18,14283,1],[18,1720,0],[61,47404,1],[47,8535,0],[28,3733,0],[36,5472,0],[20,38345,1],[44,7147,0],[38,7134,0],[19,34829,1],[21,1515,0],[46,9302,0],[58,11931,0],[20,1965,0],[18,1709,0],[28,4340,0],[33,5261,0],[19,2711,0],[45,62593,1],[62,46718,1],[25,3209,0],[43,37830,1],[42,21259,1],[24,2465,0],[29,16115,1],[32,21472,1],[25,33901,1],[41,6876,0],[42,6941,0],[33,4571,0],[34,4536,0],[19,36398,1],[30,18766,1],[18,11272,0],[19,1732,0],[18,1163,0],[35,19497,0],[39,7202,0],[31,5425,0],[62,28101,1],[62,12981,0],[42,43896,1],[31,4240,0],[61,13143,0],[42,7050,0],[51,9378,0],[23,22396,0],[52,10325,0],[57,12629,0],[23,10796,0],[52,11412,0],[50,10601,0],[18,2206,0],[18,1630,0],[21,2008,0],[61,29141,1]]; // [age, charges, smoker 1/0], all 1,338 customers of insurance.csv
+const HAND = [[693,20,2362],[22,30,4150],[688,40,5439],[942,50,9550],[203,60,13012]];
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const fmt = (v, d = 0) => v.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+const NS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+
+document.querySelectorAll("[data-predict]").forEach(g => g.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+  g.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+})));
+document.querySelectorAll("[data-show]").forEach(b => b.addEventListener("click", () => {
+  const e = document.getElementById(b.dataset.show); e.hidden = !e.hidden;
+  b.textContent = e.hidden ? b.textContent.replace("Hide", "Show") : b.textContent.replace("Show", "Hide");
+}));
+
+// Generic axes: returns mapping functions
+function frame(svg, xr, yr, xt, yt, xticks, yticks, yfmt) {
+  svg.innerHTML = "";
+  const W = svg.viewBox.baseVal.width, H = svg.viewBox.baseVal.height, L = 62, R = 14, T = 12, B = 44;
+  const X = v => L + (v - xr[0]) / (xr[1] - xr[0]) * (W - L - R);
+  const Y = v => H - B - (v - yr[0]) / (yr[1] - yr[0]) * (H - T - B);
+  yticks.forEach(t => { el("line", { x1: L, x2: W - R, y1: Y(t), y2: Y(t), class: "gr" }, svg); el("text", { x: L - 8, y: Y(t) + 4, "text-anchor": "end" }, svg).textContent = yfmt(t); });
+  xticks.forEach(t => { el("text", { x: X(t), y: H - B + 18, "text-anchor": "middle" }, svg).textContent = t; });
+  el("line", { x1: L, x2: W - R, y1: H - B, y2: H - B, class: "ax" }, svg);
+  el("line", { x1: L, x2: L, y1: T, y2: H - B, class: "ax" }, svg);
+  el("text", { x: (L + W - R) / 2, y: H - 6, "text-anchor": "middle", class: "tt" }, svg).textContent = xt;
+  const yl = el("text", { x: 14, y: (T + H - B) / 2, "text-anchor": "middle", class: "tt", transform: `rotate(-90 14 ${(T + H - B) / 2})` }, svg); yl.textContent = yt;
+  return { X, Y, L, R, T, B, W, H };
+}
+const kfmt = v => "$" + (v / 1000) + "k";
+
+// ---- Stop 2: by hand slider
+const hx = HAND.map(h => h[1]), hy = HAND.map(h => h[2]);
+const hxb = 40, hyb = hy.reduce((a, b) => a + b) / 5;
+const sseFor = b1 => { const b0 = hyb - b1 * hxb; return hy.reduce((s, y, i) => s + (y - b0 - b1 * hx[i]) ** 2, 0); };
+const SSEMIN = sseFor(267);
+function drawHand() {
+  const b1 = +document.getElementById("bSlider").value, b0 = hyb - b1 * hxb;
+  const svg = document.getElementById("handPlot");
+  const f = frame(svg, [15, 65], [-2000, 16000], "Age (years)", "Annual charges", [20, 30, 40, 50, 60], [0, 4000, 8000, 12000, 16000], kfmt);
+  hx.forEach((x, i) => el("line", { x1: f.X(x), x2: f.X(x), y1: f.Y(hy[i]), y2: f.Y(b0 + b1 * x), stroke: css("--miss"), "stroke-width": 2.5 }, svg));
+  el("line", { x1: f.X(15), x2: f.X(65), y1: f.Y(b0 + b1 * 15), y2: f.Y(b0 + b1 * 65), stroke: css("--hit"), "stroke-width": 2.5 }, svg);
+  hx.forEach((x, i) => el("circle", { cx: f.X(x), cy: f.Y(hy[i]), r: 6, fill: css("--ink") }, svg));
+  const sse = sseFor(b1);
+  document.getElementById("bVal").textContent = "$" + b1;
+  document.getElementById("lineEq").textContent = `ŷ = ${fmt(b0, 1)} + ${b1}x`;
+  document.getElementById("sseVal").textContent = fmt(sse / 1e6, 1) + "M";
+  document.getElementById("sseCmp").textContent = b1 === 267 ? "the minimum" : "+" + fmt((sse - SSEMIN) / 1e6, 1) + "M";
+}
+document.getElementById("bSlider").addEventListener("input", drawHand);
+document.getElementById("handRows").innerHTML = HAND.map(([id, x, y]) => {
+  const dx = x - hxb, dy = y - hyb;
+  return `<tr><td>${id}</td><td class="num">${x}</td><td class="num">${fmt(y)}</td><td class="num">${dx}</td><td class="num">${fmt(dy, 1)}</td><td class="num">${fmt(dx * dy, 1)}</td><td class="num">${dx * dx}</td></tr>`;
+}).join("") + `<tr class="sum"><td>Sum</td><td class="num">200</td><td class="num">34,513</td><td class="num">0</td><td class="num">0.0</td><td class="num">267,000.0</td><td class="num">1,000</td></tr>`;
+
+// ---- Stops 3 and 4: scatter
+const B1A = 257.7226, B0A = 3165.885, B1N = 267.2489, B0N = -2091.4206;
+function scatter(id, colorBy, lines) {
+  const svg = document.getElementById(id);
+  const f = frame(svg, [15, 67], [0, 65000], "Age (years)", "Annual charges", [20, 30, 40, 50, 60], [0, 10000, 20000, 30000, 40000, 50000, 60000], kfmt);
+  const g = el("g", {}, svg);
+  PTS.forEach(([a, c, s]) => el("circle", { cx: f.X(a + (Math.random() - .5) * .5), cy: f.Y(c), r: 2.6,
+    fill: colorBy ? (s ? css("--miss") : css("--hit")) : css("--dot"), "fill-opacity": colorBy ? .55 : 1 }, g));
+  lines.forEach(([b0, b1, col, dash]) => el("line", { x1: f.X(18), x2: f.X(64), y1: f.Y(b0 + b1 * 18), y2: f.Y(b0 + b1 * 64), stroke: col, "stroke-width": 3, "stroke-dasharray": dash || "" }, svg));
+}
+let colored = false;
+function drawStripes() {
+  scatter("stripePlot", colored, colored ? [[B0A, B1A, css("--ink"), "6 5"], [B0N, B1N, css("--hit")]] : []);
+  document.getElementById("stripeLegend").innerHTML = colored
+    ? `<span><i style="background:var(--miss)"></i>smoker (274)</span><span><i style="background:var(--hit)"></i>non-smoker (1,064)</span><span>dashed: all-customer line · solid: non-smoker line</span>`
+    : `<span><i style="background:var(--dot)"></i>customer</span>`;
+}
+document.getElementById("colorBtn").addEventListener("click", () => {
+  colored = !colored; drawStripes();
+  document.getElementById("stripe-res").hidden = !colored;
+  document.getElementById("colorBtn").textContent = colored ? "Remove color" : "Color by smoker";
+});
+
+// ---- Stop 6: r² bars
+const R2 = [["Charges on age · 5 hand-picked customers", 0.9547], ["Charges on age · all 1,338 customers", 0.0894], ["Charges on age · 1,064 non-smokers", 0.3943], ["Investments on income · Project 1 (410)", 0.0000]];
+document.getElementById("r2bars").innerHTML = R2.map(([lab, v]) =>
+  `<div style="display:grid;gap:4px"><div style="display:flex;justify-content:space-between;gap:8px"><span>${lab}</span><b class="mono">r² = ${v.toFixed(3)}</b></div>
+   <div class="bar-track" aria-hidden="true"><div class="bar-fill" style="width:${Math.max(v * 100, .6)}%"></div></div></div>`).join("") +
+  `<p class="note">Blue = SSR, the share the line explains. Red = SSE, the share it misses.</p>`;
+
+function drawAll() { drawHand(); scatter("allPlot", false, [[B0A, B1A, css("--hit")]]); drawStripes(); }
+drawAll();
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawAll);
+</script>
+</body>
+</html>
