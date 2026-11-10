@@ -109,6 +109,14 @@ svg.plot text { fill: var(--muted); font: 12px var(--body); }
 svg.plot .tt { fill: var(--ink); font: 600 13px var(--body); }
 .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 14px; color: var(--muted); }
 .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+.three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 860px) { .three { grid-template-columns: 1fr; } }
+.eqcard { background: var(--chip); border-radius: 8px; padding: 12px 14px; display: grid; gap: 8px; align-content: start; font-size: 15.5px; }
+.eqname { font: 700 14px var(--body); color: var(--hit); letter-spacing: .04em; }
+.eqbig { font: 600 21px var(--mono); padding: 6px 0; }
+.tag { display: inline-block; font-size: 13px; font-weight: 700; border-radius: 999px; padding: 2px 10px; }
+.tag.no { background: var(--miss-soft); color: var(--miss); }
+.tag.yes { background: var(--hit-soft); color: var(--hit); }
 .bar-track { height: 18px; border-radius: 9px; background: var(--miss-soft); position: relative; overflow: hidden; }
 .bar-fill { position: absolute; inset: 0 auto 0 0; background: var(--hit); border-radius: 9px; transition: width .2s; }
 </style>
@@ -151,19 +159,105 @@ svg.plot .tt { fill: var(--ink); font: 600 13px var(--body); }
         </div>
       </div>
       <div class="card">
-        <div class="label">14.1 · Three equations, one idea</div>
+        <div class="label">14.1 · The idea in one picture</div>
+        <svg class="plot" viewBox="0 0 560 330" role="img" aria-label="Schematic: the unknown population line, the estimated line, and one customer's point with its residual">
+          <line x1="60" y1="290" x2="545" y2="290" class="ax"/><line x1="60" y1="20" x2="60" y2="290" class="ax"/>
+          <text x="300" y="322" text-anchor="middle" class="tt">x = age</text>
+          <text x="18" y="155" text-anchor="middle" class="tt" transform="rotate(-90 18 155)">y = charges</text>
+          <line x1="70" y1="250" x2="540" y2="70" style="stroke:var(--muted);stroke-width:2.5;stroke-dasharray:7 6"/>
+          <line x1="70" y1="262" x2="540" y2="100" style="stroke:var(--hit);stroke-width:3.5"/>
+          <line x1="78" y1="34" x2="118" y2="34" style="stroke:var(--muted);stroke-width:2.5;stroke-dasharray:7 6"/>
+          <text x="126" y="38" style="fill:var(--muted);font:600 13px var(--body)">E(y) = β₀ + β₁x · true average line (unknown)</text>
+          <line x1="78" y1="58" x2="118" y2="58" style="stroke:var(--hit);stroke-width:3.5"/>
+          <text x="126" y="62" style="fill:var(--hit);font:700 13px var(--body)">ŷ = b₀ + b₁x · our estimated line (from data)</text>
+          <line x1="230" y1="207" x2="230" y2="270" style="stroke:var(--miss);stroke-width:3"/>
+          <circle cx="230" cy="270" r="7" style="fill:var(--ink)"/>
+          <circle cx="230" cy="207" r="5" style="fill:var(--hit)"/>
+          <text x="244" y="274" style="fill:var(--ink);font:600 13px var(--body)">y: what this customer cost</text>
+          <text x="244" y="222" style="fill:var(--hit);font:600 13px var(--body)">ŷ: what the line predicts (top of the red bar)</text>
+          <text x="244" y="246" style="fill:var(--miss);font:700 13px var(--body)">residual e = y − ŷ</text>
+          <line x1="230" y1="285" x2="230" y2="295" class="ax"/><text x="230" y="309" text-anchor="middle">x = 30</text>
+        </svg>
+        <p class="note">Schematic, not data. Every customer is a dot. The dashed line is the truth for <i>all</i> of Bridger's customers, which nobody knows. The solid line is our best guess from the data. The red gap is how far one customer sits from our line.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">14.1 · Three equations, one idea: read each one</div>
+      <div class="three">
+        <div class="eqcard">
+          <div class="eqname">① Regression model</div>
+          <p class="eqbig">y = β<sub>0</sub> + β<sub>1</sub>x + ε</p>
+          <p><b>Says:</b> one customer's charges = the population line at their age + that customer's own error ε.</p>
+          <p><b>For Bridger:</b> a customer's charges = (what a typical customer of that age costs) + (everything else about them: smoking, health, luck).</p>
+          <p><span class="tag no">β<sub>0</sub>, β<sub>1</sub>, ε unknown</span></p>
+        </div>
+        <div class="eqcard">
+          <div class="eqname">② Regression equation</div>
+          <p class="eqbig">E(y) = β<sub>0</sub> + β<sub>1</sub>x</p>
+          <p><b>Says:</b> the <i>average</i> y at each x. Take the expected value of ①: the errors average out to 0, so ε drops out.</p>
+          <p><b>For Bridger:</b> E(y) is the mean charges of <i>all</i> customers of a given age. It is the dashed line in the picture.</p>
+          <p><span class="tag no">a population line: unknown</span></p>
+        </div>
+        <div class="eqcard">
+          <div class="eqname">③ Estimated regression equation</div>
+          <p class="eqbig"><span class="yh">y</span> = b<sub>0</sub> + b<sub>1</sub>x</p>
+          <p><b>Says:</b> our estimate of ②, computed from sample data. ŷ (“y-hat”) is the predicted y at a given x.</p>
+          <p><b>For Bridger:</b> from the data (Stop 3): ŷ = 3,165.89 + 257.72x. This is the solid line. It is the one we can actually use.</p>
+          <p><span class="tag yes">b<sub>0</sub>, b<sub>1</sub>, ŷ computed</span></p>
+        </div>
+      </div>
+      <p class="callout">The hat on ŷ always means “estimated by us.” No hat on y means a real, observed value. Greek letters (β, ε) belong to the population; Latin letters (b, e) are what we compute from the sample.</p>
+    </div>
+
+    <div class="two">
+      <div class="card">
+        <div class="label">Every symbol, in Bridger's terms</div>
         <div class="wrapx">
           <table class="rules">
-            <thead><tr><th>Name</th><th>Equation</th><th>What it describes</th></tr></thead>
+            <thead><tr><th>Symbol</th><th>Name</th><th>Meaning for Bridger</th><th>Known?</th></tr></thead>
             <tbody>
-              <tr><td>Regression model</td><td class="mono">y = β<sub>0</sub> + β<sub>1</sub>x + ε</td><td>Every customer: the line plus their own error ε</td></tr>
-              <tr><td>Regression equation</td><td class="mono">E(y) = β<sub>0</sub> + β<sub>1</sub>x</td><td>The <i>average</i> charges at each age, for the whole population</td></tr>
-              <tr><td>Estimated regression equation</td><td class="mono"><span class="yh">y</span> = b<sub>0</sub> + b<sub>1</sub>x</td><td>Our estimate of that line, from sample data</td></tr>
+              <tr><td class="mono">x</td><td>Independent variable</td><td>A customer's age, in years</td><td>Observed</td></tr>
+              <tr><td class="mono">y</td><td>Dependent variable</td><td>That customer's actual annual charges, $</td><td>Observed</td></tr>
+              <tr><td class="mono">β<sub>1</sub></td><td>Population slope</td><td>True change in average charges per extra year of age</td><td>Unknown</td></tr>
+              <tr><td class="mono">β<sub>0</sub></td><td>Population intercept</td><td>Where the true line crosses x = 0</td><td>Unknown</td></tr>
+              <tr><td class="mono">ε</td><td>Error term</td><td>How far one customer is from the <i>true</i> line</td><td>Unknown</td></tr>
+              <tr><td class="mono">E(y)</td><td>Mean of y at a given x</td><td>Average charges of all customers that age</td><td>Unknown</td></tr>
+              <tr><td class="mono">b<sub>1</sub></td><td>Estimated slope</td><td>Our estimate of β<sub>1</sub>: $257.72 per year of age</td><td>Computed</td></tr>
+              <tr><td class="mono">b<sub>0</sub></td><td>Estimated intercept</td><td>Our estimate of β<sub>0</sub>: $3,165.89</td><td>Computed</td></tr>
+              <tr><td class="mono"><span class="yh">y</span></td><td>Predicted value</td><td>The charges our line predicts at a given age</td><td>Computed</td></tr>
+              <tr><td class="mono">e = y − <span class="yh">y</span></td><td>Residual</td><td>How far one customer is from <i>our</i> line; our stand-in for ε</td><td>Computed</td></tr>
             </tbody>
           </table>
         </div>
-        <p class="callout">Same pattern as Ch 8: β<sub>0</sub> and β<sub>1</sub> are <b>parameters</b> we never see (like μ). b<sub>0</sub> and b<sub>1</sub> are <b>statistics</b> we compute (like <span class="xb">x</span>).</p>
-        <p class="note">b<sub>1</sub> is the slope: the change in <span class="yh">y</span> for a one-unit increase in x. b<sub>0</sub> is the intercept: <span class="yh">y</span> when x = 0.</p>
+      </div>
+      <div class="card">
+        <div class="label">Worked example · one real customer</div>
+        <p>Customer #22 in <span class="mono">insurance.csv</span>: a 30-year-old non-smoker whose actual charges were <b>$4,149.74</b>.</p>
+        <div class="wrapx">
+          <table class="rules">
+            <thead><tr><th>Step</th><th>Calculation</th><th>Result</th></tr></thead>
+            <tbody>
+              <tr><td>x and y</td><td>Observed in the data</td><td class="num">x = 30, y = $4,149.74</td></tr>
+              <tr><td>ŷ, the prediction</td><td class="mono">3,165.89 + 257.72 × 30<br>= 3,165.89 + 7,731.60</td><td class="num">$10,897.49</td></tr>
+              <tr><td>e, the residual</td><td class="mono">y − ŷ = 4,149.74 − 10,897.49</td><td class="num">−$6,747.75</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="ans">The line predicts that a typical 30-year-old costs about <b>$10,897</b>. This customer cost <b>$6,748 less</b> than that. The negative residual means the point sits <i>below</i> the line. Age accounts for the $10,897 prediction; the residual e = −$6,748 is our estimate of her ε, everything about her besides age.</p>
+        <div class="label">Same pattern as Ch 8</div>
+        <div class="wrapx">
+          <table class="rules">
+            <thead><tr><th>Population (unknown)</th><th>Sample (computed)</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">μ</td><td class="mono"><span class="xb">x</span></td></tr>
+              <tr><td class="mono">β<sub>0</sub>, β<sub>1</sub></td><td class="mono">b<sub>0</sub>, b<sub>1</sub></td></tr>
+              <tr><td class="mono">E(y)</td><td class="mono"><span class="yh">y</span></td></tr>
+              <tr><td class="mono">ε</td><td class="mono">e = y − <span class="yh">y</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">b<sub>1</sub> is the slope: the change in ŷ for a one-unit increase in x. b<sub>0</sub> is the intercept: ŷ when x = 0 (Stop 5 shows when that means something).</p>
       </div>
     </div>
   </section>
