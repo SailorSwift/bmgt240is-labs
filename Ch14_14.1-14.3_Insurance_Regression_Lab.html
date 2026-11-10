@@ -110,6 +110,13 @@ svg.plot .tt { fill: var(--ink); font: 600 13px var(--body); }
 .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 14px; color: var(--muted); }
 .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
 [data-reveal] .label { margin-top: 10px; }
+.defs { border-top: 4px solid var(--gold); }
+.deflist { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 22px; margin: 0; }
+@media (max-width: 860px) { .deflist { grid-template-columns: 1fr; } }
+.deflist > div { border-left: 3px solid var(--line); padding: 2px 0 2px 10px; }
+.deflist dt { font-weight: 700; }
+.deflist dt .sym { font-family: var(--mono); font-weight: 500; color: var(--hit); margin-left: 6px; }
+.deflist dd { margin: 2px 0 0; font-size: 15.5px; color: var(--ink); }
 .defbox { border: 2px solid var(--hit); border-radius: 10px; padding: 12px 14px; display: grid; gap: 8px; background: var(--hit-soft); }
 ul.tight { margin: 0; padding-left: 20px; display: grid; gap: 4px; font-size: 15.5px; }
 ol.steps { margin: 0; padding-left: 22px; display: grid; gap: 10px; }
@@ -152,6 +159,7 @@ ol.steps { margin: 0; padding-left: 22px; display: grid; gap: 10px; }
   <!-- 1 -->
   <section class="stop" id="question">
     <div class="stop-head"><div class="stop-num">STOP 1 · 14.1 · THE BUSINESS QUESTION</div><h2>Should Bridger charge older customers more, and how much?</h2></div>
+    <div class="card defs"><div class="label">Key definitions · Stop 1</div><dl class="deflist"><div><dt>Regression analysis</dt><dd>A statistical method for building an equation that shows how variables are related, so one can be predicted from the other.</dd></div><div><dt>Dependent variable <span class=sym>y</span></dt><dd>The variable being predicted or explained. Here: annual medical charges ($).</dd></div><div><dt>Independent variable <span class=sym>x</span></dt><dd>The variable doing the predicting or explaining. Here: age (years).</dd></div><div><dt>Simple linear regression</dt><dd>Regression with one independent variable, where the relationship between x and y is approximated by a straight line.</dd></div><div><dt>Regression model <span class=sym>y = β₀ + β₁x + ε</span></dt><dd>The equation that describes how y is related to x <i>and</i> an error term, one observation at a time.</dd></div><div><dt>Error term <span class=sym>ε</span></dt><dd>A random variable for the part of y the line does not explain: everything about a customer besides age.</dd></div><div><dt>Regression equation <span class=sym>E(y) = β₀ + β₁x</span></dt><dd>The equation that describes how the <i>mean</i> of y is related to x in the population. β₀ and β₁ are unknown parameters.</dd></div><div><dt>Estimated regression equation <span class=sym><span class="yh">y</span> = b₀ + b₁x</span></dt><dd>The estimate of the regression equation computed from sample data with the least squares method. b₀ and b₁ are statistics.</dd></div></dl></div>
     <div class="two">
       <div class="card">
         <p>Bridger Health Insurance wants age-based prices. That is question Q3 in our class-example proposal: <b>does a customer's age predict their annual medical charges?</b></p>
@@ -275,6 +283,7 @@ ol.steps { margin: 0; padding-left: 22px; display: grid; gap: 10px; }
   <section class="stop" id="hand">
     <div class="stop-head"><div class="stop-num">STOP 2 · 14.2 · THE LEAST SQUARES METHOD · 5 CUSTOMERS</div><h2>Which line is the “best” line?</h2>
       <p class="muted">Workbook sheet: <b>14.2 By Hand (5)</b>. Five non-smoking customers, charges rounded to the dollar.</p></div>
+    <div class="card defs"><div class="label">Key definitions · Stop 2</div><dl class="deflist"><div><dt>Least squares method <span class=sym>min Σ(yᵢ − ŷᵢ)²</span></dt><dd>The procedure that chooses b₀ and b₁ to make the sum of squared residuals as small as possible.</dd></div><div><dt>Predicted value <span class=sym>ŷᵢ</span></dt><dd>The value of y that the estimated regression equation gives for observation i.</dd></div><div><dt>Residual <span class=sym>yᵢ − ŷᵢ</span></dt><dd>Observed y minus predicted y for observation i. Positive: the point is above the line; negative: below it.</dd></div><div><dt>Sum of squares due to error <span class=sym>SSE</span></dt><dd>Σ(yᵢ − ŷᵢ)², the total squared miss. Least squares makes it as small as possible.</dd></div><div><dt>Slope <span class=sym>b₁</span></dt><dd>The change in ŷ for a one-unit increase in x. b₁ = Σ(x − <span class="xb">x</span>)(y − <span class="xb">y</span>) / Σ(x − <span class="xb">x</span>)² (14.6). Estimates β₁.</dd></div><div><dt>y-intercept <span class=sym>b₀</span></dt><dd>The value of ŷ when x = 0. b₀ = <span class="xb">y</span> − b₁<span class="xb">x</span> (14.7). Estimates β₀.</dd></div></dl></div>
     <div class="two">
       <div class="card">
         <div class="label">Try it: you pick the slope</div>
@@ -375,6 +384,7 @@ ol.steps { margin: 0; padding-left: 22px; display: grid; gap: 10px; }
   <section class="stop" id="all">
     <div class="stop-head"><div class="stop-num">STOP 3 · 14.2 · LET EXCEL DO IT · ALL 1,338 CUSTOMERS</div><h2>Five customers was arithmetic. 1,338 is a job for SLOPE and INTERCEPT.</h2>
       <p class="muted">Workbook sheet: <b>14.2 All Customers</b>. Then build the scatter chart yourself (Insert › Scatter, add a trendline with its equation).</p></div>
+    <div class="card defs"><div class="label">Key definitions · Stop 3</div><dl class="deflist"><div><dt>Scatter diagram</dt><dd>A graph of paired (x, y) data with the independent variable on the horizontal axis and the dependent variable on the vertical axis.</dd></div><div><dt>Trendline</dt><dd>Excel's name for the least squares line drawn on a scatter chart. Its equation is the estimated regression equation.</dd></div><div><dt>Interpreting the slope <span class=sym>b₁</span></dt><dd>“Each one-unit increase in x is associated with a change of b₁ in y, on average.” Here: each extra year of age, about $258 more in charges.</dd></div><div><dt>Prediction <span class=sym><span class="yh">y</span> at a given x</span></dt><dd>Plug x into the estimated equation. It estimates the average y for all units with that x; individual units vary around it.</dd></div></dl></div>
     <div class="two">
       <div class="card">
         <svg class="plot" id="allPlot" viewBox="0 0 560 360" role="img" aria-label="Scatter of annual charges against age for 1,338 customers with the least squares line"></svg>
@@ -425,6 +435,7 @@ ol.steps { margin: 0; padding-left: 22px; display: grid; gap: 10px; }
   <section class="stop" id="stripes">
     <div class="stop-head"><div class="stop-num">STOP 4 · 14.2 · LOOK AT THE PICTURE</div><h2>Why are there three stripes?</h2>
       <p class="muted">Workbook sheet: <b>14.2 Non-smokers</b>.</p></div>
+    <div class="card defs"><div class="label">Key definitions · Stop 4</div><dl class="deflist"><div><dt>Positive / negative linear relationship</dt><dd>Positive: y tends to rise as x rises (b₁ &gt; 0). Negative: y tends to fall as x rises (b₁ &lt; 0).</dd></div><div><dt>Strength of a relationship</dt><dd>How tightly the points cluster around the line. Measured by r² and r (Stop 6). A slope can be large while the points scatter widely.</dd></div><div><dt>Error term, revisited <span class=sym>ε</span></dt><dd>Anything not in the model ends up in ε. Here smoking and BMI are not in the model, so they show up as big residuals and separate stripes.</dd></div><div><dt>Fitting a subgroup</dt><dd>Running the same regression on part of the data (non-smokers only) to see whether the slope, intercept or fit change.</dd></div></dl></div>
     <div class="two">
       <div class="card">
         <svg class="plot" id="stripePlot" viewBox="0 0 560 360" role="img" aria-label="Scatter of charges against age, optionally colored by smoker status"></svg>
@@ -478,6 +489,7 @@ ol.steps { margin: 0; padding-left: 22px; display: grid; gap: 10px; }
   <!-- 5 -->
   <section class="stop" id="intercept">
     <div class="stop-head"><div class="stop-num">STOP 5 · 14.2 · READING THE INTERCEPT</div><h2>Does a newborn cost Bridger −$2,091?</h2></div>
+    <div class="card defs"><div class="label">Key definitions · Stop 5</div><dl class="deflist"><div><dt>y-intercept <span class=sym>b₀</span></dt><dd>The value of ŷ when x = 0. It has practical meaning only if x = 0 is realistic <i>and</i> inside the observed data.</dd></div><div><dt>Range of the data <span class=sym>min x to max x</span></dt><dd>The smallest to the largest observed value of x. Here: ages 18 to 64.</dd></div><div><dt>Interpolation</dt><dd>Predicting y for an x <i>inside</i> the range of the data. The line has observations on both sides.</dd></div><div><dt>Extrapolation</dt><dd>Predicting y for an x <i>outside</i> the range of the data. Unreliable: the data say nothing about the relationship there.</dd></div></dl></div>
     <div class="two">
       <div class="card">
         <p>Non-smoker line: <span class="yh">y</span> = −2,091.42 + 267.25x. Plug in x = 0 and you get <b>−$2,091</b>, a customer who pays Bridger to be insured.</p>
@@ -591,6 +603,7 @@ ol.steps { margin: 0; padding-left: 22px; display: grid; gap: 10px; }
   <section class="stop" id="r2">
     <div class="stop-head"><div class="stop-num">STOP 6 · 14.3 · COEFFICIENT OF DETERMINATION</div><h2>The slope says how much. r² says how well.</h2>
       <p class="muted">Workbook sheets: <b>14.3 By Hand (5)</b>, <b>14.3 Project 1 Contrast</b>, <b>14.3 Compare</b>.</p></div>
+    <div class="card defs"><div class="label">Key definitions · Stop 6</div><dl class="deflist"><div><dt>Total sum of squares <span class=sym>SST</span></dt><dd>Σ(yᵢ − <span class="xb">y</span>)²: the total variation of y around its mean, before using x.</dd></div><div><dt>Sum of squares due to regression <span class=sym>SSR</span></dt><dd>Σ(ŷᵢ − <span class="xb">y</span>)²: the part of the variation explained by the estimated regression equation.</dd></div><div><dt>Sum of squares due to error <span class=sym>SSE</span></dt><dd>Σ(yᵢ − ŷᵢ)²: the part of the variation the line does not explain. SST = SSR + SSE.</dd></div><div><dt>Coefficient of determination <span class=sym>r²</span></dt><dd>The proportion of the variation in y explained by the estimated regression equation, SSR/SST. Full definition below.</dd></div><div><dt>Sample correlation coefficient <span class=sym>r</span></dt><dd>The strength and direction of the linear relationship, from −1 to +1. r = (sign of b₁)√r².</dd></div></dl></div>
     <div class="two">
       <div class="card">
         <div class="defbox">
