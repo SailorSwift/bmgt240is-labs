@@ -131,6 +131,19 @@ table.xl tr.on td { background: var(--hit-soft); font-weight: 700; }
 
 .step[hidden] { display: none !important; }
 .feedback { border-radius: 8px; padding: 10px 12px; background: var(--chip); }
+.defs { border-top: 4px solid var(--gold); }
+.deflist { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 22px; margin: 0; }
+@media (max-width: 860px) { .deflist { grid-template-columns: 1fr; } }
+.deflist > div { border-left: 3px solid var(--line); padding: 2px 0 2px 10px; }
+.deflist dt { font-weight: 700; }
+.deflist dt .sym { font-family: var(--mono); font-weight: 500; color: var(--hit); margin-left: 6px; }
+.deflist dd { margin: 2px 0 0; font-size: 15.5px; color: var(--ink); }
+.secband { border-radius: 12px; padding: 18px clamp(16px, 3vw, 28px); background: linear-gradient(135deg, var(--navy) 0%, var(--navy-deep) 100%); color: #ffffff; display: grid; gap: 6px; border: 1px solid var(--line); scroll-margin-top: 64px; }
+.secband .k { font: 700 13px var(--body); letter-spacing: .2em; text-transform: uppercase; color: var(--gold); }
+.secband h2 { color: #ffffff; }
+.secband p { color: #c9d1e6; max-width: 80ch; }
+.whylist { margin: 0; padding-left: 22px; display: grid; gap: 8px; }
+.whybox { display: grid; gap: 8px; border-top: 1px solid var(--line); padding-top: 10px; }
 </style>
 </head>
 <body>
@@ -362,9 +375,9 @@ table.xl tr.on td { background: var(--hit-soft); font-weight: 700; }
             <tr><td>Duplicate rows removed?</td><td>✓ In the clean file. The project files have planted duplicates, so clean first.</td></tr>
           </tbody></table></div>
         <p class="callout"><b>Assumption 3 holds for Bridger</b>, as long as the data are clean.</p>
-        <div class="label">Try it · what duplicate rows do</div>
-        <p class="note"><b>Illustration with made-up numbers:</b> a slope estimated from 100 customers, p = 0.19, not significant. Now copy the rows.</p>
-        <div class="row"><span class="note">Copies of each row</span><input type="range" id="a3k" min="1" max="6" step="1" value="1" aria-label="Copies of each row"><span class="val" id="a3kV">1×</span></div>
+        <div class="label">Try it · what happens when rows get copied</div>
+        <p>Say you surveyed <b>100 customers</b> and the slope came out <b>not significant</b> (p = 0.19). Now imagine someone accidentally pasted the same 100 rows into the file again, and again. <b>Drag the slider</b> to add copies and watch the p-value.</p><p class="note">The numbers are made up, just to show the idea.</p>
+        <div class="row"><span class="note">Times each customer appears</span><input type="range" id="a3k" min="1" max="6" step="1" value="1" aria-label="Times each customer appears in the file"><span class="val" id="a3kV">1×</span></div>
         <div class="tiles">
           <div class="tile"><span class="cap">Rows Excel sees</span><span class="num" id="a3n">100</span></div>
           <div class="tile"><span class="cap">t statistic</span><span class="num" id="a3t">1.32</span></div>
@@ -426,6 +439,54 @@ table.xl tr.on td { background: var(--hit-soft); font-weight: 700; }
       </div>
     </div>
   </section>
+
+  <!-- Section 14.5 title -->
+  <section class="secband" id="sec145">
+    <div class="k">Section 14.5 · Stops 3–7</div>
+    <h2>Testing for Significance: is the slope real, or just sampling noise?</h2>
+    <p>Stop 2 checked that the model is fit to test. Now we test it. If β<sub>1</sub> = 0, x tells us nothing about y. 14.5 gives two tests of that idea, the <b>t test</b> and the <b>F test</b>, plus a <b>confidence interval for β<sub>1</sub></b> that says how big the slope is.</p>
+  </section>
+  <div class="two" id="whyTest">
+    <div class="card">
+      <div class="label">Why test the slope at all?</div>
+      <ol class="whylist">
+        <li><b>Excel always gives you a slope, even when there's nothing there.</b> In Project 1, income and investments had no real link, and Excel still reported a slope (0.00137). A line always exists. The question is whether it <i>means</i> anything.</li>
+        <li><b>Our slope comes from a sample.</b> A different group of 1,338 customers would give a slightly different slope. Even if age truly didn't matter, chance alone would push the slope a bit above or below 0. The test asks: <b>is $258 bigger than chance could produce?</b></li>
+        <li><b>Real money rides on the answer.</b> Bridger should price by age only if the age effect is real. Pricing on noise overcharges some customers and undercharges others.</li>
+        <li><b>It tells you how big, not just whether.</b> The confidence interval turns “age matters” into a planning range: about $214 to $302 more per year of age.</li>
+        <li><b>Your final project needs it.</b> For your regression, the report has to say whether the relationship is significant, and how big it is.</li>
+      </ol>
+    </div>
+    <div class="card">
+      <div class="label">See it · what chance alone looks like</div>
+      <p>Shuffle Bridger's charges so each customer gets someone else's charge at random. That breaks any real link to age. Then fit the line again. Every shuffle gives the slope that <b>chance alone</b> would produce.</p>
+      <div class="btnrow"><button type="button" class="btn primary" id="shufBtn">Shuffle 200 times</button><button type="button" class="btn" id="shufReset">Reset</button></div>
+      <svg class="plot" id="shufPlot" viewBox="0 0 560 300" role="img" aria-label="Slopes from shuffled data compared with the real slope"></svg>
+      <div class="legend"><span><i style="background:var(--muted);border-radius:2px"></i>slopes from shuffled data (chance alone)</span><span><i style="background:var(--miss);border-radius:1px;width:4px;height:14px"></i>Bridger's real slope, $257.72</span></div>
+      <p class="callout" id="shufSay">Click <b>Shuffle 200 times</b>. Where do chance slopes land, compared with the real $258?</p>
+      <div id="shufWhy" class="whybox">
+        <div class="label">Why that matters · click a reason</div>
+        <div class="btnrow" id="wmSteps"><button type="button" class="btn" aria-pressed="true" data-s="1">1 · It is the p-value</button><button type="button" class="btn" aria-pressed="false" data-s="2">2 · A slope that isn't real</button><button type="button" class="btn" aria-pressed="false" data-s="3">3 · Bridger's decision</button><button type="button" class="btn" aria-pressed="false" data-s="4">4 · Your project</button></div>
+        <div class="step" data-wm="1"><p class="callout"><b>This picture <i>is</i> the p-value.</b> <b>1 · This picture <i>is</i> the p-value.</b> The p-value answers: “If age had nothing to do with charges, how often would chance give a slope as big as ours?” Count the shuffles that reached $258: <b>none</b>. So the p-value is tiny (Excel says 4.9 × 10⁻²⁹). The t test gets the same answer with a formula instead of thousands of shuffles.</p></div><div class="step" data-wm="2" hidden><p class="callout"><b>Compare a slope that isn't real.</b> If you ran the same shuffles on Project 1's income vs investments, the real slope (0.00137) would land <b>right in the middle of the chance pile</b>. That's what p = 0.95 means: chance makes slopes like that all the time. Same Excel output format, opposite meaning. Only the test tells them apart.</p></div><div class="step" data-wm="3" hidden><p class="callout"><b>For Bridger, it changes the decision.</b> Because $258 is far outside what chance produces, Bridger can treat “older customers cost more” as real and build it into prices. If $258 had sat inside the pile, raising prices by age would mean charging people for <b>noise</b>.</p></div><div class="step" data-wm="4" hidden><p class="callout"><b>For your project:</b> find your own slope's p-value in Excel's output (the x row, “P-value”). Below 0.05: your slope is outside the chance pile, so say “significant” and give the confidence interval. Above 0.05: it sits inside the pile, so say the data <b>can't show a relationship</b>, and don't build recommendations on that slope.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="card defs"><div class="label">Key terms · Section 14.5</div><dl class="deflist">
+    <div><dt>Test for significance <span class=sym>H₀: β₁ = 0 · Hₐ: β₁ ≠ 0</span></dt><dd>Asks whether x and y are related in the population. If β₁ = 0, the mean of y doesn't change with x. Rejecting H₀ means there is a significant relationship.</dd></div>
+    <div><dt>Mean square error <span class=sym>MSE = s² = SSE/(n − 2)</span></dt><dd>The estimate of σ², the variance of the error term ε. Here: 133,640,741.</dd></div>
+    <div><dt>Standard error of the estimate <span class=sym>s = √MSE</span></dt><dd>The typical size of a miss, the distance between a point and the line. Here: $11,560.</dd></div>
+    <div><dt>Degrees of freedom <span class=sym>n − 2</span></dt><dd>Two are lost because two values, b₀ and b₁, were estimated from the data. Here: 1,338 − 2 = 1,336.</dd></div>
+    <div><dt>Sampling distribution of b₁</dt><dd>The slope would change from sample to sample. b₁ is one draw from that distribution, which is centered on β₁.</dd></div>
+    <div><dt>Estimated standard deviation of b₁ <span class=sym>s<sub>b₁</sub> = s / √Σ(x − <span class="xb">x</span>)²</span></dt><dd>How much b₁ typically varies from sample to sample. Excel calls it the slope's “Standard Error.” Here: 22.50.</dd></div>
+    <div><dt>t test statistic <span class=sym>t = b₁ / s<sub>b₁</sub></span></dt><dd>How many standard errors b₁ sits from 0. Uses the t distribution with n − 2 df. Here: 257.72 / 22.50 = 11.45.</dd></div>
+    <div><dt>Rejection rule</dt><dd>p-value approach: reject H₀ if p-value ≤ α. Critical value approach: reject H₀ if t ≤ −t<sub>α/2</sub> or t ≥ t<sub>α/2</sub>.</dd></div>
+    <div><dt>Confidence interval for β₁ <span class=sym>b₁ ± t<sub>α/2</sub> s<sub>b₁</sub></span></dt><dd>A range of plausible values for the true slope. If it doesn't contain 0, reject H₀ at that α. Here (95%): $213.58 to $301.87 per year of age.</dd></div>
+    <div><dt>Mean square due to regression <span class=sym>MSR = SSR / 1</span></dt><dd>SSR divided by the number of independent variables, which is 1 in simple regression.</dd></div>
+    <div><dt>F test statistic <span class=sym>F = MSR / MSE</span></dt><dd>Compares explained to unexplained variation, with 1 and n − 2 df. In simple regression F = t², and the two tests give the same p-value. Here: F = 131.17 = 11.45².</dd></div>
+    <div><dt>ANOVA table</dt><dd>The table that organizes the F test: sums of squares (SSR, SSE, SST), degrees of freedom, mean squares (MSR, MSE), F, and its p-value. Excel labels that p-value “Significance F.”</dd></div>
+    <div><dt>Statistical vs practical significance</dt><dd>A significant result says β₁ is probably not 0. It doesn't say the effect is large or useful. The confidence interval shows how big it is.</dd></div>
+    <div><dt>Cautions about significance</dt><dd>Rejecting H₀ doesn't prove cause and effect. It doesn't prove the relationship is truly linear. And it holds only within the range of x in the data (here, ages 18–64).</dd></div>
+  </dl></div>
 
   <!-- 3 -->
   <section class="stop" id="hand">
@@ -831,8 +892,8 @@ function drawA3k() {
   document.getElementById("a3t").textContent = t.toFixed(2);
   document.getElementById("a3p").textContent = p.toFixed(3);
   document.getElementById("a3bar").style.width = Math.min(100, p / 0.2 * 100) + "%";
-  document.getElementById("a3Say").innerHTML = k === 1 ? "100 real customers: p = 0.187, not significant at α = .05."
-    : `Still the same 100 customers, copied ${k} times. Excel now sees ${fmt(100 * k)} rows, so the p-value drops to ${p.toFixed(3)}` + (p < 0.05 ? ": <b>“significant,” with zero new information.</b>" : ". No new information, yet the result looks stronger.");
+  document.getElementById("a3Say").innerHTML = k === 1 ? "This is the honest result: 100 real customers, p = 0.187. Not enough evidence that the slope is real."
+    : `You still only know <b>100 customers</b>: the other ${fmt(100 * (k - 1))} rows are just copies. But Excel thinks it has ${fmt(100 * k)} different people, so it gets more confident: p is now <b>${p.toFixed(3)}</b>.` + (p < 0.05 ? ` That's <b>“significant,” even though nothing real changed.</b> That's why you remove duplicates before running a regression.` : ` Nothing real changed, but the result already looks stronger.`);
 }
 document.getElementById("a3k").addEventListener("input", drawA3k);
 // A3 · hypothetical monthly sales with linked (autocorrelated) errors
@@ -901,6 +962,30 @@ function drawA4Cov() {
     if (j === 1 && parts[0] === 0) el("text", { x: L, y: y + 62, "text-anchor": "start", class: "tt" }, svg).textContent = "0% below";
   });
 }
+// Section 14.5 · why test: slopes produced by chance alone (shuffle test)
+const AGE = RES.map(d => d[0]), CHG = RES.map(([a, r]) => r + 3165.89 + 257.72 * a);
+const slopeOf = (x, y) => { const mx = avg(x), my = avg(y); let sxy = 0, sxx = 0; for (let i = 0; i < x.length; i++) { sxy += (x[i] - mx) * (y[i] - my); sxx += (x[i] - mx) ** 2; } return sxy / sxx; };
+let shuf = [];
+function drawShuf() {
+  const svg = document.getElementById("shufPlot"), W = 10, lo = -100, hi = 300, nb = (hi - lo) / W, cnt = Array(nb).fill(0);
+  shuf.forEach(b => { const i = Math.floor((b - lo) / W); if (i >= 0 && i < nb) cnt[i]++; });
+  const ymax = Math.max(10, Math.ceil(Math.max(...cnt) / 10) * 10 + 10), yt = []; for (let v = 0; v <= ymax; v += ymax > 60 ? 20 : 10) yt.push(v);
+  const f = frame(svg, [lo, hi], [0, ymax], "Slope (dollars per year of age)", "Shuffles", [-100, 0, 100, 200, 300], yt, v => v);
+  cnt.forEach((c, i) => { if (!c) return; const x0 = f.X(lo + i * W) + 1, x1 = f.X(lo + (i + 1) * W) - 1;
+    const rc = el("rect", { x: x0, y: f.Y(c), width: x1 - x0, height: f.Y(0) - f.Y(c), fill: css("--muted"), rx: 2 }, svg);
+    el("title", {}, rc).textContent = `${c} shuffles gave a slope from $${lo + i * W} to $${lo + (i + 1) * W}`; });
+  el("line", { x1: f.X(257.72), x2: f.X(257.72), y1: f.Y(0), y2: f.Y(ymax), stroke: css("--miss"), "stroke-width": 3 }, svg);
+  el("text", { x: f.X(257.72) - 6, y: f.Y(ymax) + 14, "text-anchor": "end", class: "tt" }, svg).textContent = "real slope $258";
+}
+document.getElementById("shufBtn").addEventListener("click", () => {
+  const y = CHG.slice();
+  for (let k = 0; k < 200; k++) { for (let i = y.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [y[i], y[j]] = [y[j], y[i]]; } shuf.push(slopeOf(AGE, y)); }
+  const mx = Math.max(...shuf.map(Math.abs)), hits = shuf.filter(b => Math.abs(b) >= 257.72).length;
+  document.getElementById("shufSay").innerHTML = `${fmt(shuf.length)} shuffles so far. Chance alone gave slopes between about <b>−$${fmt(mx)}</b> and <b>+$${fmt(mx)}</b>. Shuffles that reached $258: <b>${hits} of ${fmt(shuf.length)}</b>. A slope that big doesn't happen by luck. That's what the t test measures: t = 11.45 says $258 is about 11 standard errors away from 0.`;
+  drawShuf();
+});
+document.getElementById("shufReset").addEventListener("click", () => { shuf = []; document.getElementById("shufSay").innerHTML = "Click <b>Shuffle 200 times</b>. Where do chance slopes land, compared with the real $258?"; drawShuf(); });
+stepper("wmSteps", "wm", () => {});
 // Stop 4: CI width vs n
 const B1 = 257.72, SE = 11560.31, SX = 14.05;
 const tq = df => { const z = 1.959964; return z + (z ** 3 + z) / (4 * df) + (5 * z ** 5 + 16 * z ** 3 + 3 * z) / (96 * df * df); };
@@ -933,7 +1018,7 @@ document.querySelectorAll("#hl button").forEach(b => b.addEventListener("click",
   document.querySelectorAll("#xlout tr").forEach(tr => tr.classList.toggle("on", (tr.dataset.g || "").split(" ").includes(b.dataset.hl)));
   document.getElementById("hlSay").textContent = SAY[b.dataset.hl];
 }));
-function drawAll() { drawResid(); drawSlice(); drawCurve(); drawA2(); drawA2f(a2n); drawA3k(); drawA3f(a3n); drawA4(); drawA4Cov(); drawCI(); }
+function drawAll() { drawResid(); drawSlice(); drawCurve(); drawA2(); drawA2f(a2n); drawA3k(); drawA3f(a3n); drawA4(); drawA4Cov(); drawShuf(); drawCI(); }
 drawAll();
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawAll);
 </script>
