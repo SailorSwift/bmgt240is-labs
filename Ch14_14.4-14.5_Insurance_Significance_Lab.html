@@ -144,6 +144,7 @@ table.xl tr.on td { background: var(--hit-soft); font-weight: 700; }
 .secband p { color: #c9d1e6; max-width: 80ch; }
 .whylist { margin: 0; padding-left: 22px; display: grid; gap: 8px; }
 .whybox { display: grid; gap: 8px; border-top: 1px solid var(--line); padding-top: 10px; }
+.right { color: var(--hit); font-weight: 700; } .wrong { color: var(--miss); font-weight: 700; }
 </style>
 </head>
 <body>
@@ -179,8 +180,9 @@ table.xl tr.on td { background: var(--hit-soft); font-weight: 700; }
         <div class="predict">
           <div class="label">Predict first</div>
           <p>Age explains only 9% of the variation in charges. With all 1,338 customers, will the test reject H<sub>0</sub>?</p>
-          <div class="btnrow" data-predict="q1"><button type="button" class="btn">Yes, easily</button><button type="button" class="btn">Barely</button><button type="button" class="btn">No: r² is too low</button></div>
-          <p class="note">Keep your answer. Stop 5 settles it.</p>
+          <div class="btnrow" data-predict="q1" id="q1Btns"><button type="button" class="btn" data-a="yes">Yes, easily</button><button type="button" class="btn" data-a="barely">Barely</button><button type="button" class="btn" data-a="no">No: r² is too low</button></div>
+          <p class="feedback" id="q1Say" hidden></p>
+          <p class="note">Click an answer to see the result. Stop 5 shows where these numbers come from in Excel.</p>
         </div>
         <p class="callout">The test only works if the error term ε behaves. So first, §14.4: what are we assuming about ε, and does Bridger's data go along?</p>
       </div>
@@ -986,6 +988,15 @@ document.getElementById("shufBtn").addEventListener("click", () => {
 });
 document.getElementById("shufReset").addEventListener("click", () => { shuf = []; document.getElementById("shufSay").innerHTML = "Click <b>Shuffle 200 times</b>. Where do chance slopes land, compared with the real $258?"; drawShuf(); });
 stepper("wmSteps", "wm", () => {});
+// Stop 1: instant result for the prediction
+const Q1 = {
+  yes: `<span class="right">✓ Right: yes, easily.</span> The slope is <b>t = 11.45</b> standard errors away from 0, and the p-value is <b>4.9 × 10⁻²⁹</b>, far below .05. With 1,338 customers the slope's standard error is small ($22.50), so even a weak relationship shows up clearly.`,
+  barely: `<span class="wrong">✗ Not close at all.</span> t = 11.45 and p = 4.9 × 10⁻²⁹: far past the .05 line. With 1,338 customers the slope's standard error is only $22.50, so $258 sits more than 11 standard errors from 0. That's an easy rejection, not a narrow one.`,
+  no: `<span class="wrong">✗ This is the most common trap.</span> r² = 0.09 says age explains only 9% of why charges differ, so the line is a <b>weak predictor</b> for any one customer. But the test asks a different question: <b>is the slope different from 0?</b> With 1,338 customers it clearly is (t = 11.45, p = 4.9 × 10⁻²⁹). <b>Weak (low r²) and real (significant) can both be true.</b>`
+};
+document.querySelectorAll("#q1Btns button").forEach(b => b.addEventListener("click", () => {
+  const say = document.getElementById("q1Say"); say.innerHTML = Q1[b.dataset.a]; say.hidden = false;
+}));
 // Stop 4: CI width vs n
 const B1 = 257.72, SE = 11560.31, SX = 14.05;
 const tq = df => { const z = 1.959964; return z + (z ** 3 + z) / (4 * df) + (5 * z ** 5 + 16 * z ** 3 + 3 * z) / (96 * df * df); };
