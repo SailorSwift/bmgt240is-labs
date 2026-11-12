@@ -83,6 +83,8 @@ section.stop { display: grid; gap: 14px; scroll-margin-top: 64px; }
 .btn.primary { background: var(--hit); color: var(--on-accent); border-color: var(--hit); }
 button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 button:hover { filter: brightness(1.06); }
+.btn:disabled { opacity: .45; cursor: default; }
+[data-cv][hidden] { display: none !important; }
 .btnrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .predict { display: grid; gap: 8px; }
 .wrapx { overflow-x: auto; }
@@ -117,7 +119,18 @@ svg.plot .tt { fill: var(--ink); font: 600 13px var(--body); }
 .verdict.keep { background: var(--hit-soft); color: var(--hit); }
 table.xl td, table.xl th { font-size: 14px; }
 table.xl tr.on td { background: var(--hit-soft); font-weight: 700; }
-[data-verdict][hidden] { visibility: hidden; display: table-cell !important; }
+[data-verdict][hidden] { display: none !important; }
+.vsel { font: 600 15px var(--body); color: var(--ink); background: var(--chip); border: 2px solid var(--line); border-radius: 7px; padding: 5px 8px; width: 100%; }
+.vsel.ok { border-color: var(--hit); } .vsel.no { border-color: var(--miss); }
+.vmark { font-weight: 700; margin-top: 4px; font-size: 14.5px; } .vmark.ok { color: var(--hit); } .vmark.no { color: var(--miss); }
+.why4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 980px) { .why4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .why4 { grid-template-columns: 1fr; } }
+.why4 > div { background: var(--chip); border-radius: 8px; padding: 10px 12px; display: grid; gap: 6px; align-content: start; font-size: 15px; }
+.why4 h3 { margin: 0; font: 700 16px var(--display); color: var(--hit); }
+
+.step[hidden] { display: none !important; }
+.feedback { border-radius: 8px; padding: 10px 12px; background: var(--chip); }
 </style>
 </head>
 <body>
@@ -165,6 +178,16 @@ table.xl tr.on td { background: var(--hit-soft); font-weight: 700; }
   <section class="stop" id="assume">
     <div class="stop-head"><div class="stop-num">STOP 2 · 14.4 · ASSUMPTIONS ABOUT THE ERROR TERM ε</div><h2>Check the model before you trust the test</h2>
       <p class="muted">Workbook sheet: <b>14.4 Assumptions</b>. Each residual y − <span class="yh">y</span> is our stand-in for one customer's ε.</p></div>
+    <div class="card">
+      <div class="label">Why these four assumptions?</div>
+      <p>Stops 3–5 judge the slope by asking <b>how many standard errors b<sub>1</sub> sits from 0</b>. Every standard error, p-value and interval in 14.5 is built from one number: <b>s, the typical miss of the line</b>. The four assumptions are the conditions that make s a fair ruler. Think of a bathroom scale: it has to be zeroed, steady, and read the same way every time, or the number it shows means nothing. <b>Excel never checks them.</b> It prints a p-value either way.</p>
+      <div class="why4">
+        <div><h3>1 · E(ε) = 0 at every x</h3><p><b>Why we need it:</b> the line has to be the true <i>average</i> y at each x. Otherwise b<sub>1</sub> describes the wrong slope.</p><p><b>If it fails:</b> predictions are too high in some ranges and too low in others, as in the curve example below. The slope itself is misleading.</p></div>
+        <div><h3>2 · Same spread at every x</h3><p><b>Why we need it:</b> we use <i>one</i> s for every customer. If misses are tiny at some ages and huge at others, one number can't describe both.</p><p><b>If it fails:</b> standard errors and intervals are wrong: too narrow where the data are noisy, too wide where they're tight.</p></div>
+        <div><h3>3 · Independent errors</h3><p><b>Why we need it:</b> every row must bring <i>new</i> information. The standard error shrinks as n grows only because each row counts as a fresh customer.</p><p><b>If it fails</b> (duplicate rows, monthly data that move together): the real n is smaller than it looks, the SE comes out too small, and results look significant when they aren't.</p></div>
+        <div><h3>4 · ε is normal</h3><p><b>Why we need it:</b> it lets us read p-values from the t distribution, which matters most with small samples.</p><p><b>If it fails:</b> with a small n the p-values can't be trusted. With a big n like Bridger's 1,338, the slope test still works (Central Limit Theorem), but a “± range” for one customer is wrong, because misses aren't symmetric.</p></div>
+      </div>
+    </div>
     <div class="two">
       <div class="card">
         <svg class="plot" id="residPlot" viewBox="0 0 560 360" role="img" aria-label="Residuals against age for all 1,338 customers"></svg>
@@ -176,10 +199,10 @@ table.xl tr.on td { background: var(--hit-soft); font-weight: 700; }
           <table class="rules">
             <thead><tr><th>Assumption about ε</th><th>What to look at</th><th>Verdict</th></tr></thead>
             <tbody>
-              <tr><td>1 · E(ε) = 0</td><td>Mean residual</td><td data-verdict hidden>Holds: exactly 0</td></tr>
-              <tr><td>2 · Same variance σ² at every x</td><td>Spread of residuals at young vs. old ages</td><td data-verdict hidden>Reasonable</td></tr>
-              <tr><td>3 · Independent errors</td><td>How the data was collected</td><td data-verdict hidden>Reasonable: one row per customer</td></tr>
-              <tr><td>4 · ε is normal</td><td>Shape: skewness, share above 0</td><td class="flip" data-verdict hidden>Violated</td></tr>
+              <tr><td>1 · E(ε) = 0 at every x</td><td>Average residual in each age slice (overall it is always 0)</td><td><select class="vsel" data-ans="holds" aria-label="Verdict for assumption 1"><option value="">Choose…</option><option value="holds">Holds</option><option value="violated">Violated</option></select><div data-verdict hidden>Every age group averages close to $0 (see below).</div></td></tr>
+              <tr><td>2 · Same variance σ² at every x</td><td>Spread of residuals at young vs. old ages</td><td><select class="vsel" data-ans="holds" aria-label="Verdict for assumption 2"><option value="">Choose…</option><option value="holds">Holds</option><option value="violated">Violated</option></select><div data-verdict hidden>Residual SD is about $11,500 at every age (tiles below).</div></td></tr>
+              <tr><td>3 · Independent errors</td><td>How the data was collected</td><td><select class="vsel" data-ans="holds" aria-label="Verdict for assumption 3"><option value="">Choose…</option><option value="holds">Holds</option><option value="violated">Violated</option></select><div data-verdict hidden>One row per customer, all at one point in time. (Duplicate rows would break it, which is one more reason to clean the data.)</div></td></tr>
+              <tr><td>4 · ε is normal</td><td>Shape: skewness, share above 0</td><td><select class="vsel" data-ans="violated" aria-label="Verdict for assumption 4"><option value="">Choose…</option><option value="holds">Holds</option><option value="violated">Violated</option></select><div data-verdict hidden>Skewness 1.73 and only 27.5% above 0: lopsided, not a bell.</div></td></tr>
             </tbody>
           </table>
         </div>
@@ -189,15 +212,217 @@ table.xl tr.on td { background: var(--hit-soft); font-weight: 700; }
           <div class="tile"><span class="cap">Residual SD, ages 50–64</span><span class="num">$11,514</span></div>
         </div>
         <div class="tiles">
-          <div class="tile"><span class="cap">Mean residual</span><span class="num">$0</span></div>
+          <div class="tile"><span class="cap">Mean residual (always $0 by design)</span><span class="num">$0</span></div>
           <div class="tile"><span class="cap">Skewness</span><span class="num">1.73</span></div>
           <div class="tile"><span class="cap">Residuals above 0</span><span class="num">27.5%</span></div>
         </div>
         <button type="button" class="btn primary" id="verdictBtn">Show the verdicts</button>
         <div data-reveal id="assume-res" hidden>
-          <p class="ans">Spread is about the same at every age, so assumption 2 holds. But the errors are <b>far from normal</b>: most customers sit a little below the line and a few sit far above it. All 147 residuals more than 2s above the line belong to smokers.</p>
+          <p class="ans">The line misses young and old customers by about the same amount, so <b>assumption 2 is fine</b>. <b>Assumption 4 is not.</b> In a bell curve, the misses would be balanced: as many above the line as below. Here about <b>7 in 10 customers sit a little below the line</b> (typically by about $6,000), while a small group sits <b>far above</b> it. Every one of the 147 customers who are more than $23,000 above the line is a <b>smoker</b>. Smokers pull the line up, so it overestimates what most customers cost and badly underestimates smokers.</p>
           <p class="note">Why we can still test: with n = 1,338, the sampling distribution of b<sub>1</sub> is close to normal anyway (the same Central Limit Theorem logic as Ch 7). With 5 customers we could not lean on that. Write this in your report's assumptions section.</p>
         </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Assumption 1 up close · E(ε) = 0 at <i>every</i> x</div>
+      <div class="two">
+        <div class="predict">
+          <p>Least squares always makes the residuals average exactly $0 overall. Does that prove assumption 1?</p>
+          <div class="btnrow" data-predict="e0"><button type="button" class="btn">Yes</button><button type="button" class="btn">No</button></div>
+          <button type="button" class="btn primary" data-show="e0Ans">Show</button>
+          <div class="ans" id="e0Ans" data-reveal hidden style="display:grid;gap:8px">
+            <p><b>No.</b> The overall $0 is automatic: least squares guarantees it for any data, even data that curves. Assumption 1 is about <b>each x</b>, so check it one slice at a time.</p>
+            <p><b>Why always $0? Reason 1, the intuition.</b> Suppose the errors averaged +$500: customers sit $500 above the line on average. Then sliding the whole line up $500 would bring it closer to the data and make the sum of squared errors <i>smaller</i>. Least squares picks the line with the <i>smallest</i> sum of squared errors, so it has already made that move. It only stops when the errors average exactly $0. Try it:</p>
+            <div class="row"><span class="note">Slide the line</span><input type="range" id="shSl" min="-3000" max="3000" step="100" value="0" aria-label="Move the least-squares line up or down"><span class="val" id="shV">$0</span></div>
+            <div class="tiles">
+              <div class="tile"><span class="cap">Average error</span><span class="num" id="shE">$0</span></div>
+              <div class="tile"><span class="cap">Sum of squared errors</span><span class="num" id="shS">178.54 bn</span></div>
+              <div class="tile"><span class="cap">Extra error vs least squares</span><span class="num" id="shX">+0.0 million</span></div>
+            </div>
+            <p class="note" id="shSay">At $0 the line is the least-squares line: the smallest possible sum of squared errors.</p>
+            <p><b>Reason 2, the formula.</b> The intercept is b<sub>0</sub> = <span class="xb">y</span> − b<sub>1</sub><span class="xb">x</span>, so the line always passes through the point of averages (<span class="xb">x</span>, <span class="xb">y</span>). For Bridger: 13,270.42 − 257.72 × 39.207 = <b>3,165.89</b>, the intercept. Add up every error: Σ(y − b<sub>0</sub> − b<sub>1</sub>x) = n<span class="xb">y</span> − nb<sub>0</sub> − b<sub>1</sub>n<span class="xb">x</span> = n(<span class="xb">y</span> − b<sub>0</sub> − b<sub>1</sub><span class="xb">x</span>) = n × 0 = <b>0</b>.</p>
+          </div>
+        </div>
+        <div class="predict">
+          <p class="big-claim" style="font-size:20px">The line is meant to be the <b>average charge at each age</b>. ε is “actual − that average.”</p>
+          <p>If 40-year-olds' errors averaged +$3,000, the true average at 40 would be $3,000 <i>above</i> the line, and the line would be wrong at that age. So assumption 1 really says: <b>a straight line is the right shape for the averages.</b> Misses are random, not predictable.</p>
+        </div>
+      </div>
+    </div>
+    <div class="two">
+      <div class="card">
+        <div class="label">Bridger · residuals by age, one slice at a time</div>
+        <svg class="plot" id="slicePlot" viewBox="0 0 560 360" role="img" aria-label="Residuals against age, with the average residual of each age group drawn as a bar"></svg>
+        <div class="row"><span class="note">Pick an age</span><input type="range" id="ageSl" min="18" max="64" value="40" aria-label="Age to highlight"><span class="val" id="ageV">40</span></div>
+        <div class="tiles">
+          <div class="tile"><span class="cap">Customers this age</span><span class="num" id="sN">–</span></div>
+          <div class="tile"><span class="cap">Line predicts</span><span class="num" id="sP">–</span></div>
+          <div class="tile"><span class="cap">Their average error</span><span class="num" id="sE">–</span></div>
+        </div>
+        <div class="legend"><span><i style="background:var(--dot)"></i>customer</span><span><i style="background:var(--ink)"></i>selected age</span><span><i style="background:var(--hit);border-radius:2px;width:16px;height:5px"></i>average error of an age group</span></div>
+        <p class="callout">For every age group, the line is right on average. Single customers miss it by about $11,500, some above and some below, but within each age group those misses cancel out to within a few hundred dollars. The line isn't too high or too low for young, middle-aged, or older customers, so <b>assumption 1 holds for age.</b> One age on its own, like 40, can be off by more, because only 20 to 70 customers share each age.</p>
+      </div>
+      <div class="card">
+        <div class="label">When it fails · a relationship that curves</div>
+        <p class="warn"><b>Hypothetical data, made up for teaching.</b> 70 stores, each with its ad spending and its sales, both in $ thousands. Click through the five steps.</p>
+        <div class="btnrow" id="cvSteps">
+          <button type="button" class="btn" aria-pressed="true" data-s="1">1 · The story</button>
+          <button type="button" class="btn" aria-pressed="false" data-s="2">2 · The straight line</button>
+          <button type="button" class="btn" aria-pressed="false" data-s="3">3 · Slice by slice</button>
+          <button type="button" class="btn" aria-pressed="false" data-s="4">4 · Why it breaks</button>
+          <button type="button" class="btn" aria-pressed="false" data-s="5">5 · Why it matters</button>
+        </div>
+        <div data-cv="1"><p><b>The story.</b> The first few thousand dollars of advertising help sales a lot. After that, each extra dollar helps less and less. Economists call this <b>diminishing returns</b>.</p><p class="callout">Look at the dots: they climb steeply on the left and level off on the right. The pattern <b>bends</b>. It isn't a straight line.</p></div>
+        <div data-cv="2" hidden><p><b>The straight line.</b> Simple regression can only draw a straight line. The best one here is <span class="mono">sales = 24.6 + 4.36 × ad spending</span>.</p><p class="callout">Across all 70 stores its errors average exactly 0, the same automatic result as Bridger's. So the overall average can't warn us. We have to look closer.</p></div>
+        <div data-cv="3" hidden><p><b>Slice by slice.</b> Gold dots sit <b>above</b> the line, red dots <b>below</b>. Read left to right: <b>red, then gold, gold, gold, then red again.</b> The colors aren't mixed. They come in runs.</p>
+          <div class="wrapx"><table class="rules" style="min-width:0">
+            <thead><tr><th>Ad spending</th><th>Real sales average</th><th>Line says</th><th>The line is…</th></tr></thead>
+            <tbody>
+              <tr><td>$0–2k</td><td class="num">25.9</td><td class="num">29.5</td><td>▼ too high by 3.6 (12 of 13 stores below it)</td></tr>
+              <tr><td>$2–4k</td><td class="num">41.1</td><td class="num">38.6</td><td>▲ too low by 2.5 (all 14 stores above it)</td></tr>
+              <tr><td>$4–6k</td><td class="num">47.8</td><td class="num">45.7</td><td>▲ too low by 2.2 (15 of 16 above it)</td></tr>
+              <tr><td>$6–8k</td><td class="num">55.3</td><td class="num">54.2</td><td>▲ too low by 1.1</td></tr>
+              <tr><td>$8–10k</td><td class="num">61.0</td><td class="num">62.9</td><td>▼ too high by 1.8 (14 of 18 below it)</td></tr>
+            </tbody></table></div></div>
+        <div data-cv="4" hidden><p><b>Why it breaks assumption 1.</b> This view plots each store's <b>miss</b> (residual): actual sales minus what the line says. Each bar is the average miss in that slice.</p><p class="callout">The bars go <b>below 0, above, above, above, below 0</b>: a frown. If you tell me a store's ad spending, I can tell you <i>which way</i> the line will miss. Assumption 1 says that should be impossible: at every x, the misses should go both ways and cancel out, like Bridger's ages. Here they don't, so a straight line is the <b>wrong shape</b>.</p></div>
+        <div data-cv="5" hidden><p><b>Why a manager cares.</b> The line says every extra $1,000 of ads brings $4,360 more in sales, no matter how much you already spend. Really, the first thousands bring much more and the last ones much less.</p><p class="callout">Push spending to <b>$12,000</b>, past every store in the data. The line promises about <b>$76,900</b> in sales, but the dashed curve these data were built from gives only about <b>$66,400</b>, a <b>$10,500</b> overestimate. A manager who trusts the straight line will <b>overspend</b> on ads.</p></div>
+        <svg class="plot" id="curvePlot" viewBox="0 0 560 360" role="img" aria-label="Hypothetical ad spending and sales: a straight line fitted to curved data"></svg>
+        <div class="legend" id="cvLegend"></div>
+        <p class="callout"><b>How to spot it in your own project:</b> run Excel's Regression tool with <i>Residual Plots</i> ticked. If the residuals form a flat band around 0, like Bridger's ages, the straight line is fine. If they form a <b>frown</b> (this example) or a <b>smile</b>, the relationship curves. Say so in your report, and don't use the line to predict outside your data.</p>
+      </div>
+    </div>
+
+    <!-- ===== Assumption 2 up close ===== -->
+    <div class="card">
+      <div class="label">Assumption 2 up close · the same spread at every x</div>
+      <div class="two">
+        <div class="predict">
+          <p>Bridger's typical miss is s = $11,560. When is it fair to use that <i>one</i> number for every customer, young and old?</p>
+          <div class="btnrow" data-predict="a2"><button type="button" class="btn">Always</button><button type="button" class="btn">Only if misses are about as big at every age</button></div>
+          <button type="button" class="btn primary" data-show="a2Ans">Show</button>
+          <p class="ans" id="a2Ans" data-reveal hidden><b>Only if misses are about as big at every age.</b> Every standard error, p-value and interval uses one s for everyone. If young customers' misses were tiny and older customers' were huge, one number would be too big for some and too small for others.</p>
+        </div>
+        <div class="predict">
+          <p class="big-claim" style="font-size:20px">Picture a band of misses around the line. Assumption 2 says the band is the <b>same width everywhere</b>, not a funnel.</p>
+          <p>Same width: one ruler, s, measures every customer fairly. A funnel: the ruler is too long at the narrow end and too short at the wide end.</p>
+        </div>
+      </div>
+    </div>
+    <div class="two">
+      <div class="card">
+        <div class="label">Bridger · how spread out are the misses at each age?</div>
+        <p>Each bar covers one standard deviation above and below that age group's average miss. <b>Same height = same spread.</b> Hover a bar for its value.</p>
+        <svg class="plot" id="a2Plot" viewBox="0 0 560 360" role="img" aria-label="Spread of residuals in each age group"></svg>
+        <div class="legend"><span><i style="background:var(--dot)"></i>customer</span><span><i style="background:var(--hit);border-radius:2px;width:10px;height:16px"></i>±1 SD of the misses in each age group</span></div>
+        <p class="callout" id="a2Say"></p>
+      </div>
+      <div class="card">
+        <div class="label">When it fails · a funnel</div>
+        <p class="warn"><b>Hypothetical data, made up for teaching.</b> 120 customers of a store: yearly income and yearly spending there, both in $ thousands.</p>
+        <div class="btnrow" id="a2Steps">
+          <button type="button" class="btn" aria-pressed="true" data-s="1">1 · The story</button>
+          <button type="button" class="btn" aria-pressed="false" data-s="2">2 · The funnel</button>
+          <button type="button" class="btn" aria-pressed="false" data-s="3">3 · One ruler for all</button>
+          <button type="button" class="btn" aria-pressed="false" data-s="4">4 · Why it matters</button>
+        </div>
+        <div class="step" data-a2="1"><p><b>The story.</b> Customers with low incomes all spend about the same small amount. Customers with high incomes vary a lot: some spend big, some barely shop.</p><p class="callout">Look at the dots: tight on the left, spread out on the right. The line can still go through the middle, but the misses <b>grow with income</b>.</p></div>
+        <div class="step" data-a2="2" hidden><p><b>The funnel.</b> This view shows each customer's miss (actual minus the line). Each bar is ±1 SD of the misses for one income group.</p><p class="callout">The bars get <b>taller from left to right</b>: the misses fan out like a funnel. Compare Bridger's bars on the left, which stay the same height.</p></div>
+        <div class="step" data-a2="3" hidden><p><b>One ruler for all.</b> Regression uses one s for everyone. The shaded band is ±2s around the line. If assumption 2 held, it would catch about <b>95% of customers in every income group</b>.</p><p class="callout">Read the percentages along the top: almost everyone is inside on the left, but the right side spills out. Red dots are customers outside the band.</p></div>
+        <div class="step" data-a2="4" hidden><p><b>Why it matters.</b> Standard errors, p-values and intervals all use one s, so every customer gets the same shaded band: ±6.5. The dashed boxes show the band each income group <b>actually needs</b>, ±2 × that group's own SD.</p><p class="callout"><b>Lowest incomes:</b> they only need ±2.7, so the shaded band is <b>2.4× too wide</b>. Predictions for them look much less certain than they really are. <b>Highest incomes:</b> they need ±8.5, so the band is <b>24% too narrow</b> and catches only 86% of them instead of 95%. Predictions look more certain than they are, for exactly the customers who spend the most.</p></div>
+        <svg class="plot" id="a2fPlot" viewBox="0 0 560 360" role="img" aria-label="Hypothetical income and spending data with a funnel shape"></svg>
+        <div class="legend" id="a2fLegend"></div>
+      </div>
+    </div>
+
+    <!-- ===== Assumption 3 up close ===== -->
+    <div class="card">
+      <div class="label">Assumption 3 up close · independent errors</div>
+      <div class="two">
+        <div class="predict">
+          <p>Copy all 1,338 rows and paste them under the data, so there are 2,676 rows. Did you learn anything new about Bridger's customers?</p>
+          <div class="btnrow" data-predict="a3"><button type="button" class="btn">Yes: twice the data</button><button type="button" class="btn">No: same customers twice</button></div>
+          <button type="button" class="btn primary" data-show="a3Ans">Show</button>
+          <p class="ans" id="a3Ans" data-reveal hidden><b>No new information.</b> But Excel doesn't know that. It treats every row as a new, separate customer, so the standard error shrinks as if you had twice the customers. The results look <b>more certain than they are</b>. Assumption 3 says every row is its own, independent piece of information.</p>
+        </div>
+        <div class="predict">
+          <p class="big-claim" style="font-size:20px">Independent means <b>one customer's miss tells you nothing about the next one's</b>.</p>
+          <p>It breaks when rows are linked: duplicate rows, the same customer counted twice, or data over time, where a good month tends to follow a good month. You check it mostly by asking <b>how the data were collected</b>, not with a formula.</p>
+        </div>
+      </div>
+    </div>
+    <div class="two">
+      <div class="card">
+        <div class="label">Bridger · how were the data collected?</div>
+        <div class="wrapx"><table class="rules" style="min-width:0">
+          <thead><tr><th>Question</th><th>Bridger</th></tr></thead>
+          <tbody>
+            <tr><td>One row per customer?</td><td>✓ Yes, 1,338 customers</td></tr>
+            <tr><td>All measured at one point in time?</td><td>✓ Yes, one year's charges (not month after month)</td></tr>
+            <tr><td>Duplicate rows removed?</td><td>✓ In the clean file. The project files have planted duplicates, so clean first.</td></tr>
+          </tbody></table></div>
+        <p class="callout"><b>Assumption 3 holds for Bridger</b>, as long as the data are clean.</p>
+        <div class="label">Try it · what duplicate rows do</div>
+        <p class="note"><b>Illustration with made-up numbers:</b> a slope estimated from 100 customers, p = 0.19, not significant. Now copy the rows.</p>
+        <div class="row"><span class="note">Copies of each row</span><input type="range" id="a3k" min="1" max="6" step="1" value="1" aria-label="Copies of each row"><span class="val" id="a3kV">1×</span></div>
+        <div class="tiles">
+          <div class="tile"><span class="cap">Rows Excel sees</span><span class="num" id="a3n">100</span></div>
+          <div class="tile"><span class="cap">t statistic</span><span class="num" id="a3t">1.32</span></div>
+          <div class="tile"><span class="cap">p-value</span><span class="num" id="a3p">0.187</span></div>
+        </div>
+        <div class="bar-track" aria-hidden="true"><div class="bar-fill" id="a3bar"></div></div>
+        <p class="feedback" id="a3Say"></p>
+      </div>
+      <div class="card">
+        <div class="label">When it fails · data over time</div>
+        <p class="warn"><b>Hypothetical data, made up for teaching.</b> One store's sales for 36 months in a row, in $ thousands.</p>
+        <div class="btnrow" id="a3Steps">
+          <button type="button" class="btn" aria-pressed="true" data-s="1">1 · The story</button>
+          <button type="button" class="btn" aria-pressed="false" data-s="2">2 · The trend line</button>
+          <button type="button" class="btn" aria-pressed="false" data-s="3">3 · Misses in time order</button>
+          <button type="button" class="btn" aria-pressed="false" data-s="4">4 · Why it matters</button>
+        </div>
+        <div class="step" data-a3="1"><p><b>The story.</b> Sales grow over three years, but they also move in <b>streaks</b>: a good month is usually followed by another good month, and a slow stretch lasts a while.</p><p class="callout">Each month is <b>linked to the month before</b>. That's the opposite of independent.</p></div>
+        <div class="step" data-a3="2" hidden><p><b>The trend line.</b> Regression on month number gives a straight upward trend. So far nothing looks wrong.</p><p class="callout">The line sits near the middle of the data, and the misses average 0, as always.</p></div>
+        <div class="step" data-a3="3" hidden><p><b>Misses in time order.</b> Each bar is one month's miss: gold above the line, red below.</p><p class="callout" id="a3RunSay"></p></div>
+        <div class="step" data-a3="4" hidden><p><b>Why it matters.</b> Because each month mostly repeats the one before, 36 linked months carry the information of far fewer independent ones. Excel still counts 36.</p><p class="callout">So the standard error comes out <b>too small</b>, and the trend looks <b>more certain</b> than it is, just like the copied rows on the left. With data over time, always plot the misses in time order and look for long runs.</p></div>
+        <svg class="plot" id="a3fPlot" viewBox="0 0 560 360" role="img" aria-label="Hypothetical monthly sales with linked errors"></svg>
+        <div class="legend" id="a3fLegend"></div>
+      </div>
+    </div>
+
+    <!-- ===== Assumption 4 up close ===== -->
+    <div class="card">
+      <div class="label">Assumption 4 up close · the misses follow a bell curve</div>
+      <div class="two">
+        <div class="predict">
+          <p>If the misses followed a bell curve, about 31 of 1,338 customers would sit more than 2s ($23,000) <b>above</b> the line, and about 31 that far <b>below</b> it. What does Bridger have?</p>
+          <div class="btnrow" data-predict="a4"><button type="button" class="btn">About 31 and 31</button><button type="button" class="btn">Lopsided</button></div>
+          <button type="button" class="btn primary" data-show="a4Ans">Show</button>
+          <p class="ans" id="a4Ans" data-reveal hidden><b>Lopsided: 147 above, 0 below.</b> A bell curve is balanced: small misses are common, big ones rare, and the same on both sides. Bridger's misses pile up around −$6,000, and a long tail of smokers stretches far above.</p>
+        </div>
+        <div class="predict">
+          <p class="big-claim" style="font-size:20px">Normal means the misses form a <b>bell</b>: most small, a few big, <b>balanced on both sides</b>.</p>
+          <p>The t test reads its p-value from a bell-shaped curve, so with <b>small samples</b> a lopsided shape makes the p-value unreliable. With a big sample the slope test survives, but a “± range” for one customer doesn't.</p>
+        </div>
+      </div>
+    </div>
+    <div class="two">
+      <div class="card">
+        <div class="label">Bridger · the shape of the misses</div>
+        <p>Bars count customers by the size of their miss, in $2,500 steps. The curve shows what a bell with the same spread would look like.</p>
+        <div class="btnrow"><button type="button" class="btn" id="a4Bell" aria-pressed="true">Show the bell curve</button><button type="button" class="btn" id="a4Smk" aria-pressed="false">Color smokers</button></div>
+        <svg class="plot" id="a4Plot" viewBox="0 0 560 360" role="img" aria-label="Histogram of residuals with a normal curve"></svg>
+        <div class="legend" id="a4Legend"></div>
+        <p class="callout">The bars don't match the bell: a <b>tall pile around −$6,000</b> (most non-smokers cost about $6,000 less than the line says) and a <b>long right tail</b> (smokers). Turn on “Color smokers” to see where the tail comes from. <b>Assumption 4 is violated.</b></p>
+      </div>
+      <div class="card">
+        <div class="label">Why it matters · a “± range” for one customer</div>
+        <p>A common shortcut: “a customer's charge is the line ± 2s.” With a bell curve, that range catches <b>95%</b> of customers and misses the rest <b>evenly on both sides</b>.</p>
+        <svg class="plot" id="a4Cov" viewBox="0 0 560 230" role="img" aria-label="Share of customers below, inside and above the plus or minus 2s range"></svg>
+        <div class="legend"><span><i style="background:var(--muted);border-radius:2px"></i>inside “line ± 2s”</span><span><i style="background:var(--miss);border-radius:2px"></i>outside it (below or above)</span></div>
+        <p class="callout">Bridger's range catches fewer customers than promised, and <b>every miss is on the same side</b>: smokers who cost far more than the range allows. Pricing on “line ± 2s” would underprice exactly those customers.</p>
+        <p class="note"><b>Why the slope test still works:</b> with 1,338 customers, the sampling distribution of b<sub>1</sub> is close to a bell anyway (Central Limit Theorem, Ch 7). With 5 customers, as in Stop 3, we couldn't lean on that.</p>
       </div>
     </div>
   </section>
@@ -408,12 +633,274 @@ function drawResid() {
   document.getElementById("residLegend").innerHTML = rc ? `<span><i style="background:var(--miss)"></i>smoker</span><span><i style="background:var(--hit)"></i>non-smoker</span><span>dashed line: residual = 0</span>` : `<span><i style="background:var(--dot)"></i>customer</span><span>dashed line: residual = 0</span>`;
 }
 document.getElementById("residColor").addEventListener("click", e => { rc = !rc; e.currentTarget.setAttribute("aria-pressed", rc); drawResid(); });
+// Verdict dropdowns: check each one the moment it is chosen
+function markVerdict(s, reveal) {
+  const cell = s.parentElement, why = cell.querySelector("[data-verdict]");
+  cell.querySelector(".vmark")?.remove(); s.classList.remove("ok", "no");
+  if (!reveal) { why.hidden = true; return; }
+  const right = s.dataset.ans === "holds" ? "Holds" : "Violated", m = document.createElement("div");
+  if (!s.value) { m.className = "vmark"; m.textContent = "Answer: " + right; }
+  else { const ok = s.value === s.dataset.ans; s.classList.add(ok ? "ok" : "no"); m.className = "vmark " + (ok ? "ok" : "no"); m.textContent = ok ? "✓ Correct: it " + (right === "Holds" ? "holds" : "is violated") : "✗ Not quite: it " + (right === "Holds" ? "holds" : "is violated"); }
+  cell.insertBefore(m, s.nextSibling); why.hidden = false;
+}
+document.querySelectorAll(".vsel").forEach(s => s.addEventListener("change", () => markVerdict(s, s.value !== "")));
 document.getElementById("verdictBtn").addEventListener("click", e => {
   const show = document.getElementById("assume-res").hidden;
   document.getElementById("assume-res").hidden = !show;
-  document.querySelectorAll("[data-verdict]").forEach(c => c.hidden = !show);
+  document.querySelectorAll(".vsel").forEach(s => markVerdict(s, show));
   e.currentTarget.textContent = show ? "Hide the verdicts" : "Show the verdicts";
 });
+// Stop 2: assumption 1, one age slice at a time
+const BANDS = [[18, 24], [25, 34], [35, 44], [45, 54], [55, 64]];
+const avg = a => a.reduce((s, v) => s + v, 0) / a.length;
+const money = v => (v < 0 ? "−$" : "+$") + fmt(Math.abs(v));
+function drawSlice() {
+  const svg = document.getElementById("slicePlot"), age = +document.getElementById("ageSl").value;
+  const f = frame(svg, [15, 67], [-15000, 50000], "Age (years)", "Residual y − ŷ", [20, 30, 40, 50, 60], [-10000, 0, 10000, 20000, 30000, 40000, 50000], v => "$" + v / 1000 + "k");
+  el("rect", { x: f.X(age - 0.5), y: f.Y(50000), width: f.X(age + 0.5) - f.X(age - 0.5), height: f.Y(-15000) - f.Y(50000), fill: css("--hit-soft") }, svg);
+  el("line", { x1: f.X(15), x2: f.X(67), y1: f.Y(0), y2: f.Y(0), stroke: css("--ink"), "stroke-width": 1.5, "stroke-dasharray": "5 4" }, svg);
+  RES.forEach(([a, r]) => { if (a !== age) el("circle", { cx: f.X(a + ((r * 7919) % 100) / 220 - .22), cy: f.Y(r), r: 2.2, fill: css("--dot") }, svg); });
+  BANDS.forEach(([lo, hi]) => {
+    const m = avg(RES.filter(d => d[0] >= lo && d[0] <= hi).map(d => d[1]));
+    const seg = el("line", { x1: f.X(lo - 0.4), x2: f.X(hi + 0.4), y1: f.Y(m), y2: f.Y(m), stroke: css("--hit"), "stroke-width": 6, "stroke-linecap": "round" }, svg);
+    el("title", {}, seg).textContent = `Ages ${lo}–${hi}: average error ${money(m)}`;
+    el("text", { x: f.X((lo + hi) / 2), y: f.Y(-11200) + 4, "text-anchor": "middle" }, svg).textContent = `${lo}–${hi}`;
+    el("text", { x: f.X((lo + hi) / 2), y: f.Y(-13700) + 4, "text-anchor": "middle", class: "tt" }, svg).textContent = money(m);
+  });
+  const sel = RES.filter(d => d[0] === age);
+  sel.forEach(([a, r]) => { const c = el("circle", { cx: f.X(a), cy: f.Y(r), r: 3.6, fill: css("--ink"), stroke: css("--panel"), "stroke-width": 1.5 }, svg); el("title", {}, c).textContent = `Age ${a}: ${money(r)} from the line`; });
+  const sm = avg(sel.map(d => d[1]));
+  el("line", { x1: f.X(age - 1.6), x2: f.X(age + 1.6), y1: f.Y(sm), y2: f.Y(sm), stroke: css("--ink"), "stroke-width": 3 }, svg);
+  document.getElementById("ageV").textContent = age;
+  document.getElementById("sN").textContent = sel.length;
+  document.getElementById("sP").textContent = "$" + fmt(3165.89 + 257.72 * age);
+  document.getElementById("sE").textContent = money(sm);
+}
+document.getElementById("ageSl").addEventListener("input", drawSlice);
+// Stop 2: why the overall average error is always 0. Moving the line by c: average error −c, SSE grows by n·c²
+const SSE0 = 178544029385, NC = 1338;
+document.getElementById("shSl").addEventListener("input", e => {
+  const c = +e.target.value, extra = NC * c * c;
+  document.getElementById("shV").textContent = (c < 0 ? "−$" : c > 0 ? "+$" : "$") + fmt(Math.abs(c));
+  document.getElementById("shE").textContent = c === 0 ? "$0" : (c > 0 ? "−$" : "+$") + fmt(Math.abs(c));
+  document.getElementById("shS").textContent = fmt((SSE0 + extra) / 1e9, 2) + " bn";
+  document.getElementById("shX").textContent = "+" + fmt(extra / 1e6, 1) + " million";
+  document.getElementById("shSay").textContent = c === 0 ? "At $0 the line is the least-squares line: the smallest possible sum of squared errors."
+    : `Moved ${c > 0 ? "up" : "down"} $${fmt(Math.abs(c))}: customers now average $${fmt(Math.abs(c))} ${c > 0 ? "below" : "above"} the line, and the squared errors grow by 1,338 × ${fmt(Math.abs(c))}² = ${fmt(extra / 1e6, 1)} million. Any move makes it worse, so least squares stays where the average error is 0.`;
+});
+// Stop 2: hypothetical curved data (diminishing returns), fitted with a straight line
+const CV = (() => {
+  let seed = 240; const r = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const pts = []; for (let i = 0; i < 70; i++) { const x = 0.3 + r() * 9.7; pts.push([x, 10 + 22 * Math.log(1 + x) + (r() + r() + r() - 1.5) * 4]); }
+  const mx = avg(pts.map(p => p[0])), my = avg(pts.map(p => p[1]));
+  const b1 = pts.reduce((s, [x, y]) => s + (x - mx) * (y - my), 0) / pts.reduce((s, [x]) => s + (x - mx) ** 2, 0), b0 = my - b1 * mx;
+  return { pts: pts.map(([x, y]) => [x, y, y - (b0 + b1 * x)]), b0, b1 };
+})();
+let cvStep = 1;
+function drawCurve() {
+  const svg = document.getElementById("curvePlot"), up = css("--hit"), dn = css("--miss"), ink = css("--ink"), st = cvStep;
+  const lineLeg = `<span><i style="background:var(--ink);border-radius:1px;width:22px;height:3px"></i>least-squares line</span>`;
+  const leg = h => { document.getElementById("cvLegend").innerHTML = h; };
+  if (st === 4) {
+    const f = frame(svg, [0, 10.5], [-16, 12], "Ad spending ($ thousands)", "Miss (residual)", [0, 2, 4, 6, 8, 10], [-16, -12, -8, -4, 0, 4, 8, 12], v => v);
+    el("line", { x1: f.X(0), x2: f.X(10.5), y1: f.Y(0), y2: f.Y(0), stroke: ink, "stroke-width": 1.5, "stroke-dasharray": "5 4" }, svg);
+    CV.pts.forEach(([x, y, e]) => el("circle", { cx: f.X(x), cy: f.Y(e), r: 3.4, fill: e > 0 ? up : dn, "fill-opacity": .45 }, svg));
+    [[0, 2], [2, 4], [4, 6], [6, 8], [8, 10.3]].forEach(([lo, hi]) => {
+      const g = CV.pts.filter(p => p[0] >= lo && p[0] < hi).map(p => p[2]); if (!g.length) return;
+      const m = avg(g), c = m > 0 ? up : dn;
+      const seg = el("line", { x1: f.X(lo + .15), x2: f.X(hi - .15), y1: f.Y(m), y2: f.Y(m), stroke: c, "stroke-width": 6, "stroke-linecap": "round" }, svg);
+      el("title", {}, seg).textContent = `Spending ${lo}–${Math.round(hi)}: average miss ${m > 0 ? "+" : "−"}${Math.abs(m).toFixed(1)}`;
+      el("text", { x: f.X((lo + hi) / 2), y: f.Y(m) + (m > 0 ? -10 : 20), "text-anchor": "middle", class: "tt" }, svg).textContent = (m > 0 ? "▲ +" : "▼ −") + Math.abs(m).toFixed(1);
+    });
+    leg(`<span><i style="background:var(--hit);border-radius:2px;width:16px;height:5px"></i>▲ slice average above 0 (line too low)</span><span><i style="background:var(--miss);border-radius:2px;width:16px;height:5px"></i>▼ slice average below 0 (line too high)</span>`);
+    return;
+  }
+  const xmax = st === 5 ? 12.6 : 10.5, ymax = st === 5 ? 90 : 70;
+  const f = frame(svg, [0, xmax], [0, ymax], "Ad spending ($ thousands)", "Sales ($ thousands)", st === 5 ? [0, 2, 4, 6, 8, 10, 12] : [0, 2, 4, 6, 8, 10], st === 5 ? [0, 15, 30, 45, 60, 75, 90] : [0, 10, 20, 30, 40, 50, 60, 70], v => v);
+  if (st === 3) [2, 4, 6, 8].forEach(x => el("line", { x1: f.X(x), x2: f.X(x), y1: f.Y(0), y2: f.Y(ymax), stroke: css("--muted"), "stroke-width": 1, "stroke-dasharray": "3 4" }, svg));
+  if (st === 5) {
+    el("rect", { x: f.X(10.3), y: f.Y(ymax), width: f.X(xmax) - f.X(10.3), height: f.Y(0) - f.Y(ymax), fill: css("--chip") }, svg);
+    el("text", { x: f.X(11.45), y: f.Y(8), "text-anchor": "middle" }, svg).textContent = "no stores here";
+    let d = ""; for (let x = 0.3; x <= 12.01; x += 0.1) d += (d ? "L" : "M") + f.X(x) + "," + f.Y(10 + 22 * Math.log(1 + x));
+    el("path", { d, fill: "none", stroke: up, "stroke-width": 3, "stroke-dasharray": "7 5" }, svg);
+  }
+  const colored = st === 3;
+  CV.pts.forEach(([x, y, e]) => el("circle", { cx: f.X(x), cy: f.Y(y), r: 4, fill: colored ? (e > 0 ? up : dn) : css("--dot"), "fill-opacity": colored ? .85 : 1, stroke: css("--panel"), "stroke-width": 1.5 }, svg));
+  if (st >= 2) { const xe = st === 5 ? 12 : 10.3; el("line", { x1: f.X(0), x2: f.X(xe), y1: f.Y(CV.b0), y2: f.Y(CV.b0 + CV.b1 * xe), stroke: ink, "stroke-width": 3 }, svg); }
+  if (st === 5) {
+    const yl = CV.b0 + CV.b1 * 12, yc = 10 + 22 * Math.log(13);
+    el("line", { x1: f.X(12), x2: f.X(12), y1: f.Y(yl), y2: f.Y(yc), stroke: dn, "stroke-width": 3 }, svg);
+    el("circle", { cx: f.X(12), cy: f.Y(yl), r: 6, fill: ink }, svg); el("circle", { cx: f.X(12), cy: f.Y(yc), r: 6, fill: up }, svg);
+    el("text", { x: f.X(11.75), y: f.Y(yl) - 10, "text-anchor": "end", class: "tt" }, svg).textContent = `line: $${yl.toFixed(1)}k`;
+    el("text", { x: f.X(11.45), y: f.Y(yc) + 24, "text-anchor": "middle", class: "tt" }, svg).textContent = `curve: $${yc.toFixed(1)}k`;
+    el("text", { x: f.X(11.45), y: f.Y(40), "text-anchor": "middle", class: "tt" }, svg).textContent = `line $${(yl - yc).toFixed(1)}k`; el("text", { x: f.X(11.45), y: f.Y(40) + 17, "text-anchor": "middle", class: "tt" }, svg).textContent = "too high";
+  }
+  if (st === 1) leg(`<span><i style="background:var(--dot)"></i>one store</span>`);
+  else if (st === 2) leg(`<span><i style="background:var(--dot)"></i>one store</span>${lineLeg}`);
+  else if (st === 3) leg(`<span><i style="background:var(--hit)"></i>above the line (line too low)</span><span><i style="background:var(--miss)"></i>below the line (line too high)</span>${lineLeg}`);
+  else leg(`${lineLeg}<span><i style="background:var(--hit);border-radius:1px;width:22px;height:3px"></i>the curve the data were built from (dashed)</span><span><i style="background:var(--chip);border-radius:2px;border:1px solid var(--line)"></i>outside the data</span>`);
+}
+function setCv(n) {
+  cvStep = Math.min(5, Math.max(1, n));
+  document.querySelectorAll("#cvSteps button").forEach(b => b.setAttribute("aria-pressed", +b.dataset.s === cvStep ? "true" : "false"));
+  document.querySelectorAll("[data-cv]").forEach(d => { d.hidden = +d.dataset.cv !== cvStep; });
+  drawCurve();
+}
+document.querySelectorAll("#cvSteps button").forEach(b => b.addEventListener("click", () => setCv(+b.dataset.s)));
+// ===== Assumptions 2-4 up close =====
+const S_LINE = 11560.31;
+const erfcA = x => { const z = Math.abs(x), t = 1 / (1 + 0.5 * z);
+  const r = t * Math.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (0.37409196 + t * (0.09678418 + t * (-0.18628806 + t * (0.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277)))))))));
+  return x >= 0 ? r : 2 - r; };
+const seeded = s0 => { let q = s0; return () => (q = q * 16807 % 2147483647) / 2147483647; };
+const gauss = r => () => Math.sqrt(-2 * Math.log(r() || 1e-9)) * Math.cos(2 * Math.PI * r());
+const sdOf = a => { const m = avg(a); return Math.sqrt(a.reduce((t, v) => t + (v - m) ** 2, 0) / (a.length - 1)); };
+const fitLine = pts => { const mx = avg(pts.map(p => p[0])), my = avg(pts.map(p => p[1]));
+  const b1 = pts.reduce((t, [x, y]) => t + (x - mx) * (y - my), 0) / pts.reduce((t, [x]) => t + (x - mx) ** 2, 0); return { b0: my - b1 * mx, b1 }; };
+function stepper(id, key, draw) {
+  const set = n => {
+    document.querySelectorAll(`#${id} button`).forEach(b => b.setAttribute("aria-pressed", +b.dataset.s === n ? "true" : "false"));
+    document.querySelectorAll(`[data-${key}]`).forEach(d => { d.hidden = +d.getAttribute(`data-${key}`) !== n; });
+    draw(n);
+  };
+  document.querySelectorAll(`#${id} button`).forEach(b => b.addEventListener("click", () => set(+b.dataset.s)));
+  return set;
+}
+// A2 · Bridger spread by age group
+function drawA2() {
+  const svg = document.getElementById("a2Plot");
+  const f = frame(svg, [15, 67], [-20000, 50000], "Age (years)", "Residual y − ŷ", [20, 30, 40, 50, 60], [-20000, -10000, 0, 10000, 20000, 30000, 40000, 50000], v => "$" + v / 1000 + "k");
+  el("line", { x1: f.X(15), x2: f.X(67), y1: f.Y(0), y2: f.Y(0), stroke: css("--ink"), "stroke-width": 1.5, "stroke-dasharray": "5 4" }, svg);
+  RES.forEach(([a, r]) => el("circle", { cx: f.X(a + ((r * 7919) % 100) / 220 - .22), cy: f.Y(r), r: 2, fill: css("--dot") }, svg));
+  const sds = [];
+  BANDS.forEach(([lo, hi]) => {
+    const g = RES.filter(d => d[0] >= lo && d[0] <= hi).map(d => d[1]), m = avg(g), sd = sdOf(g); sds.push(sd);
+    const rc = el("rect", { x: f.X(lo - 0.3), y: f.Y(m + sd), width: f.X(hi + 0.3) - f.X(lo - 0.3), height: f.Y(m - sd) - f.Y(m + sd), fill: css("--hit-soft"), stroke: css("--hit"), "stroke-width": 2.5, rx: 4 }, svg);
+    el("title", {}, rc).textContent = `Ages ${lo}–${hi}: SD of the misses $${fmt(sd)}`;
+    el("text", { x: f.X((lo + hi) / 2), y: f.Y(m + sd) - 8, "text-anchor": "middle", class: "tt" }, svg).textContent = "$" + (sd / 1000).toFixed(1) + "k";
+  });
+  const lo = Math.min(...sds), hi = Math.max(...sds);
+  document.getElementById("a2Say").innerHTML = `Every age group's misses spread about the same: between <b>$${fmt(lo)}</b> and <b>$${fmt(hi)}</b>. The bars are the same height, so <b>assumption 2 holds</b>.`;
+}
+// A2 · hypothetical funnel
+const A2 = (() => { const r = seeded(2402), g = gauss(r), pts = [];
+  for (let i = 0; i < 120; i++) { const x = 20 + r() * 130; pts.push([x, 3 + 0.06 * x + g() * 0.035 * x]); }
+  const L = fitLine(pts), res = pts.map(([x, y]) => [x, y, y - L.b0 - L.b1 * x]);
+  return { pts: res, ...L, s: Math.sqrt(res.reduce((t, p) => t + p[2] ** 2, 0) / (res.length - 2)) }; })();
+const A2BINS = [[20, 46], [46, 72], [72, 98], [98, 124], [124, 150.1]];
+function drawA2f(n) {
+  const svg = document.getElementById("a2fPlot"), leg = h => { document.getElementById("a2fLegend").innerHTML = h; };
+  if (n === 1) {
+    const f = frame(svg, [15, 155], [0, 25], "Income ($ thousands)", "Spending ($ thousands)", [20, 50, 80, 110, 140], [0, 5, 10, 15, 20, 25], v => v);
+    A2.pts.forEach(([x, y]) => el("circle", { cx: f.X(x), cy: f.Y(y), r: 3.6, fill: css("--dot"), stroke: css("--panel"), "stroke-width": 1 }, svg));
+    el("line", { x1: f.X(20), x2: f.X(150), y1: f.Y(A2.b0 + A2.b1 * 20), y2: f.Y(A2.b0 + A2.b1 * 150), stroke: css("--ink"), "stroke-width": 3 }, svg);
+    leg(`<span><i style="background:var(--dot)"></i>one customer</span><span><i style="background:var(--ink);border-radius:1px;width:22px;height:3px"></i>least-squares line</span>`);
+    return;
+  }
+  const f = frame(svg, [15, 155], [-16, 16], "Income ($ thousands)", "Miss (residual)", [20, 50, 80, 110, 140], [-16, -8, 0, 8, 16], v => v);
+  if (n >= 3) el("rect", { x: f.X(15), y: f.Y(2 * A2.s), width: f.X(155) - f.X(15), height: f.Y(-2 * A2.s) - f.Y(2 * A2.s), fill: css("--hit-soft") }, svg);
+  el("line", { x1: f.X(15), x2: f.X(155), y1: f.Y(0), y2: f.Y(0), stroke: css("--ink"), "stroke-width": 1.5, "stroke-dasharray": "5 4" }, svg);
+  A2.pts.forEach(([x, y, e]) => { const out = Math.abs(e) > 2 * A2.s; el("circle", { cx: f.X(x), cy: f.Y(e), r: 3.4, fill: n >= 3 && out ? css("--miss") : css("--dot"), stroke: css("--panel"), "stroke-width": 1 }, svg); });
+  A2BINS.forEach(([lo, hi]) => {
+    const g = A2.pts.filter(p => p[0] >= lo && p[0] < hi).map(p => p[2]); if (!g.length) return;
+    if (n === 2) { const sd = sdOf(g), m = avg(g);
+      const rc = el("rect", { x: f.X(lo + 2), y: f.Y(m + sd), width: f.X(hi - 2) - f.X(lo + 2), height: f.Y(m - sd) - f.Y(m + sd), fill: "none", stroke: css("--hit"), "stroke-width": 3, rx: 4 }, svg);
+      el("title", {}, rc).textContent = `Income ${lo}–${Math.round(hi)}: SD of the misses ${sd.toFixed(1)}`;
+      el("text", { x: f.X((lo + hi) / 2), y: f.Y(m + sd) - 8, "text-anchor": "middle", class: "tt" }, svg).textContent = "SD " + sd.toFixed(1);
+    } else if (n === 3) { const inside = g.filter(v => Math.abs(v) <= 2 * A2.s).length / g.length;
+      el("text", { x: f.X((lo + hi) / 2), y: f.Y(15) + 4, "text-anchor": "middle", class: "tt" }, svg).textContent = Math.round(inside * 100) + "% in";
+    } else { const need = 2 * sdOf(g), ratio = 2 * A2.s / need;
+      const rc = el("rect", { x: f.X(lo + 2), y: f.Y(need), width: f.X(hi - 2) - f.X(lo + 2), height: f.Y(-need) - f.Y(need), fill: "none", stroke: css("--ink"), "stroke-width": 2.5, "stroke-dasharray": "6 4", rx: 3 }, svg);
+      el("title", {}, rc).textContent = `Income ${lo}–${Math.round(hi)}: this group needs ±${need.toFixed(1)}, the one-size band is ±${(2 * A2.s).toFixed(1)}`;
+      el("text", { x: f.X((lo + hi) / 2), y: f.Y(15) + 4, "text-anchor": "middle", class: "tt" }, svg).textContent = "needs ±" + need.toFixed(1);
+      el("text", { x: f.X((lo + hi) / 2), y: f.Y(-15) + 2, "text-anchor": "middle", class: "tt", style: `fill:${ratio > 1.1 ? css("--muted") : ratio < 0.9 ? css("--miss") : css("--ink")}` }, svg).textContent =
+        ratio > 1.1 ? ratio.toFixed(1) + "× too wide" : ratio < 0.9 ? Math.round((1 - ratio) * 100) + "% too narrow" : "about right";
+    }
+  });
+  leg(n === 2 ? `<span><i style="background:var(--dot)"></i>one customer's miss</span><span><i style="border:2px solid var(--hit);background:none;border-radius:2px;width:10px;height:14px"></i>±1 SD in each income group</span>`
+    : n === 4 ? `<span><i style="background:var(--hit-soft);border:1px solid var(--hit);border-radius:2px"></i>one-size band, ±2s = ±${(2 * A2.s).toFixed(1)} for everyone</span><span><i style="border:2px dashed var(--ink);background:none;border-radius:2px;width:12px;height:14px"></i>the band each income group actually needs (±2 × its own SD)</span>`
+    : `<span><i style="background:var(--hit-soft);border:1px solid var(--hit);border-radius:2px"></i>±2s band (one ruler for everyone)</span><span><i style="background:var(--miss)"></i>outside the band</span><span>“% in” = share of that group inside the band (about 95% if assumption 2 held)</span>`);
+}
+const setA2 = stepper("a2Steps", "a2", drawA2f); let a2n = 1;
+document.querySelectorAll("#a2Steps button").forEach(b => b.addEventListener("click", () => { a2n = +b.dataset.s; }));
+// A3 · copy-the-rows illustration (made-up slope: t = 1.32 with 100 rows)
+function drawA3k() {
+  const k = +document.getElementById("a3k").value, t = 1.32 * Math.sqrt(k), p = erfcA(t / Math.SQRT2);
+  document.getElementById("a3kV").textContent = k + "×";
+  document.getElementById("a3n").textContent = fmt(100 * k);
+  document.getElementById("a3t").textContent = t.toFixed(2);
+  document.getElementById("a3p").textContent = p.toFixed(3);
+  document.getElementById("a3bar").style.width = Math.min(100, p / 0.2 * 100) + "%";
+  document.getElementById("a3Say").innerHTML = k === 1 ? "100 real customers: p = 0.187, not significant at α = .05."
+    : `Still the same 100 customers, copied ${k} times. Excel now sees ${fmt(100 * k)} rows, so the p-value drops to ${p.toFixed(3)}` + (p < 0.05 ? ": <b>“significant,” with zero new information.</b>" : ". No new information, yet the result looks stronger.");
+}
+document.getElementById("a3k").addEventListener("input", drawA3k);
+// A3 · hypothetical monthly sales with linked (autocorrelated) errors
+const A3 = (() => { const g = gauss(seeded(3603)), pts = []; let e = 0;
+  for (let m = 1; m <= 36; m++) { e = 0.85 * e + g() * 2.6; pts.push([m, 60 + 1.1 * m + e]); }
+  const L = fitLine(pts), res = pts.map(([x, y]) => [x, y, y - L.b0 - L.b1 * x]);
+  let runs = 1; for (let i = 1; i < res.length; i++) if (Math.sign(res[i][2]) !== Math.sign(res[i - 1][2])) runs++;
+  return { pts: res, ...L, runs }; })();
+function drawA3f(n) {
+  const svg = document.getElementById("a3fPlot"), leg = h => { document.getElementById("a3fLegend").innerHTML = h; };
+  if (n <= 2) {
+    const f = frame(svg, [0, 37], [40, 120], "Month", "Sales ($ thousands)", [1, 6, 12, 18, 24, 30, 36], [40, 60, 80, 100, 120], v => v);
+    el("path", { d: A3.pts.map(([x, y], i) => (i ? "L" : "M") + f.X(x) + "," + f.Y(y)).join(""), fill: "none", stroke: css("--dot"), "stroke-width": 1.5 }, svg);
+    A3.pts.forEach(([x, y]) => el("circle", { cx: f.X(x), cy: f.Y(y), r: 3.6, fill: css("--muted") }, svg));
+    if (n === 2) el("line", { x1: f.X(1), x2: f.X(36), y1: f.Y(A3.b0 + A3.b1), y2: f.Y(A3.b0 + A3.b1 * 36), stroke: css("--ink"), "stroke-width": 3 }, svg);
+    leg(`<span><i style="background:var(--muted)"></i>one month</span>` + (n === 2 ? `<span><i style="background:var(--ink);border-radius:1px;width:22px;height:3px"></i>trend line</span>` : ""));
+    return;
+  }
+  const f = frame(svg, [0, 37], [-12, 12], "Month", "Miss (residual)", [1, 6, 12, 18, 24, 30, 36], [-12, -6, 0, 6, 12], v => v);
+  el("line", { x1: f.X(0), x2: f.X(37), y1: f.Y(0), y2: f.Y(0), stroke: css("--ink"), "stroke-width": 1.5 }, svg);
+  const w = (f.X(2) - f.X(1)) * 0.7;
+  A3.pts.forEach(([x, , e]) => { const rc = el("rect", { x: f.X(x) - w / 2, y: f.Y(Math.max(e, 0)), width: w, height: Math.abs(f.Y(e) - f.Y(0)), fill: e > 0 ? css("--hit") : css("--miss"), rx: 2 }, svg);
+    el("title", {}, rc).textContent = `Month ${x}: miss ${e > 0 ? "+" : "−"}${Math.abs(e).toFixed(1)}`; });
+  if (n === 4) el("text", { x: f.X(18.5), y: f.Y(10.5), "text-anchor": "middle", class: "tt" }, svg).textContent = `${A3.runs} runs, where independent misses would give about 18`;
+  leg(`<span><i style="background:var(--hit);border-radius:2px"></i>month above the trend</span><span><i style="background:var(--miss);border-radius:2px"></i>month below the trend</span>`);
+}
+document.getElementById("a3RunSay").innerHTML = `The colors come in <b>long runs</b>: several gold months in a row, then several red ones. Counting each switch of color, there are only <b>${A3.runs} runs</b> in 36 months. Independent misses would switch back and forth about <b>18 times</b>, like coin flips.`;
+const setA3 = stepper("a3Steps", "a3", drawA3f); let a3n = 1;
+document.querySelectorAll("#a3Steps button").forEach(b => b.addEventListener("click", () => { a3n = +b.dataset.s; }));
+// A4 · histogram of Bridger's residuals vs a bell curve
+let a4Bell = true, a4Smk = false;
+function drawA4() {
+  const svg = document.getElementById("a4Plot"), W = 2500, lo = -10000, hi = 50000, nb = (hi - lo) / W;
+  const all = Array(nb).fill(0), smk = Array(nb).fill(0);
+  RES.forEach(([, r, sm]) => { const i = Math.min(nb - 1, Math.max(0, Math.floor((r - lo) / W))); all[i]++; if (sm) smk[i]++; });
+  const ymax = Math.ceil(Math.max(...all) / 100) * 100 + 50, yt = []; for (let v = 0; v <= ymax; v += 100) yt.push(v);
+  const f = frame(svg, [lo, hi], [0, ymax], "Miss y − ŷ (dollars)", "Customers", [-10000, 0, 10000, 20000, 30000, 40000, 50000], yt, v => v);
+  svg.querySelectorAll("text").forEach(t => { if (/^-?\d+$/.test(t.textContent) && Math.abs(+t.textContent) >= 10000) t.textContent = (+t.textContent < 0 ? "−$" : "$") + Math.abs(+t.textContent) / 1000 + "k"; });
+  all.forEach((c, i) => {
+    const x0 = f.X(lo + i * W) + 1, x1 = f.X(lo + (i + 1) * W) - 1, ns = c - smk[i];
+    const rc = el("rect", { x: x0, y: f.Y(c), width: x1 - x0, height: f.Y(0) - f.Y(c), fill: a4Smk ? css("--hit") : css("--muted"), rx: 2 }, svg);
+    el("title", {}, rc).textContent = `$${fmt(lo + i * W)} to $${fmt(lo + (i + 1) * W)}: ${c} customers` + (a4Smk ? ` (${smk[i]} smokers)` : "");
+    if (a4Smk && smk[i]) el("rect", { x: x0, y: f.Y(c), width: x1 - x0, height: f.Y(0) - f.Y(smk[i]), fill: css("--miss"), rx: 2 }, svg);
+    void ns;
+  });
+  el("line", { x1: f.X(0), x2: f.X(0), y1: f.Y(0), y2: f.Y(ymax), stroke: css("--ink"), "stroke-width": 1.5, "stroke-dasharray": "5 4" }, svg);
+  if (a4Bell) { let d = ""; for (let x = lo; x <= hi; x += 250) { const y = RES.length * W * Math.exp(-0.5 * (x / S_LINE) ** 2) / (S_LINE * Math.sqrt(2 * Math.PI)); d += (d ? "L" : "M") + f.X(x) + "," + f.Y(y); }
+    el("path", { d, fill: "none", stroke: css("--ink"), "stroke-width": 3 }, svg); }
+  document.getElementById("a4Legend").innerHTML = (a4Smk ? `<span><i style="background:var(--miss);border-radius:2px"></i>smokers</span><span><i style="background:var(--hit);border-radius:2px"></i>non-smokers</span>` : `<span><i style="background:var(--muted);border-radius:2px"></i>customers</span>`)
+    + (a4Bell ? `<span><i style="background:var(--ink);border-radius:1px;width:22px;height:3px"></i>bell curve with the same spread</span>` : "") + `<span>dashed: miss = 0</span>`;
+}
+document.getElementById("a4Bell").addEventListener("click", e => { a4Bell = !a4Bell; e.currentTarget.setAttribute("aria-pressed", a4Bell); drawA4(); });
+document.getElementById("a4Smk").addEventListener("click", e => { a4Smk = !a4Smk; e.currentTarget.setAttribute("aria-pressed", a4Smk); drawA4(); });
+// A4 · coverage of "line ± 2s"
+function drawA4Cov() {
+  const svg = document.getElementById("a4Cov"); svg.innerHTML = "";
+  const n = RES.length, above = RES.filter(d => d[1] > 2 * S_LINE).length, below = RES.filter(d => d[1] < -2 * S_LINE).length;
+  const rows = [["A bell curve", [2.3, 95.4, 2.3]], ["Bridger", [below / n * 100, (n - above - below) / n * 100, above / n * 100]]];
+  const L = 120, R = 540, cols = [css("--miss"), css("--muted"), css("--miss")];
+  rows.forEach(([name, parts], j) => {
+    const y = 40 + j * 90; el("text", { x: L - 10, y: y + 26, "text-anchor": "end", class: "tt" }, svg).textContent = name;
+    let x = L; parts.forEach((pc, i) => { const w = (R - L) * pc / 100; if (w > 0) {
+      const rc = el("rect", { x, y, width: Math.max(w - 2, 1), height: 44, fill: cols[i], rx: 3 }, svg); el("title", {}, rc).textContent = `${["below", "inside", "above"][i]}: ${pc.toFixed(1)}%`;
+      if (pc >= 2) el("text", { x: i === 0 ? L : i === 2 ? R : x + w / 2, y: y + (i === 1 ? 27 : 62), "text-anchor": i === 0 ? "start" : i === 2 ? "end" : "middle", class: "tt", style: i === 1 ? "fill:var(--panel)" : "" }, svg).textContent = (i === 0 ? "below " : i === 2 ? "above " : "") + pc.toFixed(1) + "%"; }
+      x += w; });
+    if (j === 1 && parts[0] === 0) el("text", { x: L, y: y + 62, "text-anchor": "start", class: "tt" }, svg).textContent = "0% below";
+  });
+}
 // Stop 4: CI width vs n
 const B1 = 257.72, SE = 11560.31, SX = 14.05;
 const tq = df => { const z = 1.959964; return z + (z ** 3 + z) / (4 * df) + (5 * z ** 5 + 16 * z ** 3 + 3 * z) / (96 * df * df); };
@@ -446,7 +933,7 @@ document.querySelectorAll("#hl button").forEach(b => b.addEventListener("click",
   document.querySelectorAll("#xlout tr").forEach(tr => tr.classList.toggle("on", (tr.dataset.g || "").split(" ").includes(b.dataset.hl)));
   document.getElementById("hlSay").textContent = SAY[b.dataset.hl];
 }));
-function drawAll() { drawResid(); drawCI(); }
+function drawAll() { drawResid(); drawSlice(); drawCurve(); drawA2(); drawA2f(a2n); drawA3k(); drawA3f(a3n); drawA4(); drawA4Cov(); drawCI(); }
 drawAll();
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawAll);
 </script>
