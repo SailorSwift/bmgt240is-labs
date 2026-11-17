@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chapter 14 Review</title>
+<style>
+/* Self-check review for Chapter 14, matching the Ch 9-14 labs. Brand: MSU navy #162860 + gold #F3B324, Aptos.
+   All numbers come from the insurance labs' Excel output (Bridger: n = 1,338) and the 5-customer by-hand example. */
+:root {
+  --navy: #162860; --navy-deep: #0f1c48; --gold: #F3B324;
+  --bg: #f3f5fa; --panel: #ffffff; --ink: #111a30; --muted: #4a5570; --line: #d5dae7;
+  --hit: #162860; --hit-soft: rgba(22,40,96,.13); --miss: #c8432f; --miss-soft: rgba(200,67,47,.14);
+  --ok: #2e6b2e; --ok-soft: rgba(46,107,46,.13); --chip: #e7ebf4; --focus: #F3B324; --on-accent: #ffffff;
+  --dot: rgba(74,85,112,.55); --grid: #e3e7f0;
+  --display: Aptos, "Aptos Display", "Segoe UI", Arial, Helvetica, sans-serif;
+  --body: Aptos, "Segoe UI", Arial, Helvetica, sans-serif;
+  --mono: Consolas, "Courier New", monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b1433; --panel: #14214d; --ink: #eef1f8; --muted: #a9b3cc; --line: #2a3a6e;
+    --hit: #F3B324; --hit-soft: rgba(243,179,36,.18); --miss: #f07a63; --miss-soft: rgba(240,122,99,.16);
+    --ok: #7fc97f; --ok-soft: rgba(127,201,127,.16); --chip: #1c2b5c; --focus: #FADA92; --on-accent: #162860;
+    --dot: rgba(169,179,204,.6); --grid: #22336a; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b1433; --panel: #14214d; --ink: #eef1f8; --muted: #a9b3cc; --line: #2a3a6e;
+  --hit: #F3B324; --hit-soft: rgba(243,179,36,.18); --miss: #f07a63; --miss-soft: rgba(240,122,99,.16);
+  --ok: #7fc97f; --ok-soft: rgba(127,201,127,.16); --chip: #1c2b5c; --focus: #FADA92; --on-accent: #162860;
+  --dot: rgba(169,179,204,.6); --grid: #22336a; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 56px; }
+.wrap { max-width: 1100px; margin: 0 auto; display: grid; gap: 24px; }
+header.brand { margin-top: 20px; border-radius: 12px; padding: 26px clamp(18px, 3vw, 36px) 24px;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-deep) 100%); color: #fff; display: grid; gap: 8px; border: 1px solid var(--line); }
+header.brand .bar { width: 52px; height: 4px; border-radius: 2px; background: var(--gold); }
+header.brand .course { font-size: 14px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); }
+header.brand .meta { font-size: 14px; color: #b9c3dc; }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(30px, 4.2vw, 44px); line-height: 1.1; margin: 0; color: #fff; }
+h2 { font-family: var(--display); font-size: clamp(22px, 2.6vw, 27px); line-height: 1.2; margin: 0; }
+p { margin: 0; }
+.mono { font-family: var(--mono); }
+nav.stops { position: sticky; top: 0; z-index: 5; background: var(--bg); display: flex; gap: 6px; overflow-x: auto; padding-block: 10px; border-bottom: 1px solid var(--line); align-items: center; }
+nav.stops a { flex: 0 0 auto; text-decoration: none; color: var(--ink); background: var(--chip); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; font-size: 14px; font-weight: 500; white-space: nowrap; }
+nav.stops a:hover { border-color: var(--hit); }
+.score { margin-left: auto; flex: 0 0 auto; font: 700 15px var(--body); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 5px 14px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; min-width: 0; }
+section.sec { display: grid; gap: 14px; scroll-margin-top: 64px; }
+.sec-head { display: grid; gap: 4px; }
+.sec-num { font: 700 13px var(--body); color: var(--hit); letter-spacing: .14em; display: flex; align-items: center; gap: 10px; text-transform: uppercase; }
+.sec-num::before { content: ""; width: 28px; height: 3px; border-radius: 2px; background: var(--gold); }
+.given { background: var(--chip); border-radius: 8px; padding: 10px 14px; font-size: 15.5px; }
+.given b.mono { font-weight: 600; }
+.q { display: grid; gap: 10px; }
+.qtop { display: flex; gap: 10px; align-items: baseline; }
+.qn { flex: 0 0 auto; font: 700 14px var(--mono); color: var(--on-accent); background: var(--hit); border-radius: 999px; min-width: 34px; height: 28px; display: grid; place-items: center; padding: 0 8px; }
+.qtext { font-weight: 600; }
+.opts { display: grid; gap: 6px; }
+.opt { text-align: left; font: 500 16px var(--body); color: var(--ink); background: var(--chip); border: 2px solid var(--line); border-radius: 8px; padding: 9px 12px; cursor: pointer; }
+.opt:hover { border-color: var(--hit); }
+.opt.right { border-color: var(--ok); background: var(--ok-soft); font-weight: 700; }
+.opt.wrong { border-color: var(--miss); background: var(--miss-soft); }
+.numrow { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.numrow input { font: 600 17px var(--mono); width: 170px; padding: 8px 10px; border-radius: 7px; border: 2px solid var(--line); background: var(--panel); color: var(--ink); }
+.numrow input.right { border-color: var(--ok); } .numrow input.wrong { border-color: var(--miss); }
+.btn { font: 600 15px var(--body); color: var(--ink); background: var(--chip); border: 1px solid var(--line); border-radius: 7px; padding: 8px 12px; cursor: pointer; }
+.btn.primary { background: var(--hit); color: var(--on-accent); border-color: var(--hit); }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.fb { border-radius: 8px; padding: 10px 12px; font-size: 15.5px; }
+.fb.right { background: var(--ok-soft); } .fb.wrong { background: var(--miss-soft); } .fb.info { background: var(--chip); }
+.fb b.tag { display: block; margin-bottom: 2px; }
+.fb.right b.tag { color: var(--ok); } .fb.wrong b.tag { color: var(--miss); }
+.plots { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 760px) { .plots { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.plots figure { margin: 0; background: var(--chip); border-radius: 8px; padding: 6px 8px 8px; }
+.plots figcaption { font: 700 15px var(--display); text-align: center; }
+svg.mini { width: 100%; height: auto; display: block; }
+.wrapx { overflow-x: auto; }
+table.out { border-collapse: collapse; font: 14px var(--mono); min-width: 520px; }
+table.out td, table.out th { border: 1px solid var(--line); padding: 4px 8px; text-align: right; }
+table.out th { background: var(--chip); font-family: var(--body); font-size: 13px; color: var(--muted); }
+table.out td:first-child { text-align: left; font-family: var(--body); }
+.endcard { text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="brand">
+    <div class="bar"></div>
+    <div class="course">BMGT 240IS · Business Analytics</div>
+    <h1>Chapter 14 Review</h1>
+    <div class="meta">Simple linear regression · §14.1–14.7 · self-check with instant feedback · Fall 2026 · Montana State University</div>
+  </header>
+
+  <nav class="stops" aria-label="Review sections">
+    <a href="#s1">14.1 The model</a><a href="#s2">14.2 The line</a><a href="#s3">14.3 Fit</a><a href="#s4">14.4 Assumptions</a>
+    <a href="#s5">14.5 Significance</a><a href="#s6">14.6 Prediction</a><a href="#s7">14.7 Excel</a>
+    <span class="score" id="score" aria-live="polite">0 / 0 correct</span>
+  </nav>
+
+  <div class="card">
+    <p><b>How it works:</b> answer each question, and the page tells you right away whether you're right and <b>why</b>. Your score counts your <b>first</b> try on each question, so think before you click. You can change an answer afterward to read the other explanations.</p>
+    <div class="given"><b>Bridger Health</b> (the insurance data, all 1,338 customers): y = annual charges ($), x = age (years).<br>
+      Estimated regression equation: <b class="mono">ŷ = 3,165.89 + 257.72x</b> · r² = 0.0894 · s = $11,560.31 · s<sub>b₁</sub> = 22.50 · average age x̄ = 39.21</div>
+    <div class="btnrow"><button type="button" class="btn" id="resetAll">Start over</button></div>
+  </div>
+
+  <div id="quiz"></div>
+
+  <div class="card endcard">
+    <h2 id="finalSay">Answer the questions above to see your score.</h2>
+    <p class="note" style="color:var(--muted)">Data: insurance.csv, the course's class-example file. Bridger Health is a made-up company used for teaching.</p>
+  </div>
+</div>
+
+<script>
+// Each section: id, label, title, optional intro html, questions.
+// mc: { q, opts:[[text, isRight, why], ...] }   num: { q, ans, tol, unit, why, hint }   plots: renders the four residual-plot thumbnails
+const OUTPUT = `<div class="wrapx"><table class="out">
+<tr><th></th><th>Coefficients</th><th>Standard Error</th><th>t Stat</th><th>P-value</th><th>Lower 95%</th><th>Upper 95%</th></tr>
+<tr><td>Intercept</td><td>3165.89</td><td>937.15</td><td>3.38</td><td>7.51E-04</td><td>1327.44</td><td>5004.33</td></tr>
+<tr><td>age</td><td>257.72</td><td>22.50</td><td>11.45</td><td>4.89E-29</td><td>213.58</td><td>301.87</td></tr></table></div>
+<p style="font-size:14px;color:var(--muted)">Regression Statistics: Multiple R 0.2990 · R Square 0.0894 · Standard Error 11560.31 · Observations 1338. ANOVA: F = 131.17, Significance F = 4.89E-29.</p>`;
+const SECTIONS = [
+ { id: "s1", label: "14.1", title: "The simple linear regression model", qs: [
+  { type: "mc", q: "In Bridger's regression, which is the dependent variable?", opts: [
+    ["Age", false, "Age does the predicting. It's the <b>independent</b> variable, x."],
+    ["Annual charges", true, "Charges is what we're trying to predict or explain, so it's y, the dependent variable."],
+    ["Whether the customer smokes", false, "Smoking isn't in this model at all. It's one of the things hiding in the error term ε."]]},
+  { type: "mc", q: "What's the difference between β₁ and b₁?", opts: [
+    ["β₁ is the slope for <i>all</i> of Bridger's customers (unknown); b₁ = 257.72 is our estimate of it from the data.", true, "Greek letters are population parameters we never see. Latin letters are statistics computed from a sample, here b₁ = 257.72."],
+    ["They're the same number written two ways.", false, "β₁ is unknown; b₁ is what we computed. They're probably close, but they aren't the same thing. That gap is why 14.5 tests whether β₁ could be 0."],
+    ["b₁ is the intercept and β₁ is the slope.", false, "Both are slopes. The intercept is b₀ (sample) or β₀ (population)."]]},
+  { type: "mc", q: "What does the error term ε stand for in y = β₀ + β₁x + ε?", opts: [
+    ["A mistake in the data entry.", false, "ε isn't a typo. It's real, normal variation."],
+    ["Everything about a customer's charges that age doesn't explain: smoking, BMI, health, luck.", true, "Two customers of the same age can cost very different amounts. ε is that leftover part."],
+    ["The difference between β₁ and b₁.", false, "That's sampling error in the slope. ε is about individual customers, not about the estimate."]]},
+ ]},
+ { id: "s2", label: "14.2", title: "The least squares line", qs: [
+  { type: "mc", q: "How do you interpret the slope b₁ = 257.72?", opts: [
+    ["Each customer costs $257.72.", false, "That's not a cost per customer. The slope is a <b>change</b>: how much ŷ moves when x goes up by 1."],
+    ["Each extra year of age is associated with about $258 more in annual charges, on average.", true, "Slope = change in ŷ per one-unit change in x, “on average,” and associated with (not caused by)."],
+    ["A 1-year-old costs $257.72.", false, "Plugging in x = 1 gives 3,165.89 + 257.72 = $3,423.61, and age 1 isn't even in the data (ages 18–64)."]]},
+  { type: "num", q: "Predict the annual charges for a 30-year-old customer.", ans: 10897.49, tol: 10, unit: "$", why: "ŷ = 3,165.89 + 257.72 × 30 = 3,165.89 + 7,731.60 = <b>$10,897.49</b>. In Excel: <span class=mono>=3165.89+257.72*30</span> or <span class=mono>=FORECAST.LINEAR(30, y, x)</span>.", hint: "Plug x = 30 into ŷ = b₀ + b₁x." },
+  { type: "mc", q: "Does the intercept b₀ = $3,165.89 have a practical meaning here?", opts: [
+    ["Yes: newborns cost $3,165.89 a year.", false, "x = 0 means age 0, which is far outside the data (ages 18–64). The line says nothing reliable there."],
+    ["No: age 0 is outside the range of the data, so b₀ just positions the line.", true, "The intercept has practical meaning only when x = 0 is realistic <b>and</b> inside the data. Predicting at age 0 would be extrapolation."]]},
+  { type: "mc", q: "What does the least squares method make as small as possible?", opts: [
+    ["The number of points off the line.", false, "Almost every point is off the line. Least squares works with the <b>size</b> of the misses."],
+    ["The sum of the squared residuals, Σ(y − ŷ)², also called SSE.", true, "That's the definition: choose b₀ and b₁ so that SSE is as small as possible."],
+    ["The sum of the residuals, Σ(y − ŷ).", false, "That sum is always 0 for the least squares line, so it can't tell lines apart. Squaring keeps misses from canceling."]]},
+ ]},
+ { id: "s3", label: "14.3", title: "Coefficient of determination", qs: [
+  { type: "mc", q: "r² = 0.0894. What does that mean?", opts: [
+    ["Age explains about 9% of the variation in charges.", true, "r² is the share of the variation in y explained by the line. The other 91% comes from things not in the model."],
+    ["The prediction is 9% accurate.", false, "r² isn't an accuracy rate. It measures the share of variation explained."],
+    ["9% of customers are on the line.", false, "r² doesn't count points. It's SSR ÷ SST, a share of variation."]]},
+  { type: "num", q: "Find the sample correlation coefficient r from r² = 0.0894 and the slope's sign.", ans: 0.299, tol: 0.003, unit: "", why: "r = (sign of b₁) × √r² = +√0.0894 = <b>0.299</b>. Positive, because the slope is positive. In Excel: <span class=mono>=CORREL(x, y)</span>.", hint: "Square root of r², with the same sign as the slope." },
+ ]},
+ { id: "s4", label: "14.4", title: "Assumptions about the error term ε",
+   intro: "These are four residual plots (residual on the vertical axis, x across). Use them for questions 10–12.", plots: true, qs: [
+  { type: "mc", q: "Which plot shows the misses getting bigger as x grows (assumption 2, same spread, broken)?", opts: [
+    ["A", false, "A is a flat, even band: all four assumptions look fine."], ["B", true, "B fans out like a funnel: small misses on the left, big ones on the right. One s can't describe both."],
+    ["C", false, "C curves: that's a straight line being the wrong shape (assumption 1)."], ["D", false, "D is lopsided: that's the normal assumption (4), like Bridger's."]]},
+  { type: "mc", q: "Which plot says a straight line is the wrong shape (assumption 1, E(ε) = 0 at every x, broken)?", opts: [
+    ["A", false, "A hugs 0 everywhere, so the line is the right shape."], ["B", false, "B's center stays at 0. It's the <b>spread</b> that changes."],
+    ["C", true, "C forms a frown: misses are below 0 at both ends and above in the middle, so the line misses in a predictable direction."], ["D", false, "D's problem is lopsided misses, not a curve."]]},
+  { type: "mc", q: "Which plot looks like Bridger's: most customers a little below the line, a few far above (assumption 4, normal, broken)?", opts: [
+    ["A", false, "A is balanced above and below."], ["B", false, "B is a funnel, a spread problem."], ["C", false, "C is a curve, a shape problem."],
+    ["D", true, "D piles up just below 0 with a long tail above, like Bridger's smokers. The misses aren't a balanced bell."]]},
+  { type: "mc", q: "The least squares residuals always average exactly 0. Does that prove assumption 1 holds?", opts: [
+    ["Yes: the average error is 0.", false, "The overall 0 is automatic for any least squares line, even on curved data like plot C. You have to check each slice of x."],
+    ["No: it's automatic. Assumption 1 is about the errors averaging 0 at <i>every</i> x.", true, "Check the residual plot one slice at a time: each slice should center on 0."]]},
+ ]},
+ { id: "s5", label: "14.5", title: "Testing for significance",
+   intro: "Excel's Regression output for Bridger (y = charges, x = age):" + OUTPUT, qs: [
+  { type: "mc", q: "What are the hypotheses for the t test of the slope?", opts: [
+    ["H₀: β₁ = 0 · Hₐ: β₁ ≠ 0", true, "If β₁ = 0, age tells us nothing about charges. The test asks whether the data rule that out."],
+    ["H₀: b₁ = 0 · Hₐ: b₁ ≠ 0", false, "Hypotheses are about the population slope β₁, never about b₁. We already know b₁ = 257.72."],
+    ["H₀: r² = 0 · Hₐ: r² > 0", false, "Not the form we use in 14.5. The t test is stated with β₁."]]},
+  { type: "num", q: "Compute the t statistic for the slope: t = b₁ / s_b₁.", ans: 11.45, tol: 0.03, unit: "", why: "t = 257.72 / 22.50 = <b>11.45</b>. The slope sits more than 11 standard errors away from 0. Excel's age row, t Stat.", hint: "Divide the age Coefficient by its Standard Error." },
+  { type: "num", q: "How many degrees of freedom does that t test have?", ans: 1336, tol: 0, unit: "", why: "df = n − 2 = 1,338 − 2 = <b>1,336</b>. Two are lost because b₀ and b₁ were both estimated from the data.", hint: "n minus the number of things estimated." },
+  { type: "mc", q: "The age P-value is 4.89E-29. At α = .05, what do you conclude?", opts: [
+    ["Do not reject H₀: the p-value has a 4.89 in it.", false, "E-29 means ×10⁻²⁹: 0.0000…0489, with 28 zeros after the decimal point. It's tiny."],
+    ["Reject H₀: age and charges have a significant linear relationship.", true, "p ≈ 0 is far below .05. The $258 slope is very unlikely to be sampling noise."]]},
+  { type: "mc", q: "r² is only 0.09, but the slope is highly significant. Which statement is right?", opts: [
+    ["Something is wrong: a weak fit can't be significant.", false, "Both can be true. With 1,338 customers, even a weak relationship is detected clearly."],
+    ["Age is a weak predictor for any one customer, but its relationship with charges is real.", true, "r² measures strength (how much is explained). The test measures whether the slope is real. They answer different questions."],
+    ["A significant slope means age causes higher charges.", false, "Significance isn't causation. Age may matter through what comes with it, like health conditions."]]},
+  { type: "num", q: "In simple regression, F = t². Use t = 11.453 to find F.", ans: 131.17, tol: 0.3, unit: "", why: "F = 11.453² = <b>131.17</b>, matching the ANOVA table. That's why the F test and the t test give the same p-value in simple regression.", hint: "Square t." },
+  { type: "mc", q: "Project 1 (income → investments): the 95% CI for β₁ is −0.043 to 0.046. What do you conclude at α = .05?", opts: [
+    ["Reject H₀: the interval is narrow.", false, "Narrow doesn't matter here. What matters is whether 0 is inside."],
+    ["Do not reject H₀: 0 is inside the interval, so the data can't tell the slope apart from 0.", true, "Same as p = 0.95 > .05. And “do not reject” doesn't prove β₁ = 0; it means no evidence of a linear relationship."]]},
+  { type: "num", q: "By hand, 5 customers: s = 1,061.52 and Σ(x − x̄)² = 1,000. Compute s_b₁.", ans: 33.57, tol: 0.03, unit: "", why: "s_b₁ = s / √Σ(x − x̄)² = 1,061.52 / √1,000 = 1,061.52 / 31.62 = <b>33.57</b>.", hint: "Divide s by the square root of Σ(x − x̄)²." },
+  { type: "num", q: "Same 5 customers, b₁ = 267. Compute t.", ans: 7.95, tol: 0.03, unit: "", why: "t = 267 / 33.57 = <b>7.95</b>, with df = 5 − 2 = 3. The critical value t<sub>.025,3</sub> = 3.182, so 7.95 > 3.182 and we reject H₀ even with 5 customers.", hint: "b₁ ÷ s_b₁." },
+ ]},
+ { id: "s6", label: "14.6", title: "Estimation and prediction",
+   intro: `<div class="given">At age 40: ŷ = $13,475 · 95% confidence interval $12,854 to $14,096 · 95% prediction interval −$9,212 to $36,162</div>`, qs: [
+  { type: "mc", q: "A 40-year-old walks in to buy a policy. Which interval describes <i>their</i> charges?", opts: [
+    ["The confidence interval, $12,854 to $14,096.", false, "That's for the <b>average</b> of all 40-year-olds. One person varies far more than an average."],
+    ["The prediction interval, −$9,212 to $36,162.", true, "One individual: use the prediction interval. It's wide because one person can be far from the average."]]},
+  { type: "mc", q: "Why is the prediction interval so much wider than the confidence interval?", opts: [
+    ["It uses a bigger t value.", false, "Both use the same t (1.962). The difference is the standard error."],
+    ["It adds one person's own variation: s·√(1 + 1/n + …) instead of s·√(1/n + …).", true, "That extra “1” is a whole s of individual variation. The average is pinned down by 1,338 customers; one person isn't."],
+    ["Because the data are wrong.", false, "The data are fine. Averages are just easier to predict than individuals."]]},
+  { type: "mc", q: "The prediction interval's lower limit is −$9,212. What does that tell you?", opts: [
+    ["Some customers get paid by Bridger.", false, "Charges can't be negative."],
+    ["The ± range assumes balanced, bell-shaped misses (assumption 4), and Bridger's misses aren't. So the interval's shape is off.", true, "A symmetric interval around $13,475 runs below $0. That's a sign the normal assumption fails, as the residual analysis showed."]]},
+  { type: "mc", q: "Can you use the line to predict charges for an 80-year-old?", opts: [
+    ["Yes: ŷ = 3,165.89 + 257.72 × 80.", false, "You can compute it, but don't trust it: 80 is outside the data (18–64)."],
+    ["Not reliably: 80 is outside the range of the data, so that's extrapolation.", true, "The data say nothing about how charges behave after 64."]]},
+ ]},
+ { id: "s7", label: "14.7", title: "Excel", qs: [
+  { type: "mc", q: "Which Excel function returns s, the standard error of the estimate?", opts: [
+    ["=STDEV.S(y)", false, "That's the standard deviation of y around its mean, before using x. s measures misses around the line."],
+    ["=STEYX(y, x)", true, "STEYX = √MSE, the typical miss of the line. Here $11,560.31."],
+    ["=SLOPE(y, x)", false, "SLOPE returns b₁."]]},
+  { type: "mc", q: "Excel's output shows Multiple R = 0.2990. If the slope were negative, what would r be?", opts: [
+    ["+0.2990", false, "Multiple R is always positive: it shows |r| only."],
+    ["−0.2990", true, "Multiple R = |r|. The sign of r comes from the slope, so a negative slope means r = −0.299."]]},
+  { type: "mc", q: "Where do you turn on the Regression tool?", opts: [
+    ["Data › Data Analysis › Regression (Analysis ToolPak).", true, "If Data Analysis is missing: File › Options › Add-ins › Excel Add-ins › Go › tick Analysis ToolPak."],
+    ["Insert › Regression.", false, "There's no Insert › Regression. You can add a trendline to a scatter chart, but the full output comes from Data Analysis."]]},
+ ]},
+];
+
+// ---------- build ----------
+const quiz = document.getElementById("quiz"); let qnum = 0; const state = new Map();
+function plotsHTML() {
+  const sv = (k) => { let s = 1240 + k * 77; const r = () => (s = s * 16807 % 2147483647) / 2147483647; const g = () => Math.sqrt(-2 * Math.log(r() || 1e-9)) * Math.cos(2 * Math.PI * r());
+    let d = '<svg class="mini" viewBox="0 0 160 110" role="img" aria-label="residual plot"><line x1="8" x2="152" y1="55" y2="55" stroke="var(--muted)" stroke-dasharray="4 3"/>';
+    for (let i = 0; i < 70; i++) { const x = 10 + r() * 140, u = (x - 10) / 140; let e;
+      if (k === 0) e = g() * 13; else if (k === 1) e = g() * (3 + 26 * u); else if (k === 2) e = 34 * (u - .5) ** 2 * -4 + 8 + g() * 5; else e = (r() < .8 ? -7 + g() * 3 : 18 + r() * 26);
+      d += `<circle cx="${x.toFixed(1)}" cy="${(55 - e).toFixed(1)}" r="2.6" fill="var(--dot)"/>`; }
+    return d + "</svg>"; };
+  return '<div class="plots">' + ["A", "B", "C", "D"].map((L, k) => `<figure>${sv(k)}<figcaption>${L}</figcaption></figure>`).join("") + "</div>";
+}
+SECTIONS.forEach(sec => {
+  const s = document.createElement("section"); s.className = "sec"; s.id = sec.id;
+  s.innerHTML = `<div class="sec-head"><div class="sec-num">§${sec.label}</div><h2>${sec.title}</h2></div>`;
+  if (sec.intro || sec.plots) { const c = document.createElement("div"); c.className = "card"; c.innerHTML = (sec.intro ? `<div>${sec.intro}</div>` : "") + (sec.plots ? plotsHTML() : ""); s.appendChild(c); }
+  sec.qs.forEach(q => {
+    qnum++; const id = "q" + qnum; state.set(id, null);
+    const c = document.createElement("div"); c.className = "card q";
+    let body = `<div class="qtop"><span class="qn">${qnum}</span><span class="qtext">${q.q}</span></div>`;
+    if (q.type === "mc") body += `<div class="opts">` + q.opts.map((o, i) => `<button type="button" class="opt" data-i="${i}">${o[0]}</button>`).join("") + `</div>`;
+    else body += `<div class="numrow"><input type="text" inputmode="decimal" aria-label="Your answer to question ${qnum}" placeholder="${q.unit === "$" ? "dollars" : "number"}"><button type="button" class="btn primary chk">Check</button><button type="button" class="btn show">Show answer</button><span class="mono" style="color:var(--muted)">${q.hint ? "Hint: " + q.hint : ""}</span></div>`;
+    body += `<div class="fb" hidden></div>`;
+    c.innerHTML = body; s.appendChild(c);
+    const fb = c.querySelector(".fb");
+    const say = (ok, html, tagText) => { fb.className = "fb " + (ok === null ? "info" : ok ? "right" : "wrong"); fb.innerHTML = `<b class="tag">${tagText}</b>${html}`; fb.hidden = false; };
+    if (q.type === "mc") {
+      c.querySelectorAll(".opt").forEach(b => b.addEventListener("click", () => {
+        const o = q.opts[+b.dataset.i];
+        c.querySelectorAll(".opt").forEach(x => x.classList.remove("right", "wrong"));
+        b.classList.add(o[1] ? "right" : "wrong");
+        if (state.get(id) === null) state.set(id, o[1]);
+        say(o[1], o[2], o[1] ? "✓ Right." : "✗ Not quite.");
+        if (!o[1]) { const r = q.opts.findIndex(x => x[1]); c.querySelectorAll(".opt")[r].classList.add("right"); fb.innerHTML += `<br><span style="color:var(--muted)">The right answer is highlighted. Click it to read why.</span>`; }
+        score();
+      }));
+    } else {
+      const inp = c.querySelector("input");
+      const check = () => { const v = parseFloat(inp.value.replace(/[$,\s]/g, "").replace("−", "-")); if (isNaN(v)) { say(null, "Type a number first (commas and $ are fine).", "Hmm."); return; }
+        const ok = Math.abs(v - q.ans) <= q.tol; inp.classList.remove("right", "wrong"); inp.classList.add(ok ? "right" : "wrong");
+        if (state.get(id) === null) state.set(id, ok);
+        say(ok, ok ? q.why : "Not this one yet. Check the hint and try again, or click Show answer.", ok ? "✓ Right." : "✗ Not quite."); score(); };
+      c.querySelector(".chk").addEventListener("click", check); inp.addEventListener("keydown", e => { if (e.key === "Enter") check(); });
+      c.querySelector(".show").addEventListener("click", () => { if (state.get(id) === null) state.set(id, false); say(null, q.why, "Answer"); score(); });
+    }
+  });
+  quiz.appendChild(s);
+});
+function score() {
+  const vals = [...state.values()], done = vals.filter(v => v !== null).length, right = vals.filter(v => v === true).length;
+  document.getElementById("score").textContent = `${right} / ${done} correct · ${state.size - done} left`;
+  document.getElementById("finalSay").textContent = done === 0 ? "Answer the questions above to see your score." :
+    done < state.size ? `So far: ${right} of ${done} right on the first try. ${state.size - done} questions to go.` :
+    `Done: ${right} of ${state.size} right on the first try.` + (right / state.size >= .85 ? " Ready for the exam on Chapter 14." : " Re-read the explanations for the ones you missed, then start over.");
+}
+document.getElementById("resetAll").addEventListener("click", () => {
+  state.forEach((_, k) => state.set(k, null));
+  document.querySelectorAll(".opt").forEach(b => b.classList.remove("right", "wrong"));
+  document.querySelectorAll(".numrow input").forEach(i => { i.value = ""; i.classList.remove("right", "wrong"); });
+  document.querySelectorAll(".fb").forEach(f => f.hidden = true); score(); window.scrollTo(0, 0);
+});
+score();
+</script>
+</body>
+</html>
